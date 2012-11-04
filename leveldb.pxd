@@ -1,11 +1,8 @@
 # distutils: language = c++
 
+from libc.string cimport const_char
 from libcpp cimport bool
 from libcpp.string cimport string
-
-
-cdef extern from *:
-    ctypedef char* const_char_ptr "const char*"
 
 
 cdef extern from "stdint.h":
@@ -92,10 +89,10 @@ cdef extern from "leveldb/slice.h" namespace "leveldb":
 
     cdef cppclass Slice:
         Slice()
-        Slice(const_char_ptr d, size_t n)
+        Slice(const_char* d, size_t n)
         Slice(string& s)
-        Slice(const_char_ptr s)
-        const_char_ptr data()
+        Slice(const_char* s)
+        const_char* data()
         size_t size()
         bool empty()
         # char operator[](size_t n)
