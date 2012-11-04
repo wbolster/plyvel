@@ -1,6 +1,4 @@
 
-from libcpp.string cimport string
-
 cimport leveldb
 
 __version__ = '%d.%d' % (leveldb.kMajorVersion, leveldb.kMinorVersion)
