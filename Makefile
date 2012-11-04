@@ -2,6 +2,7 @@
 .PHONY: all clean test
 
 all:
+	cython --cplus leveldb.pyx
 	python setup.py build_ext --inplace --force
 
 clean:
