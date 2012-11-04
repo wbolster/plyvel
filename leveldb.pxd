@@ -26,7 +26,6 @@ cdef extern from "leveldb/db.h" namespace "leveldb":
         Range(Slice& s, Slice& l)
 
     cdef cppclass DB:
-        Status Open(Options& options, string& name, DB** dbptr)
         Status Put(WriteOptions& options, Slice& key, Slice& value)
         Status Delete(WriteOptions& options, Slice& key)
         Status Write(WriteOptions& options, WriteBatch* updates)
@@ -37,6 +36,10 @@ cdef extern from "leveldb/db.h" namespace "leveldb":
         bool GetProperty(Slice& property, string* value)
         void GetApproximateSizes(Range* range, int n, uint64_t* sizes)
         void CompactRange(Slice* begin, Slice* end)
+
+    # The DB::open() method is static, and hence not a member of the DB
+    # class defined above
+    Status DB_Open "DB::Open"(Options& options, string& name, DB** dbptr)
 
     cdef Status DestroyDB(string& name, Options& options)
     cdef Status RepairDB(string& dbname, Options& options)
