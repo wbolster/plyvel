@@ -57,7 +57,9 @@ cdef class LevelDB:
         raise_for_status(st)
 
     def delete(self, bytes key):
-        raise NotImplementedError()
+        cdef Status st
+        st = self.db.Delete(WriteOptions(), Slice(key, len(key)))
+        raise_for_status(st)
 
     def __iter__(self):
         raise NotImplementedError()
