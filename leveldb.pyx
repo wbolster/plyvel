@@ -41,7 +41,12 @@ cdef class LevelDB:
         raise NotImplementedError()
 
     def put(self, bytes key, bytes value):
-        raise NotImplementedError()
+        cdef Status st
+        cdef WriteOptions write_options = WriteOptions()
+        st = self.db.Put(write_options,
+                         Slice(key, len(key)),
+                         Slice(value, len(value)))
+        raise_for_status(st)
 
     def delete(self, bytes key):
         raise NotImplementedError()

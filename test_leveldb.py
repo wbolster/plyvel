@@ -23,6 +23,11 @@ def test_close():
     del db
 
 
+def test_put():
+    db = LevelDB(DB_DIR)
+    print db.put('foo', 'bar')
+
+
 def test_get():
     db = LevelDB(DB_DIR)
     print db.get('foo')
