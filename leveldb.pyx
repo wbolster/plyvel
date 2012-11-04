@@ -38,7 +38,15 @@ cdef class LevelDB:
         del self.db
 
     def get(self, bytes key):
-        raise NotImplementedError()
+        cdef Status st
+        cdef string value
+
+        st = self.db.Get(ReadOptions(), Slice(key, len(key)), &value)
+        if st.IsNotFound():
+            return None
+
+        raise_for_status(st)
+        return value
 
     def put(self, bytes key, bytes value):
         cdef Status st
