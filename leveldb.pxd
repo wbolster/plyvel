@@ -40,7 +40,7 @@ cdef extern from "leveldb/db.h" namespace "leveldb":
 
     # The DB::open() method is static, and hence not a member of the DB
     # class defined above
-    Status DB_Open "DB::Open"(Options& options, string& name, DB** dbptr)
+    Status DB_Open "leveldb::DB::Open"(Options& options, string& name, DB** dbptr)
 
     cdef Status DestroyDB(string& name, Options& options)
     cdef Status RepairDB(string& dbname, Options& options)
