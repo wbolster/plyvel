@@ -1,4 +1,5 @@
 # distutils: language = c++
+# distutils: libraries = leveldb
 
 from libc.string cimport const_char
 from libcpp cimport bool
