@@ -31,7 +31,7 @@ cdef extern from "leveldb/db.h" namespace "leveldb":
         Status Delete(WriteOptions& options, Slice& key)
         Status Write(WriteOptions& options, WriteBatch* updates)
         Status Get(ReadOptions& options, Slice& key, string* value)
-        # Iterator* NewIterator(ReadOptions& options)
+        Iterator* NewIterator(ReadOptions& options)
         Snapshot* GetSnapshot()
         void ReleaseSnapshot(Snapshot* snapshot)
         bool GetProperty(Slice& property, string* value)
