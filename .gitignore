@@ -1,0 +1,3 @@
+build/
+leveldb.cpp
+leveldb.so
