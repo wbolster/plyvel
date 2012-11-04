@@ -8,6 +8,12 @@ class Error(Exception):
     pass
 
 
+cdef raise_for_status(leveldb.Status st):
+    # TODO: add different error classes, depending on the error type
+    if not st.ok():
+        raise Error(st.ToString())
+
+
 cdef class LevelDB:
     """LevelDB database
 
@@ -26,9 +32,7 @@ cdef class LevelDB:
 
         options.create_if_missing = True
         st = leveldb.DB_Open(options, name, &self.db)
-
-        if not st.ok():
-            raise Error(st.ToString())
+        raise_for_status(st)
 
     def __dealloc__(self):
         del self.db
