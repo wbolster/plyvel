@@ -4,7 +4,19 @@ from nose.tools import assert_raises
 import leveldb
 from leveldb import LevelDB
 
-DB_DIR = 'db/'
+TEST_DB_DIR = 'db/'
+
+db = None
+
+
+def setup():
+    global db
+    db = LevelDB(TEST_DB_DIR)
+
+
+def teardown():
+    global db
+    del db
 
 
 def test_version():
@@ -13,23 +25,18 @@ def test_version():
     assert v.startswith('1.')
 
 
-def test_open():
-    db = LevelDB(DB_DIR)
-    print db
-
-
-def test_close():
-    db = LevelDB(DB_DIR)
-    del db
+# TODO: use different directories for open/close tests
+# def test_open_close():
+#     somedb = LevelDB(TEST_DB_DIR2)
+#     print somedb
+#     del somedb
 
 
 def test_put():
-    db = LevelDB(DB_DIR)
     print db.put('foo', 'bar')
 
 
 def test_get():
-    db = LevelDB(DB_DIR)
     print db.get('foo')
 
     with assert_raises(TypeError):
