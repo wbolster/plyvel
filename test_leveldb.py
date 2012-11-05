@@ -39,5 +39,6 @@ def test_put():
 def test_get():
     print db.get('foo')
 
-    with assert_raises(TypeError):
-        print db.get('foo', 'bar')
+    assert_raises(TypeError, db.get, 1)
+    assert_raises(TypeError, db.get, u'foo')
+    assert_raises(TypeError, db.get, None)
