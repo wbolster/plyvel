@@ -1,5 +1,5 @@
 
-from nose.tools import assert_raises
+from nose.tools import assert_equal, assert_raises
 
 import leveldb
 from leveldb import LevelDB
@@ -33,12 +33,24 @@ def test_version():
 
 
 def test_put():
-    print db.put('foo', 'bar')
+    db.put('foo', 'bar')
+    db.put('foo', 'bar', sync=False)
+    db.put('foo', 'bar', sync=True)
+
+    assert_raises(TypeError, db.put, 'foo', 12)
+    assert_raises(TypeError, db.put, 12, 'foo')
 
 
 def test_get():
-    print db.get('foo')
+    assert_equal('bar', db.get('foo'))
+    assert_equal('bar', db.get('foo', verify_checksums=True))
+    assert_equal('bar', db.get('foo', verify_checksums=False))
+    assert_equal('bar', db.get('foo', verify_checksums=None))
+    assert_equal('bar', db.get('foo', fill_cache=True))
+    assert_equal('bar', db.get('foo', fill_cache=False, verify_checksums=None))
 
     assert_raises(TypeError, db.get, 1)
     assert_raises(TypeError, db.get, u'foo')
     assert_raises(TypeError, db.get, None)
+
+    assert_raises(TypeError, db.get, 'foo', True)
