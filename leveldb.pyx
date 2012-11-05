@@ -8,7 +8,7 @@ class Error(Exception):
     pass
 
 
-cdef raise_for_status(leveldb.Status st):
+cdef void raise_for_status(leveldb.Status st):
     # TODO: add different error classes, depending on the error type
     if not st.ok():
         raise Error(st.ToString())
