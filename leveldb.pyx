@@ -254,7 +254,9 @@ cdef class Iterator:
         if not self._iter.Valid():
             raise StopIteration
 
+        out = self.current()
         self._iter.Prev()
+        return out
 
     def begin(self):
         self._iter.SeekToFirst()
