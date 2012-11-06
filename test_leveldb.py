@@ -67,94 +67,103 @@ def test_version():
 
 
 def test_put():
-    db.put('foo', 'bar')
-    db.put('foo', 'bar', sync=False)
-    db.put('foo', 'bar', sync=True)
+    with tmp_db('put') as db:
+        db.put('foo', 'bar')
+        db.put('foo', 'bar', sync=False)
+        db.put('foo', 'bar', sync=True)
 
-    for i in xrange(100000):
-        key = 'key-%d' % i
-        value = 'value-%d' % i
-        db.put(key, value)
+        for i in xrange(100000):
+            key = 'key-%d' % i
+            value = 'value-%d' % i
+            db.put(key, value)
 
-    assert_raises(TypeError, db.put, 'foo', 12)
-    assert_raises(TypeError, db.put, 12, 'foo')
+        assert_raises(TypeError, db.put, 'foo', 12)
+        assert_raises(TypeError, db.put, 12, 'foo')
 
 
 def test_get():
-    assert_equal('bar', db.get('foo'))
-    assert_equal('bar', db.get('foo', verify_checksums=True))
-    assert_equal('bar', db.get('foo', verify_checksums=False))
-    assert_equal('bar', db.get('foo', verify_checksums=None))
-    assert_equal('bar', db.get('foo', fill_cache=True))
-    assert_equal('bar', db.get('foo', fill_cache=False, verify_checksums=None))
+    with tmp_db('get') as db:
+        key = 'the-key'
+        value = 'the-value'
+        assert_is_none(db.get(key))
+        db.put(key, value)
+        assert_equal(value, db.get(key))
+        assert_equal(value, db.get(key, verify_checksums=True))
+        assert_equal(value, db.get(key, verify_checksums=False))
+        assert_equal(value, db.get(key, verify_checksums=None))
+        assert_equal(value, db.get(key, fill_cache=True))
+        assert_equal(value, db.get(key, fill_cache=False, verify_checksums=None))
 
-    assert_is_none(db.get('key-that-does-not-exist'))
+        assert_is_none(db.get('key-that-does-not-exist'))
 
-    assert_raises(TypeError, db.get, 1)
-    assert_raises(TypeError, db.get, u'foo')
-    assert_raises(TypeError, db.get, None)
+        assert_raises(TypeError, db.get, 1)
+        assert_raises(TypeError, db.get, u'foo')
+        assert_raises(TypeError, db.get, None)
 
-    assert_raises(TypeError, db.get, 'foo', True)
+        assert_raises(TypeError, db.get, 'foo', True)
 
 
 def test_delete():
-    # Put and delete a key
-    key = 'key-that-will-be-deleted'
-    db.put(key, '')
-    assert_is_not_none(db.get(key))
-    db.delete(key)
-    assert_is_none(db.get(key))
+    with tmp_db('delete') as db:
+        # Put and delete a key
+        key = 'key-that-will-be-deleted'
+        db.put(key, '')
+        assert_is_not_none(db.get(key))
+        db.delete(key)
+        assert_is_none(db.get(key))
 
-    # The .delete() method also takes write options
-    db.put(key, '')
-    db.delete(key, sync=True)
+        # The .delete() method also takes write options
+        db.put(key, '')
+        db.delete(key, sync=True)
 
 
 def test_batch():
-    # Prepare a batch with some data
-    batch = db.batch()
-    for i in xrange(1000):
-        batch.put('batch-key-%d' % i, 'value')
+    with tmp_db('batch') as db:
+        # Prepare a batch with some data
+        batch = db.batch()
+        for i in xrange(1000):
+            batch.put('batch-key-%d' % i, 'value')
 
-    # Delete a key that was also set in the same (pending) batch
-    batch.delete('batch-key-2')
+        # Delete a key that was also set in the same (pending) batch
+        batch.delete('batch-key-2')
 
-    # The DB should not have any data before the batch is written
-    assert_is_none(db.get('batch-key-1'))
+        # The DB should not have any data before the batch is written
+        assert_is_none(db.get('batch-key-1'))
 
-    # ...but it should have data afterwards
-    batch.write()
-    assert_is_not_none(db.get('batch-key-1'))
-    assert_is_none(db.get('batch-key-2'))
+        # ...but it should have data afterwards
+        batch.write()
+        assert_is_not_none(db.get('batch-key-1'))
+        assert_is_none(db.get('batch-key-2'))
 
-    # Batches can be cleared
-    batch = db.batch()
-    batch.put('this-is-never-saved', '')
-    batch.clear()
-    batch.write()
-    assert_is_none(db.get('this-is-never-saved'))
+        # Batches can be cleared
+        batch = db.batch()
+        batch.put('this-is-never-saved', '')
+        batch.clear()
+        batch.write()
+        assert_is_none(db.get('this-is-never-saved'))
 
-    # Batches take write options
-    batch = db.batch(sync=True)
-    batch.put('batch-key-sync', '')
-    batch.write()
+        # Batches take write options
+        batch = db.batch(sync=True)
+        batch.put('batch-key-sync', '')
+        batch.write()
 
 
 def test_batch_context_manager():
-    key = 'batch-key'
-    assert_is_none(db.get(key))
-    with db.batch() as b:
-        b.put(key, '')
-    assert_is_not_none(db.get(key))
-
-    # Data should also be written when an exception is raised
-    key = 'batch-key-exception'
-    assert_is_none(db.get(key))
-    with assert_raises(ValueError):
+    with tmp_db('batch_context_manager') as db:
+        key = 'batch-key'
+        assert_is_none(db.get(key))
         with db.batch() as b:
             b.put(key, '')
-            raise ValueError()
-    assert_is_not_none(db.get(key))
+        assert_is_not_none(db.get(key))
+
+        # Data should also be written when an exception is raised
+        key = 'batch-key-exception'
+        assert_is_none(db.get(key))
+        with assert_raises(ValueError):
+            with db.batch() as b:
+                b.put(key, '')
+                raise ValueError()
+        assert_is_not_none(db.get(key))
 
 
 def test_iteration():
