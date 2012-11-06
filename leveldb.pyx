@@ -96,5 +96,44 @@ cdef class DB:
         st = self.db.Delete(WriteOptions(), Slice(key, len(key)))
         raise_for_status(st)
 
+    def batch(self):
+        return WriteBatch(db=self)
+
     def __iter__(self):
         raise NotImplementedError()
+
+
+cdef class WriteBatch:
+    cdef cpp_leveldb.DB* db
+    cdef cpp_leveldb.WriteBatch* wb
+
+    def __cinit__(self, DB db not None):
+        self.db = db.db
+        self.wb = new cpp_leveldb.WriteBatch()
+
+    def put(self, bytes key, bytes value):
+        """Set the value for specified key to the specified value.
+
+        See DB.put()
+        """
+        self.wb.Put(
+            Slice(key, len(key)),
+            Slice(value, len(value)))
+
+    def delete(self, bytes key):
+        """Delete the entry for the specified key.
+
+        See DB.delete()
+        """
+        self.wb.Delete(Slice(key, len(key)))
+
+    def clear(self):
+        """Clear the batch"""
+        self.wb.Clear()
+
+    def write(self):
+        """Write the batch to the database"""
+        # TODO: handle WriteOptions
+        cdef Status st
+        st = self.db.Write(WriteOptions(), self.wb)
+        raise_for_status(st)

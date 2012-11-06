@@ -1,5 +1,9 @@
 
-from nose.tools import assert_equal, assert_is_none, assert_raises
+from nose.tools import (
+    assert_equal,
+    assert_is_none,
+    assert_is_not_none,
+    assert_raises)
 
 import leveldb
 from leveldb import DB
@@ -61,3 +65,28 @@ def test_get():
     assert_raises(TypeError, db.get, None)
 
     assert_raises(TypeError, db.get, 'foo', True)
+
+
+def test_batch():
+    # Prepare a batch with some data
+    batch = db.batch()
+    for i in xrange(1000):
+        batch.put('batch-key-%d' % i, 'value')
+
+    # Delete a key that was also set in the same (pending) batch
+    batch.delete('batch-key-2')
+
+    # The DB should not have any data before the batch is written
+    assert_is_none(db.get('batch-key-1'))
+
+    # ...but it should have data afterwards
+    batch.write()
+    assert_is_not_none(db.get('batch-key-1'))
+    assert_is_none(db.get('batch-key-2'))
+
+    # Batches can be cleared
+    batch = db.batch()
+    batch.put('this-is-never-saved', '')
+    batch.clear()
+    batch.write()
+    assert_is_none(db.get('this-is-never-saved'))
