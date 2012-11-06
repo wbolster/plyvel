@@ -1,14 +1,14 @@
 
 cimport leveldb
 
-__version__ = '%d.%d' % (leveldb.kMajorVersion, leveldb.kMinorVersion)
+__version__ = '%d.%d' % (kMajorVersion, kMinorVersion)
 
 
 class Error(Exception):
     pass
 
 
-cdef void raise_for_status(leveldb.Status st):
+cdef void raise_for_status(Status st):
     # TODO: add different error classes, depending on the error type
     if not st.ok():
         raise Error(st.ToString())
@@ -20,18 +20,18 @@ cdef class Database:
     A LevelDB database is a persistent ordered map from keys to values.
     """
 
-    cdef leveldb.DB* db
+    cdef DB* db
 
     def __cinit__(self, bytes name):
         """Open the underlying database handle
 
         :param str name: The name of the database
         """
-        cdef leveldb.Options options
-        cdef leveldb.Status st
+        cdef Options options
+        cdef Status st
 
         options.create_if_missing = True
-        st = leveldb.DB_Open(options, name, &self.db)
+        st = DB_Open(options, name, &self.db)
         raise_for_status(st)
 
     def __dealloc__(self):
