@@ -1,5 +1,6 @@
 
 from contextlib import contextmanager
+from itertools import izip
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -167,8 +168,17 @@ def test_batch_context_manager():
 
 
 def test_iteration():
-    for key, value in db:
-        print key, value
+    with tmp_db('iteration') as db:
+        entries = []
+        for i in xrange(100):
+            entry = ('%3d' % i, '%3d' % i)
+            entries.append(entry)
+
+        for k, v in entries:
+            db.put(k, v)
+
+        for entry, expected in izip(entries, db):
+            assert_equal(entry, expected)
 
 
 @nottest
