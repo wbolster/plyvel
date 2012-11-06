@@ -118,7 +118,13 @@ cdef class DB:
     #
 
     def __iter__(self):
-        return Iterator(self)
+        return self.iterator()
+
+    def iterator(self, reverse=False, start=None, stop=None,
+                 verify_checksums=None, fill_cache=None):
+        return Iterator(
+            self, reverse=reverse, start=start, stop=stop,
+            verify_checksums=verify_checksums, fill_cache=fill_cache)
 
 
 cdef class WriteBatch:
@@ -174,8 +180,11 @@ cdef class Iterator:
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
 
-    def __cinit__(self, DB db not None, verify_checksums=None, fill_cache=None):
+    def __cinit__(self, DB db not None, reverse=False, start=None, stop=None,
+            verify_checksums=None, fill_cache=None):
         cdef ReadOptions read_options
+
+        # TODO: args type checking
 
         self.db = db
 
