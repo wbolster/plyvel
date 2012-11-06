@@ -37,6 +37,11 @@ def test_put():
     db.put('foo', 'bar', sync=False)
     db.put('foo', 'bar', sync=True)
 
+    for i in xrange(100000):
+        key = 'key-%d' % i
+        value = 'value-%d' % i
+        db.put(key, value)
+
     assert_raises(TypeError, db.put, 'foo', 12)
     assert_raises(TypeError, db.put, 12, 'foo')
 
