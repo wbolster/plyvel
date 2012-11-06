@@ -1,4 +1,8 @@
 
+from contextlib import contextmanager
+from shutil import rmtree
+from tempfile import mkdtemp
+
 from nose.tools import (
     assert_equal,
     assert_is_none,
@@ -15,6 +19,26 @@ TEST_DB_DIR = 'testdb/'
 db = None
 
 
+#
+# Utilities
+#
+
+def tmp_dir(name):
+    return mkdtemp(prefix=name + '-', dir=TEST_DB_DIR)
+
+@contextmanager
+def tmp_db(name):
+    dir_name = tmp_dir(name)
+    db = DB(dir_name)
+    yield db
+    del db
+    rmtree(dir_name)
+
+
+#
+# Test setup and teardown
+#
+
 def setup():
     global db
     db = DB(TEST_DB_DIR)
@@ -24,6 +48,10 @@ def teardown():
     global db
     del db
 
+
+#
+# Actual tests
+#
 
 def test_version():
     v = leveldb.__leveldb_version__
@@ -244,4 +272,3 @@ def test_range_empty_database():
         it.prev()
     with assert_raises(StopIteration):
         it.next()
-
