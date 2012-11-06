@@ -3,7 +3,8 @@ from nose.tools import (
     assert_equal,
     assert_is_none,
     assert_is_not_none,
-    assert_raises)
+    assert_raises,
+    nottest)
 
 import leveldb
 from leveldb import DB
@@ -132,8 +133,8 @@ def test_iteration():
         print key, value
 
 
-def test_manual_iteration():
-    it = iter(db)
+@nottest
+def test_manual_iteration(it):
     assert_equal('1', next(it))
     assert_equal('2', next(it))
     assert_equal('3', it.next())
@@ -141,8 +142,8 @@ def test_manual_iteration():
         next(it)
 
 
-def test_iterator_single_step():
-    it = iter(db)
+@nottest
+def test_iterator_single_step(it):
     assert_equal('1', next(it))
     assert_equal('1', it.prev())
     assert_equal('1', next(it))
@@ -158,9 +159,8 @@ def test_iterator_single_step():
     assert_equal('2', it.prev())
 
 
-def test_iterator_extremes():
-    it = iter(db)
-
+@nottest
+def test_iterator_extremes(it):
     # End of iterator
     it.end()
     with assert_raises(StopIteration):
@@ -172,3 +172,14 @@ def test_iterator_extremes():
     with assert_raises(StopIteration):
         it.prev()
     assert_equal('1', next(it))
+
+
+def test_forward_iteration():
+    it = iter(db)
+    test_manual_iteration(it)
+
+    it = iter(db)
+    test_iterator_single_step(it)
+
+    it = iter(db)
+    test_iterator_extremes(it)
