@@ -122,6 +122,9 @@ cdef class WriteBatch:
 
         self.wb = new cpp_leveldb.WriteBatch()
 
+    def __dealloc__(self):
+        del self.wb
+
     def put(self, bytes key, bytes value):
         """Set the value for specified key to the specified value.
 
