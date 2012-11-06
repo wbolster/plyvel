@@ -1,6 +1,8 @@
 
 cimport cython
+
 from libcpp.string cimport string
+from libcpp cimport bool
 
 cimport cpp_leveldb
 from cpp_leveldb cimport (Options, ReadOptions, Slice, Status, WriteOptions)
@@ -180,8 +182,8 @@ cdef class WriteBatch:
 cdef class Iterator:
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
-    cdef bint include_key
-    cdef bint include_value
+    cdef bool include_key
+    cdef bool include_value
 
     def __cinit__(self, DB db not None, reverse=False, start=None, stop=None,
             include_key=True, include_value=True, verify_checksums=None,
@@ -212,18 +214,37 @@ cdef class Iterator:
 
     def __next__(self):
         # XXX: Cython will also make a .next() method
+        cdef Slice key_slice
+        cdef bytes key
+        cdef Slice value_slice
+        cdef bytes value
+        cdef object out
 
         if not self._iter.Valid():
             raise StopIteration
 
-        cdef Slice k = self._iter.key()
-        cdef Slice v = self._iter.value()
-        cdef bytes key = k.data()[:k.size()]
-        cdef bytes value = v.data()[:v.size()]
+        # Only build Python strings that will be returned
+        if self.include_key:
+            key_slice = self._iter.key()
+            key = key_slice.data()[:key_slice.size()]
+        if self.include_value:
+            value_slice = self._iter.value()
+            value = value_slice.data()[:value_slice.size()]
 
+        # Build return value
+        if self.include_key and self.include_value:
+            out = (key, value)
+        elif self.include_key:
+            out = key
+        elif self.include_value:
+            out = value
+        else:
+            out = None
+
+        # Reposition iterator
         self._iter.Next()
 
-        return key, value
+        return out
 
     def prev(self):
         if not self._iter.Valid():
