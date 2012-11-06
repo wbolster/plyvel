@@ -1,4 +1,5 @@
 
+cimport cython
 cimport leveldb
 
 __version__ = '%d.%d' % (kMajorVersion, kMinorVersion)
@@ -14,6 +15,7 @@ cdef void raise_for_status(Status st):
         raise Error(st.ToString())
 
 
+@cython.final
 cdef class Database:
     """LevelDB database
 
