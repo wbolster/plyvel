@@ -181,11 +181,24 @@ def test_iterator_extremes(it, expected_values):
 def test_forward_iteration():
     expected_values = ('1', '2', '3')
 
-    it = iter(db)
+    it = db.range_iter()
     test_manual_iteration(it, expected_values)
 
-    it = iter(db)
+    it = db.range_iter()
     test_iterator_single_step(it, expected_values)
 
-    it = iter(db)
+    it = db.range_iter()
+    test_iterator_extremes(it, expected_values)
+
+
+def test_backward_iteration():
+    expected_values = ('3', '2', '1')
+
+    it = db.range_iter(reverse=True)
+    test_manual_iteration(it, expected_values)
+
+    it = db.range_iter(reverse=True)
+    test_iterator_single_step(it, expected_values)
+
+    it = db.range_iter(reverse=True)
     test_iterator_extremes(it, expected_values)
