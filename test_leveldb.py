@@ -134,52 +134,58 @@ def test_iteration():
 
 
 @nottest
-def test_manual_iteration(it):
-    assert_equal('1', next(it))
-    assert_equal('2', next(it))
-    assert_equal('3', it.next())
+def test_manual_iteration(it, expected_values):
+    first, second, third = expected_values
+    assert_equal(first, next(it))
+    assert_equal(second, next(it))
+    assert_equal(third, it.next())
     with assert_raises(StopIteration):
         next(it)
 
 
 @nottest
-def test_iterator_single_step(it):
-    assert_equal('1', next(it))
-    assert_equal('1', it.prev())
-    assert_equal('1', next(it))
-    assert_equal('1', it.prev())
+def test_iterator_single_step(it, expected_values):
+    first, second, third = expected_values
+    assert_equal(first, next(it))
+    assert_equal(first, it.prev())
+    assert_equal(first, next(it))
+    assert_equal(first, it.prev())
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal('1', it.next())
-    assert_equal('2', it.next())
-    assert_equal('3', it.next())
+    assert_equal(first, it.next())
+    assert_equal(second, it.next())
+    assert_equal(third, it.next())
     with assert_raises(StopIteration):
         it.next()
-    assert_equal('3', it.prev())
-    assert_equal('2', it.prev())
+    assert_equal(third, it.prev())
+    assert_equal(second, it.prev())
 
 
 @nottest
-def test_iterator_extremes(it):
+def test_iterator_extremes(it, expected_values):
+    first, second, third = expected_values
+
     # End of iterator
     it.end()
     with assert_raises(StopIteration):
         it.next()
-    assert_equal('3', it.prev())
+    assert_equal(third, it.prev())
 
     # Begin of iterator
     it.begin()
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal('1', next(it))
+    assert_equal(first, next(it))
 
 
 def test_forward_iteration():
-    it = iter(db)
-    test_manual_iteration(it)
+    expected_values = ('1', '2', '3')
 
     it = iter(db)
-    test_iterator_single_step(it)
+    test_manual_iteration(it, expected_values)
 
     it = iter(db)
-    test_iterator_extremes(it)
+    test_iterator_single_step(it, expected_values)
+
+    it = iter(db)
+    test_iterator_extremes(it, expected_values)
