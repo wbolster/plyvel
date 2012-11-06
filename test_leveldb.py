@@ -84,7 +84,7 @@ def test_put():
         db.put('foo', 'bar', sync=False)
         db.put('foo', 'bar', sync=True)
 
-        for i in xrange(100000):
+        for i in xrange(1000):
             key = 'key-%d' % i
             value = 'value-%d' % i
             db.put(key, value)
