@@ -102,8 +102,8 @@ cdef class DB:
         st = self.db.Delete(write_options, Slice(key, len(key)))
         raise_for_status(st)
 
-    def batch(self):
-        return WriteBatch(db=self)
+    def batch(self, *, sync=None):
+        return WriteBatch(self, sync=sync)
 
     def __iter__(self):
         raise NotImplementedError()
@@ -112,9 +112,14 @@ cdef class DB:
 cdef class WriteBatch:
     cdef cpp_leveldb.DB* db
     cdef cpp_leveldb.WriteBatch* wb
+    cdef WriteOptions write_options
 
-    def __cinit__(self, DB db not None):
+    def __cinit__(self, DB db not None, *, sync=None):
         self.db = db.db
+
+        if sync is not None:
+            self.write_options.sync = sync
+
         self.wb = new cpp_leveldb.WriteBatch()
 
     def put(self, bytes key, bytes value):
@@ -139,7 +144,6 @@ cdef class WriteBatch:
 
     def write(self):
         """Write the batch to the database"""
-        # TODO: handle WriteOptions
         cdef Status st
-        st = self.db.Write(WriteOptions(), self.wb)
+        st = self.db.Write(self.write_options, self.wb)
         raise_for_status(st)

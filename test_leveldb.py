@@ -103,3 +103,8 @@ def test_batch():
     batch.clear()
     batch.write()
     assert_is_none(db.get('this-is-never-saved'))
+
+    # Batches take write options
+    batch = db.batch(sync=True)
+    batch.put('batch-key-sync', '')
+    batch.write()
