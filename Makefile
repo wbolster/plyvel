@@ -8,7 +8,7 @@ all:
 clean:
 	python setup.py clean
 	$(RM) leveldb.cpp leveldb.so
+	$(RM) -r testdb/
 
 test:
-	$(RM) -r testdb/
 	python $$(which nosetests) -v test_leveldb.py
