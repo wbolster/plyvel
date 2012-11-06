@@ -174,10 +174,17 @@ cdef class Iterator:
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
 
-    def __cinit__(self, DB db not None):
-        self.db = db
+    def __cinit__(self, DB db not None, verify_checksums=None, fill_cache=None):
         cdef ReadOptions read_options
-        # TODO: handle ReadOptions
+
+        self.db = db
+
+        if verify_checksums is not None:
+            read_options.verify_checksums = verify_checksums
+
+        if fill_cache is not None:
+            read_options.fill_cache = fill_cache
+
         self._iter = db.db.NewIterator(read_options)
         self._iter.SeekToFirst()
 
