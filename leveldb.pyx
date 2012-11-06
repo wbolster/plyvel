@@ -221,10 +221,10 @@ cdef class Iterator:
     def prev(self):
         self._iter.Prev()
 
-    def first(self):
+    def begin(self):
         self._iter.SeekToFirst()
 
-    def last(self):
+    def end(self):
         self._iter.SeekToLast()
 
     def seek(self, bytes target):
