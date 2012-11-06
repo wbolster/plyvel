@@ -222,6 +222,28 @@ def test_range_iteration():
 
     assert_list_equal([], db.range_iter(start='3', stop='0'))
 
+    expected_values = ('2', '3', '4')
+
+    it = db.range_iter(start='2', stop='5')
+    test_manual_iteration(it, expected_values)
+
+    it = db.range_iter(start='2', stop='5')
+    test_iterator_single_step(it, expected_values)
+
+    it = db.range_iter(start='2', stop='5')
+    test_iterator_extremes(it, expected_values)
+
+    expected_values = ('5', '4', '3')
+
+    it = db.range_iter(stop='2', reverse=True)
+    test_manual_iteration(it, expected_values)
+
+    it = db.range_iter(stop='2', reverse=True)
+    test_iterator_single_step(it, expected_values)
+
+    it = db.range_iter(stop='2', reverse=True)
+    test_iterator_extremes(it, expected_values)
+
 
 def test_range_empty_database():
     empty_db = db  # FIXME: actually use an empty database
