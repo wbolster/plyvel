@@ -88,13 +88,18 @@ cdef class DB:
                          Slice(value, len(value)))
         raise_for_status(st)
 
-    def delete(self, bytes key):
+    def delete(self, bytes key, *, sync=None):
         """Delete the entry for the specified key.
 
         :param bytes key:
         """
         cdef Status st
-        st = self.db.Delete(WriteOptions(), Slice(key, len(key)))
+        cdef WriteOptions write_options
+
+        if sync is not None:
+            write_options.sync = sync
+
+        st = self.db.Delete(write_options, Slice(key, len(key)))
         raise_for_status(st)
 
     def batch(self):

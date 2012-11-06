@@ -68,11 +68,16 @@ def test_get():
 
 
 def test_delete():
+    # Put and delete a key
     key = 'key-that-will-be-deleted'
     db.put(key, '')
     assert_is_not_none(db.get(key))
     db.delete(key)
     assert_is_none(db.get(key))
+
+    # The .delete() method also takes write options
+    db.put(key, '')
+    db.delete(key, sync=True)
 
 
 def test_batch():
