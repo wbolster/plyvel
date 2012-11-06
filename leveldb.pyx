@@ -20,7 +20,7 @@ cdef void raise_for_status(Status st):
 
 
 @cython.final
-cdef class Database:
+cdef class DB:
     """LevelDB database
 
     A LevelDB database is a persistent ordered map from keys to values.
