@@ -3,6 +3,7 @@ from nose.tools import (
     assert_equal,
     assert_is_none,
     assert_is_not_none,
+    assert_list_equal,
     assert_raises,
     nottest)
 
@@ -202,3 +203,21 @@ def test_backward_iteration():
 
     it = db.range_iter(reverse=True)
     test_iterator_extremes(it, expected_values)
+
+
+def test_range_iteration():
+    # TODO: use a database containing ['1', '2', '3', '4', '5'] keys
+
+    assert_list_equal(
+        ['2', '3', '4', '5'],
+        db.range_iter(start='2'))
+
+    assert_list_equal(
+        ['1', '2'],
+        db.range_iter(stop='3'))
+
+    assert_list_equal(
+        ['1', '2'],
+        db.range_iter(start='0', stop='3'))
+
+    assert_list_equal([], db.range_iter(start='3', stop='0'))
