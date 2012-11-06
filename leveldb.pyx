@@ -219,6 +219,9 @@ cdef class Iterator:
         return key, value
 
     def prev(self):
+        if not self._iter.Valid():
+            raise StopIteration
+
         self._iter.Prev()
 
     def begin(self):
