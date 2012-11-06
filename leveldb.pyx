@@ -1,8 +1,12 @@
 
 cimport cython
-cimport leveldb
+from libcpp.string cimport string
 
-__version__ = '%d.%d' % (kMajorVersion, kMinorVersion)
+cimport cpp_leveldb
+from cpp_leveldb cimport (Options, ReadOptions, Slice, Status, WriteOptions)
+
+
+__version__ = '%d.%d' % (cpp_leveldb.kMajorVersion, cpp_leveldb.kMinorVersion)
 
 
 class Error(Exception):
@@ -22,7 +26,7 @@ cdef class Database:
     A LevelDB database is a persistent ordered map from keys to values.
     """
 
-    cdef DB* db
+    cdef cpp_leveldb.DB* db
 
     def __cinit__(self, bytes name):
         """Open the underlying database handle
@@ -33,7 +37,7 @@ cdef class Database:
         cdef Status st
 
         options.create_if_missing = True
-        st = DB_Open(options, name, &self.db)
+        st = cpp_leveldb.DB_Open(options, name, &self.db)
         raise_for_status(st)
 
     def __dealloc__(self):
