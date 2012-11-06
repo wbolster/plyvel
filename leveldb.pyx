@@ -212,16 +212,13 @@ cdef class Iterator:
     def __iter__(self):
         return self
 
-    def __next__(self):
-        # XXX: Cython will also make a .next() method
+    cdef object current(self):
+        """Helper function to return the current iterator key/value."""
         cdef Slice key_slice
         cdef bytes key
         cdef Slice value_slice
         cdef bytes value
         cdef object out
-
-        if not self._iter.Valid():
-            raise StopIteration
 
         # Only build Python strings that will be returned
         if self.include_key:
@@ -241,9 +238,16 @@ cdef class Iterator:
         else:
             out = None
 
-        # Reposition iterator
-        self._iter.Next()
+        return out
 
+    def __next__(self):
+        # XXX: Cython will also make a .next() method
+
+        if not self._iter.Valid():
+            raise StopIteration
+
+        out = self.current()
+        self._iter.Next()
         return out
 
     def prev(self):
