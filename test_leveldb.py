@@ -1,6 +1,7 @@
 
 from contextlib import contextmanager
 from itertools import izip
+from os import mkdir, rmdir
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -16,8 +17,6 @@ import leveldb
 from leveldb import DB
 
 TEST_DB_DIR = 'testdb/'
-
-db = None
 
 
 #
@@ -41,13 +40,25 @@ def tmp_db(name):
 #
 
 def setup():
-    global db
-    db = DB(TEST_DB_DIR)
+    try:
+        mkdir(TEST_DB_DIR)
+    except OSError as exc:
+        if exc.errno == 17:
+            # Directory already exists; ignore
+            pass
+        else:
+            raise
 
 
 def teardown():
-    global db
-    del db
+    try:
+        rmdir(TEST_DB_DIR)
+    except OSError as exc:
+        if exc.errno == 39:
+            # Directory not empty; some tests failed
+            pass
+        else:
+            raise
 
 
 #
@@ -232,62 +243,77 @@ def test_iterator_extremes(db, iter_kwargs, expected_values):
 
 
 def test_forward_iteration():
-    expected_values = ('1', '2', '3')
-    iter_kwargs = dict()
-    test_manual_iteration(db, iter_kwargs, expected_values)
-    test_iterator_single_step(db, iter_kwargs, expected_values)
-    test_iterator_extremes(db, iter_kwargs, expected_values)
+    with tmp_db('forward_iteration') as db:
+        db.put('1', '1')
+        db.put('2', '2')
+        db.put('3', '3')
+
+        expected_values = ('1', '2', '3')
+        iter_kwargs = dict()
+        test_manual_iteration(db, iter_kwargs, expected_values)
+        test_iterator_single_step(db, iter_kwargs, expected_values)
+        test_iterator_extremes(db, iter_kwargs, expected_values)
 
 
 def test_backward_iteration():
-    expected_values = ('3', '2', '1')
-    iter_kwargs = dict(reverse=True)
-    test_manual_iteration(db, iter_kwargs, expected_values)
-    test_iterator_single_step(db, iter_kwargs, expected_values)
-    test_iterator_extremes(db, iter_kwargs, expected_values)
+    with tmp_db('backward_iteration') as db:
+        db.put('1', '1')
+        db.put('2', '2')
+        db.put('3', '3')
+
+        expected_values = ('3', '2', '1')
+        iter_kwargs = dict(reverse=True)
+        test_manual_iteration(db, iter_kwargs, expected_values)
+        test_iterator_single_step(db, iter_kwargs, expected_values)
+        test_iterator_extremes(db, iter_kwargs, expected_values)
 
 
 def test_range_iteration():
     # TODO: use a database containing ['1', '2', '3', '4', '5'] keys
+    with tmp_db('range_iteration') as db:
+        db.put('1', '1')
+        db.put('2', '2')
+        db.put('3', '3')
+        db.put('4', '4')
+        db.put('5', '5')
 
-    assert_list_equal(
-        ['2', '3', '4', '5'],
-        list(db.iterator(start='2')))
+        assert_list_equal(
+            ['2', '3', '4', '5'],
+            list(db.iterator(start='2')))
 
-    assert_list_equal(
-        ['1', '2'],
-        list(db.iterator(stop='3')))
+        assert_list_equal(
+            ['1', '2'],
+            list(db.iterator(stop='3')))
 
-    assert_list_equal(
-        ['1', '2'],
-        list(db.iterator(start='0', stop='3')))
+        assert_list_equal(
+            ['1', '2'],
+            list(db.iterator(start='0', stop='3')))
 
-    assert_list_equal([], list(db.iterator(start='3', stop='0')))
+        assert_list_equal([], list(db.iterator(start='3', stop='0')))
 
-    expected_values = ('2', '3', '4')
-    test_manual_iteration(db, dict(start='2', stop='5'), expected_values)
-    test_iterator_single_step(db, dict(start='2', stop='5'), expected_values)
-    test_iterator_extremes(db, dict(start='2', stop='5'), expected_values)
+        expected_values = ('2', '3', '4')
+        test_manual_iteration(db, dict(start='2', stop='5'), expected_values)
+        test_iterator_single_step(db, dict(start='2', stop='5'), expected_values)
+        test_iterator_extremes(db, dict(start='2', stop='5'), expected_values)
 
-    expected_values = ('5', '4', '3')
-    test_manual_iteration(db, dict(stop='2', reverse=True), expected_values)
-    test_iterator_single_step(db, dict(stop='2', reverse=True), expected_values)
-    test_iterator_extremes(db, dict(stop='2', reverse=True), expected_values)
+        expected_values = ('5', '4', '3')
+        test_manual_iteration(db, dict(stop='2', reverse=True), expected_values)
+        test_iterator_single_step(db, dict(stop='2', reverse=True), expected_values)
+        test_iterator_extremes(db, dict(stop='2', reverse=True), expected_values)
 
 
 def test_range_empty_database():
-    empty_db = db  # FIXME: actually use an empty database
+    with tmp_db('range_empty_database') as db:
+        it = db.iterator()
+        it.begin()  # no-op (don't crash)
+        it.end()  # no-op (don't crash)
 
-    it = empty_db.iterator()
-    it.begin()  # no-op (don't crash)
-    it.end()  # no-op (don't crash)
+        it = db.iterator()
+        with assert_raises(StopIteration):
+            it.next()
 
-    it = empty_db.iterator()
-    with assert_raises(StopIteration):
-        it.next()
-
-    it = empty_db.iterator()
-    with assert_raises(StopIteration):
-        it.prev()
-    with assert_raises(StopIteration):
-        it.next()
+        it = db.iterator()
+        with assert_raises(StopIteration):
+            it.prev()
+        with assert_raises(StopIteration):
+            it.next()
