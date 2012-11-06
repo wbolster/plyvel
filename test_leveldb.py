@@ -125,3 +125,50 @@ def test_batch_context_manager():
             b.put(key, '')
             raise ValueError()
     assert_is_not_none(db.get(key))
+
+
+def test_iteration():
+    for key, value in db:
+        print key, value
+
+
+def test_manual_iteration():
+    it = iter(db)
+    assert_equal('1', next(it))
+    assert_equal('2', next(it))
+    assert_equal('3', it.next())
+    with assert_raises(StopIteration):
+        next(it)
+
+
+def test_iterator_single_step():
+    it = iter(db)
+    assert_equal('1', next(it))
+    assert_equal('1', it.prev())
+    assert_equal('1', next(it))
+    assert_equal('1', it.prev())
+    with assert_raises(StopIteration):
+        it.prev()
+    assert_equal('1', it.next())
+    assert_equal('2', it.next())
+    assert_equal('3', it.next())
+    with assert_raises(StopIteration):
+        it.next()
+    assert_equal('3', it.prev())
+    assert_equal('2', it.prev())
+
+
+def test_iterator_extremes():
+    it = iter(db)
+
+    # End of iterator
+    it.end()
+    with assert_raises(StopIteration):
+        it.next()
+    assert_equal('3', it.prev())
+
+    # Begin of iterator
+    it.begin()
+    with assert_raises(StopIteration):
+        it.prev()
+    assert_equal('1', next(it))
