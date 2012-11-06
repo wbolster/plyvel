@@ -123,7 +123,7 @@ cdef class DB:
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
             include_value=True, verify_checksums=None, fill_cache=None):
         return Iterator(self, reverse=reverse, start=start, stop=stop,
-                        include_key=True, include_value=True,
+                        include_key=include_key, include_value=include_value,
                         verify_checksums=verify_checksums,
                         fill_cache=fill_cache)
 
