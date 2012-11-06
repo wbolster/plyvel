@@ -110,12 +110,12 @@ cdef class DB:
 
 
 cdef class WriteBatch:
-    cdef cpp_leveldb.DB* db
     cdef cpp_leveldb.WriteBatch* wb
     cdef WriteOptions write_options
+    cdef DB db
 
     def __cinit__(self, DB db not None, *, sync=None):
-        self.db = db.db
+        self.db = db
 
         if sync is not None:
             self.write_options.sync = sync
@@ -148,7 +148,7 @@ cdef class WriteBatch:
     def write(self):
         """Write the batch to the database"""
         cdef Status st
-        st = self.db.Write(self.write_options, self.wb)
+        st = self.db.db.Write(self.write_options, self.wb)
         raise_for_status(st)
 
     def __enter__(self):
