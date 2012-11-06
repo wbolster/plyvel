@@ -26,6 +26,7 @@ TEST_DB_DIR = 'testdb/'
 def tmp_dir(name):
     return mkdtemp(prefix=name + '-', dir=TEST_DB_DIR)
 
+
 @contextmanager
 def tmp_db(name):
     dir_name = tmp_dir(name)
@@ -190,6 +191,28 @@ def test_iteration():
 
         for entry, expected in izip(entries, db):
             assert_equal(entry, expected)
+
+
+def test_iterator_return():
+    with tmp_db('iteration') as db:
+        db.put('key', 'value')
+
+    for key, value in db:
+        assert_equal(key, 'key')
+        assert_equal(value, 'value')
+
+    for key, value in db.iterator():
+        assert_equal(key, 'key')
+        assert_equal(value, 'value')
+
+    for key in db.iterator(include_value=False):
+        assert_equal(key, 'key')
+
+    for value in db.iterator(include_key=False):
+        assert_equal(value, 'value')
+
+    for ret in db.iterator(include_key=False, include_value=False):
+        assert_is_none(ret)
 
 
 @nottest
