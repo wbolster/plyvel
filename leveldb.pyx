@@ -14,7 +14,7 @@ cdef void raise_for_status(leveldb.Status st):
         raise Error(st.ToString())
 
 
-cdef class LevelDB:
+cdef class Database:
     """LevelDB database
 
     A LevelDB database is a persistent ordered map from keys to values.
