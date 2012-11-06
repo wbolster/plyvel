@@ -10,4 +10,5 @@ clean:
 	$(RM) leveldb.cpp leveldb.so
 
 test:
+	$(RM) -r testdb/
 	python $$(which nosetests) -v test_leveldb.py
