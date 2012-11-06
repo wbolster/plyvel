@@ -106,7 +106,7 @@ cdef class DB:
         return WriteBatch(self, sync=sync)
 
     def __iter__(self):
-        raise NotImplementedError()
+        return Iterator(self)
 
 
 cdef class WriteBatch:
@@ -156,3 +156,48 @@ cdef class WriteBatch:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.write()
+
+
+cdef class Iterator:
+    cdef DB db
+    cdef cpp_leveldb.Iterator* _iter
+
+    def __cinit__(self, DB db not None):
+        self.db = db
+        cdef ReadOptions read_options
+        # TODO: handle ReadOptions
+        self._iter = db.db.NewIterator(read_options)
+        self._iter.SeekToFirst()
+
+    def __dealloc__(self):
+        del self._iter
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # XXX: Cython will also make a .next() method
+
+        if not self._iter.Valid():
+            raise StopIteration
+
+        cdef Slice k = self._iter.key()
+        cdef Slice v = self._iter.value()
+        cdef bytes key = k.data()[:k.size()]
+        cdef bytes value = v.data()[:v.size()]
+
+        self._iter.Next()
+
+        return key, value
+
+    def prev(self):
+        self._iter.Prev()
+
+    def first(self):
+        self._iter.SeekToFirst()
+
+    def last(self):
+        self._iter.SeekToLast()
+
+    def seek(self, bytes target):
+        self._iter.Seek(Slice(target, len(target)))
