@@ -1,5 +1,5 @@
 
-from nose.tools import assert_equal, assert_raises
+from nose.tools import assert_equal, assert_is_none, assert_raises
 
 import leveldb
 from leveldb import LevelDB
@@ -48,6 +48,8 @@ def test_get():
     assert_equal('bar', db.get('foo', verify_checksums=None))
     assert_equal('bar', db.get('foo', fill_cache=True))
     assert_equal('bar', db.get('foo', fill_cache=False, verify_checksums=None))
+
+    assert_is_none(db.get('key-that-does-not-exist'))
 
     assert_raises(TypeError, db.get, 1)
     assert_raises(TypeError, db.get, u'foo')
