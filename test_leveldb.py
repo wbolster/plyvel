@@ -221,3 +221,22 @@ def test_range_iteration():
         db.range_iter(start='0', stop='3'))
 
     assert_list_equal([], db.range_iter(start='3', stop='0'))
+
+
+def test_range_empty_database():
+    empty_db = db  # FIXME: actually use an empty database
+
+    it = empty_db.range_iter()
+    it.begin()  # no-op (don't crash)
+    it.end()  # no-op (don't crash)
+
+    it = empty_db.range_iter()
+    with assert_raises(StopIteration):
+        it.next()
+
+    it = empty_db.range_iter()
+    with assert_raises(StopIteration):
+        it.prev()
+    with assert_raises(StopIteration):
+        it.next()
+
