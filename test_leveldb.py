@@ -24,7 +24,7 @@ def teardown():
 
 
 def test_version():
-    v = leveldb.__version__
+    v = leveldb.__leveldb_version__
     assert isinstance(v, basestring)
     assert v.startswith('1.')
 

@@ -6,7 +6,8 @@ cimport cpp_leveldb
 from cpp_leveldb cimport (Options, ReadOptions, Slice, Status, WriteOptions)
 
 
-__version__ = '%d.%d' % (cpp_leveldb.kMajorVersion, cpp_leveldb.kMinorVersion)
+__leveldb_version__ = '%d.%d' % (cpp_leveldb.kMajorVersion,
+                                 cpp_leveldb.kMinorVersion)
 
 
 class Error(Exception):
