@@ -44,6 +44,10 @@ cdef class DB:
     def __dealloc__(self):
         del self.db
 
+    #
+    # Basic operations
+    #
+
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
         """Get the value for specified key (or None if not found)
 
@@ -102,8 +106,16 @@ cdef class DB:
         st = self.db.Delete(write_options, Slice(key, len(key)))
         raise_for_status(st)
 
+    #
+    # Batch writes
+    #
+
     def batch(self, *, sync=None):
         return WriteBatch(self, sync=sync)
+
+    #
+    # Iteration
+    #
 
     def __iter__(self):
         return Iterator(self)
