@@ -67,6 +67,14 @@ def test_get():
     assert_raises(TypeError, db.get, 'foo', True)
 
 
+def test_delete():
+    key = 'key-that-will-be-deleted'
+    db.put(key, '')
+    assert_is_not_none(db.get(key))
+    db.delete(key)
+    assert_is_none(db.get(key))
+
+
 def test_batch():
     # Prepare a batch with some data
     batch = db.batch()
