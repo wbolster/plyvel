@@ -183,7 +183,7 @@ def test_iteration():
 
 @nottest
 def test_manual_iteration(db, iter_kwargs, expected_values):
-    it = db.range_iter(**iter_kwargs)
+    it = db.iterator(**iter_kwargs)
     first, second, third = expected_values
 
     assert_equal(first, next(it))
@@ -195,7 +195,7 @@ def test_manual_iteration(db, iter_kwargs, expected_values):
 
 @nottest
 def test_iterator_single_step(db, iter_kwargs, expected_values):
-    it = db.range_iter(**iter_kwargs)
+    it = db.iterator(**iter_kwargs)
     first, second, third = expected_values
 
     assert_equal(first, next(it))
@@ -215,7 +215,7 @@ def test_iterator_single_step(db, iter_kwargs, expected_values):
 
 @nottest
 def test_iterator_extremes(db, iter_kwargs, expected_values):
-    it = db.range_iter(**iter_kwargs)
+    it = db.iterator(**iter_kwargs)
     first, second, third = expected_values
 
     # End of iterator
@@ -252,17 +252,17 @@ def test_range_iteration():
 
     assert_list_equal(
         ['2', '3', '4', '5'],
-        list(db.range_iter(start='2')))
+        list(db.iterator(start='2')))
 
     assert_list_equal(
         ['1', '2'],
-        list(db.range_iter(stop='3')))
+        list(db.iterator(stop='3')))
 
     assert_list_equal(
         ['1', '2'],
-        list(db.range_iter(start='0', stop='3')))
+        list(db.iterator(start='0', stop='3')))
 
-    assert_list_equal([], list(db.range_iter(start='3', stop='0')))
+    assert_list_equal([], list(db.iterator(start='3', stop='0')))
 
     expected_values = ('2', '3', '4')
     test_manual_iteration(db, dict(start='2', stop='5'), expected_values)
@@ -278,15 +278,15 @@ def test_range_iteration():
 def test_range_empty_database():
     empty_db = db  # FIXME: actually use an empty database
 
-    it = empty_db.range_iter()
+    it = empty_db.iterator()
     it.begin()  # no-op (don't crash)
     it.end()  # no-op (don't crash)
 
-    it = empty_db.range_iter()
+    it = empty_db.iterator()
     with assert_raises(StopIteration):
         it.next()
 
-    it = empty_db.range_iter()
+    it = empty_db.iterator()
     with assert_raises(StopIteration):
         it.prev()
     with assert_raises(StopIteration):
