@@ -108,3 +108,20 @@ def test_batch():
     batch = db.batch(sync=True)
     batch.put('batch-key-sync', '')
     batch.write()
+
+
+def test_batch_context_manager():
+    key = 'batch-key'
+    assert_is_none(db.get(key))
+    with db.batch() as b:
+        b.put(key, '')
+    assert_is_not_none(db.get(key))
+
+    # Data should also be written when an exception is raised
+    key = 'batch-key-exception'
+    assert_is_none(db.get(key))
+    with assert_raises(ValueError):
+        with db.batch() as b:
+            b.put(key, '')
+            raise ValueError()
+    assert_is_not_none(db.get(key))

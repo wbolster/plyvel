@@ -150,3 +150,9 @@ cdef class WriteBatch:
         cdef Status st
         st = self.db.Write(self.write_options, self.wb)
         raise_for_status(st)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.write()
