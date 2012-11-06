@@ -4,7 +4,7 @@ from nose.tools import assert_equal, assert_is_none, assert_raises
 import leveldb
 from leveldb import DB
 
-TEST_DB_DIR = 'db/'
+TEST_DB_DIR = 'testdb/'
 
 db = None
 
