@@ -268,6 +268,7 @@ cdef class Iterator:
         elif self.state == BEFORE_BEGIN:
             self._iter.SeekToFirst()
             if not self._iter.Valid():
+                # Iterator is empty
                 raise StopIteration
             self.state = IN_BETWEEN
             return self.current()
@@ -278,22 +279,22 @@ cdef class Iterator:
     def prev(self):
         """Return the previous iterator entry."""
 
-        if self.state == IN_BETWEEN:
-            self._iter.Prev()
-            if not self._iter.Valid():
-                self.state = BEFORE_BEGIN
-                raise StopIteration
-            return self.current()
+        if self.state == BEFORE_BEGIN:
+            raise StopIteration
 
-        elif self.state == PAST_END:
+        if self.state == PAST_END:
             self._iter.SeekToLast()
             if not self._iter.Valid():
+                # Iterator is empty
                 raise StopIteration
-            self.state = IN_BETWEEN
-            return self.current()
 
-        assert self.state == BEFORE_BEGIN
-        raise StopIteration
+        out = self.current()
+        self._iter.Prev()
+        if not self._iter.Valid():
+            self.state = BEFORE_BEGIN
+        else:
+            self.state = IN_BETWEEN
+        return out
 
     def move_to_begin(self):
         """Move the iterator pointer to the begin of the range.
