@@ -33,6 +33,19 @@ cdef enum IteratorDirection:
     REVERSE
 
 
+cdef inline db_get(DB db, bytes key, ReadOptions read_options):
+    cdef string value
+    cdef Status st
+
+    st = db.db.Get(read_options, Slice(key, len(key)), &value)
+
+    if st.IsNotFound():
+        return None
+    raise_for_status(st)
+
+    return value
+
+
 @cython.final
 cdef class DB:
     """LevelDB database
@@ -70,21 +83,13 @@ cdef class DB:
         :rtype: bytes
         """
         cdef ReadOptions read_options
-        cdef Status st
-        cdef string value
 
         if verify_checksums is not None:
             read_options.verify_checksums = verify_checksums
-
         if fill_cache is not None:
             read_options.fill_cache = fill_cache
 
-        st = self.db.Get(read_options, Slice(key, len(key)), &value)
-        if st.IsNotFound():
-            return None
-
-        raise_for_status(st)
-        return value
+        return db_get(self, key, read_options)
 
     def put(self, bytes key, bytes value, *, sync=None):
         """Set the value for specified key to the specified value.
@@ -365,24 +370,14 @@ cdef class Snapshot:
         self.db.db.ReleaseSnapshot(self.snapshot)
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
-        # FIXME: this duplicates most of the DB.get() code
         cdef ReadOptions read_options
-        cdef Status st
-        cdef string value
-
+        read_options.snapshot = self.snapshot
         if verify_checksums is not None:
             read_options.verify_checksums = verify_checksums
-
         if fill_cache is not None:
             read_options.fill_cache = fill_cache
 
-        read_options.snapshot = self.snapshot
-        st = self.db.db.Get(read_options, Slice(key, len(key)), &value)
-        if st.IsNotFound():
-            return None
-
-        raise_for_status(st)
-        return value
+        return db_get(self.db, key, read_options)
 
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
             include_value=True, verify_checksums=None, fill_cache=None):
