@@ -108,11 +108,9 @@ def test_get():
         assert_equal(value, db.get(key, fill_cache=False, verify_checksums=None))
 
         assert_is_none(db.get('key-that-does-not-exist'))
-
         assert_raises(TypeError, db.get, 1)
         assert_raises(TypeError, db.get, u'foo')
         assert_raises(TypeError, db.get, None)
-
         assert_raises(TypeError, db.get, 'foo', True)
 
 
@@ -128,6 +126,16 @@ def test_delete():
         # The .delete() method also takes write options
         db.put(key, '')
         db.delete(key, sync=True)
+
+
+def test_null_bytes():
+    with tmp_db('null_bytes') as db:
+        key = 'key\x00\x01'
+        value = '\x00\x00\x01'
+        db.put(key, value)
+        assert_equal(value, db.get(key))
+        db.delete(key)
+        assert_is_none(db.get(key))
 
 
 def test_batch():
