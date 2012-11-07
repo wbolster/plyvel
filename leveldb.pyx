@@ -5,7 +5,8 @@ from libcpp.string cimport string
 from libcpp cimport bool
 
 cimport cpp_leveldb
-from cpp_leveldb cimport (Options, ReadOptions, Slice, Status, WriteOptions)
+from cpp_leveldb cimport (Comparator, Options, ReadOptions, Slice, Status,
+                          WriteOptions)
 
 
 __leveldb_version__ = '%d.%d' % (cpp_leveldb.kMajorVersion,
@@ -54,6 +55,7 @@ cdef class DB:
     """
 
     cdef cpp_leveldb.DB* db
+    cdef Comparator* comparator
 
     def __cinit__(self, bytes name):
         """Open the underlying database handle
@@ -63,7 +65,9 @@ cdef class DB:
         cdef Options options
         cdef Status st
 
+        options = Options()
         options.create_if_missing = True
+        self.comparator = <cpp_leveldb.Comparator*>options.comparator
         st = cpp_leveldb.DB_Open(options, name, &self.db)
         raise_for_status(st)
 
