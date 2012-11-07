@@ -183,7 +183,7 @@ def test_iteration():
     with tmp_db('iteration') as db:
         entries = []
         for i in xrange(100):
-            entry = ('%3d' % i, '%3d' % i)
+            entry = ('%03d' % i, '%03d' % i)
             entries.append(entry)
 
         for k, v in entries:
