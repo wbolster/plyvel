@@ -288,7 +288,7 @@ def test_backward_iteration():
         db.put('3', '3')
 
         expected_values = ('3', '2', '1')
-        iter_kwargs = dict(include_key=False)
+        iter_kwargs = dict(reverse=True, include_key=False)
         test_manual_iteration(db, iter_kwargs, expected_values)
         test_iterator_single_step(db, iter_kwargs, expected_values)
         test_iterator_extremes(db, iter_kwargs, expected_values)
