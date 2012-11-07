@@ -22,6 +22,12 @@ cdef void raise_for_status(Status st):
         raise Error(st.ToString())
 
 
+cdef enum IteratorState:
+    BEFORE_BEGIN
+    PAST_END
+    IN_BETWEEN
+
+
 @cython.final
 cdef class DB:
     """LevelDB database
@@ -184,6 +190,7 @@ cdef class Iterator:
     cdef cpp_leveldb.Iterator* _iter
     cdef bool include_key
     cdef bool include_value
+    cdef IteratorState state
 
     def __cinit__(self, DB db not None, reverse=False, start=None, stop=None,
             include_key=True, include_value=True, verify_checksums=None,
@@ -204,7 +211,7 @@ cdef class Iterator:
             read_options.fill_cache = fill_cache
 
         self._iter = db.db.NewIterator(read_options)
-        self._iter.SeekToFirst()
+        self.state = BEFORE_BEGIN
 
     def __dealloc__(self):
         del self._iter
@@ -245,28 +252,48 @@ cdef class Iterator:
         return out
 
     def __next__(self):
-        """Return the next iterator entry."""
-        # XXX: Cython will also make a .next() method
+        """Return the next iterator entry.
 
-        if not self._iter.Valid():
-            raise StopIteration
+        Note: Cython will also create a .next() method that does the
+        same as this method.
+        """
 
-        out = self.current()
-        self._iter.Next()
-        return out
+        if self.state == IN_BETWEEN:
+            self._iter.Next()
+            if not self._iter.Valid():
+                self.state = PAST_END
+                raise StopIteration
+            return self.current()
+
+        elif self.state == BEFORE_BEGIN:
+            self._iter.SeekToFirst()
+            if not self._iter.Valid():
+                raise StopIteration
+            self.state = IN_BETWEEN
+            return self.current()
+
+        assert self.state == PAST_END
+        raise StopIteration
 
     def prev(self):
         """Return the previous iterator entry."""
-        if not self._iter.Valid():
-            raise StopIteration
 
-        self._iter.Prev()
+        if self.state == IN_BETWEEN:
+            self._iter.Prev()
+            if not self._iter.Valid():
+                self.state = BEFORE_BEGIN
+                raise StopIteration
+            return self.current()
 
-        if not self._iter.Valid():
-            raise StopIteration
+        elif self.state == PAST_END:
+            self._iter.SeekToLast()
+            if not self._iter.Valid():
+                raise StopIteration
+            self.state = IN_BETWEEN
+            return self.current()
 
-        out = self.current()
-        return out
+        assert self.state == BEFORE_BEGIN
+        raise StopIteration
 
     def move_to_begin(self):
         """Move the iterator pointer to the begin of the range.
@@ -274,7 +301,9 @@ cdef class Iterator:
         This "rewinds" the iterator, so that it is in the same state as
         when first created.
         """
-        self._iter.SeekToFirst()
+        # self._iter.SeekToFirst()
+        # self.state = BEFORE_BEGIN
+        pass
 
     def move_to_end(self):
         """Move the iterator pointer past the end of the range.
@@ -283,7 +312,9 @@ cdef class Iterator:
         the iterator is exhausted, which means a call to .next() raises
         StopIteration (but .prev() will work).
         """
-        self._iter.SeekToLast()
+        # self._iter.SeekToLast()
+        # self.state = PAST_END
+        pass
 
     def seek(self, bytes target):
         self._iter.Seek(Slice(target, len(target)))
