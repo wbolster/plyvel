@@ -225,6 +225,9 @@ def test_manual_iteration(db, iter_kwargs, expected_values):
     assert_equal(third, it.next())
     with assert_raises(StopIteration):
         next(it)
+    with assert_raises(StopIteration):
+        # second time may not cause a segfault
+        next(it)
 
 
 @nottest
