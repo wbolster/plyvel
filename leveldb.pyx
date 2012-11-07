@@ -351,6 +351,7 @@ cdef class Iterator:
         self.state = AFTER_STOP if self.direction == FORWARD else BEFORE_START
 
     def seek(self, bytes target):
+        # TODO: should this be in the public API?
         self._iter.Seek(Slice(target, len(target)))
 
 
