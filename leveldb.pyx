@@ -268,7 +268,7 @@ cdef class Iterator:
         out = self.current()
         return out
 
-    def begin(self):
+    def move_to_begin(self):
         """Move the iterator pointer to the begin of the range.
 
         This "rewinds" the iterator, so that it is in the same state as
@@ -276,7 +276,7 @@ cdef class Iterator:
         """
         self._iter.SeekToFirst()
 
-    def end(self):
+    def move_to_end(self):
         """Move the iterator pointer past the end of the range.
 
         This "fast-forwards" the iterator to the end. After this call
