@@ -214,6 +214,8 @@ cdef class Iterator:
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
     cdef IteratorDirection direction
+    cdef bytes start
+    cdef bytes stop
     cdef bool include_key
     cdef bool include_value
     cdef IteratorState state
@@ -225,6 +227,8 @@ cdef class Iterator:
         self.db = db
         self.comparator = db.comparator
         self.direction = FORWARD if not reverse else REVERSE
+        self.start = start
+        self.stop = stop
         self.include_key = include_key
         self.include_value = include_value
 
