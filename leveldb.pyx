@@ -222,25 +222,17 @@ cdef class Iterator:
     def __cinit__(self, DB db not None, bool reverse, bytes start, bytes stop,
             bool include_key, bool include_value, bool verify_checksums,
             bool fill_cache, Snapshot snapshot):
-        cdef ReadOptions read_options
-
         self.db = db
         self.comparator = db.comparator
-        if reverse:
-            self.direction = REVERSE
-        else:
-            self.direction = FORWARD
+        self.direction = FORWARD if not reverse else REVERSE
         self.include_key = include_key
         self.include_value = include_value
 
-        # TODO: args type checking
-
+        cdef ReadOptions read_options
         if verify_checksums is not None:
             read_options.verify_checksums = verify_checksums
-
         if fill_cache is not None:
             read_options.fill_cache = fill_cache
-
         if snapshot is not None:
             read_options.snapshot = snapshot.snapshot
 
@@ -347,10 +339,7 @@ cdef class Iterator:
         when first created. This means calling .next() will return the
         first entry.
         """
-        if self.direction == FORWARD:
-            self.state = BEFORE_START
-        else:
-            self.state = AFTER_STOP
+        self.state = BEFORE_START if self.direction == FORWARD else AFTER_STOP
 
     def move_to_stop(self):
         """Move the iterator pointer past the end of the range.
@@ -359,10 +348,7 @@ cdef class Iterator:
         the iterator is exhausted, which means a call to .next() raises
         StopIteration, but .prev() will work.
         """
-        if self.direction == FORWARD:
-            self.state = AFTER_STOP
-        else:
-            self.state = BEFORE_START
+        self.state = AFTER_STOP if self.direction == FORWARD else BEFORE_START
 
     def seek(self, bytes target):
         self._iter.Seek(Slice(target, len(target)))
