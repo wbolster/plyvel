@@ -361,3 +361,30 @@ def test_iterator_single_entry():
         assert_equal(key, it.next())
         with assert_raises(StopIteration):
             it.next()
+
+
+def test_snapshot():
+    with tmp_db('snapshot') as db:
+        db.put('a', 'a')
+        db.put('b', 'b')
+
+        # Snapshot should have existing values, but not changed values
+        snapshot = db.snapshot()
+        assert_equal('a', snapshot.get('a'))
+        assert_list_equal(
+            ['a', 'b'],
+            list(db.iterator(include_value=False)))
+        assert_is_none(snapshot.get('c'))
+        db.delete('a')
+        db.put('c', 'c')
+        assert_is_none(snapshot.get('c'))
+        assert_list_equal(
+            ['a', 'b'],
+            list(db.iterator(include_value=False)))
+
+        # New snapshot should reflect latest state
+        snapshot = db.snapshot()
+        assert_equal('c', snapshot.get('c'))
+        assert_list_equal(
+            ['b', 'c'],
+            list(db.iterator(include_value=False)))
