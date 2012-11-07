@@ -365,11 +365,28 @@ cdef class Snapshot:
         self.db.db.ReleaseSnapshot(self.snapshot)
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
-        raise NotImplementedError()
+        # FIXME: this duplicates most of the DB.get() code
+        cdef ReadOptions read_options
+        cdef Status st
+        cdef string value
+
+        if verify_checksums is not None:
+            read_options.verify_checksums = verify_checksums
+
+        if fill_cache is not None:
+            read_options.fill_cache = fill_cache
+
+        read_options.snapshot = self.snapshot
+        st = self.db.db.Get(read_options, Slice(key, len(key)), &value)
+        if st.IsNotFound():
+            return None
+
+        raise_for_status(st)
+        return value
 
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
             include_value=True, verify_checksums=None, fill_cache=None):
-        return Iterator(self, reverse=reverse, start=start, stop=stop,
+        return Iterator(self.db, reverse=reverse, start=start, stop=stop,
                         include_key=include_key, include_value=include_value,
                         verify_checksums=verify_checksums,
                         fill_cache=fill_cache, snapshot=self)
