@@ -213,6 +213,7 @@ cdef class Iterator:
     cdef bool include_key
     cdef bool include_value
     cdef IteratorState state
+    cdef Comparator* comparator
 
     def __cinit__(self, DB db not None, bool reverse, bytes start, bytes stop,
             bool include_key, bool include_value, bool verify_checksums,
@@ -220,6 +221,7 @@ cdef class Iterator:
         cdef ReadOptions read_options
 
         self.db = db
+        self.comparator = db.comparator
         if reverse:
             self.direction = REVERSE
         else:
