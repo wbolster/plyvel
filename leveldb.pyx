@@ -188,6 +188,7 @@ cdef class WriteBatch:
 cdef class Iterator:
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
+    cdef bool reverse
     cdef bool include_key
     cdef bool include_value
     cdef IteratorState state
@@ -197,12 +198,12 @@ cdef class Iterator:
             fill_cache=None):
         cdef ReadOptions read_options
 
+        self.db = db
+        self.reverse = reverse
         self.include_key = include_key
         self.include_value = include_value
 
         # TODO: args type checking
-
-        self.db = db
 
         if verify_checksums is not None:
             read_options.verify_checksums = verify_checksums
@@ -211,7 +212,7 @@ cdef class Iterator:
             read_options.fill_cache = fill_cache
 
         self._iter = db.db.NewIterator(read_options)
-        self.state = BEFORE_BEGIN
+        self.move_to_begin()
 
     def __dealloc__(self):
         del self._iter
@@ -257,7 +258,19 @@ cdef class Iterator:
         Note: Cython will also create a .next() method that does the
         same as this method.
         """
+        if self.reverse:
+            return self.real_prev()
+        else:
+            return self.real_next()
 
+    def prev(self):
+        """Return the previous iterator entry."""
+        if self.reverse:
+            return self.real_next()
+        else:
+            return self.real_prev()
+
+    cdef real_next(self):
         if self.state == IN_BETWEEN:
             self._iter.Next()
             if not self._iter.Valid():
@@ -276,9 +289,7 @@ cdef class Iterator:
         assert self.state == PAST_END
         raise StopIteration
 
-    def prev(self):
-        """Return the previous iterator entry."""
-
+    cdef real_prev(self):
         if self.state == BEFORE_BEGIN:
             raise StopIteration
 
@@ -303,7 +314,10 @@ cdef class Iterator:
         when first created. This means calling .next() will return the
         first entry.
         """
-        self.state = BEFORE_BEGIN
+        if self.reverse:
+            self.state = PAST_END
+        else:
+            self.state = BEFORE_BEGIN
 
     def move_to_end(self):
         """Move the iterator pointer past the end of the range.
@@ -312,7 +326,10 @@ cdef class Iterator:
         the iterator is exhausted, which means a call to .next() raises
         StopIteration, but .prev() will work.
         """
-        self.state = PAST_END
+        if self.reverse:
+            self.state = BEFORE_BEGIN
+        else:
+            self.state = PAST_END
 
     def seek(self, bytes target):
         self._iter.Seek(Slice(target, len(target)))
