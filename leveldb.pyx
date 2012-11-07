@@ -28,6 +28,11 @@ cdef enum IteratorState:
     IN_BETWEEN
 
 
+cdef enum IteratorDirection:
+    FORWARD
+    REVERSE
+
+
 @cython.final
 cdef class DB:
     """LevelDB database
@@ -188,7 +193,7 @@ cdef class WriteBatch:
 cdef class Iterator:
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
-    cdef bool reverse
+    cdef IteratorDirection direction
     cdef bool include_key
     cdef bool include_value
     cdef IteratorState state
@@ -199,7 +204,10 @@ cdef class Iterator:
         cdef ReadOptions read_options
 
         self.db = db
-        self.reverse = reverse
+        if reverse:
+            self.direction = REVERSE
+        else:
+            self.direction = FORWARD
         self.include_key = include_key
         self.include_value = include_value
 
@@ -258,17 +266,17 @@ cdef class Iterator:
         Note: Cython will also create a .next() method that does the
         same as this method.
         """
-        if self.reverse:
-            return self.real_prev()
-        else:
+        if self.direction == FORWARD:
             return self.real_next()
+        else:
+            return self.real_prev()
 
     def prev(self):
         """Return the previous iterator entry."""
-        if self.reverse:
-            return self.real_next()
-        else:
+        if self.direction == FORWARD:
             return self.real_prev()
+        else:
+            return self.real_next()
 
     cdef real_next(self):
         if self.state == IN_BETWEEN:
@@ -314,10 +322,10 @@ cdef class Iterator:
         when first created. This means calling .next() will return the
         first entry.
         """
-        if self.reverse:
-            self.state = AFTER_STOP
-        else:
+        if self.direction == FORWARD:
             self.state = BEFORE_START
+        else:
+            self.state = AFTER_STOP
 
     def move_to_stop(self):
         """Move the iterator pointer past the end of the range.
@@ -326,10 +334,10 @@ cdef class Iterator:
         the iterator is exhausted, which means a call to .next() raises
         StopIteration, but .prev() will work.
         """
-        if self.reverse:
-            self.state = BEFORE_START
-        else:
+        if self.direction == FORWARD:
             self.state = AFTER_STOP
+        else:
+            self.state = BEFORE_START
 
     def seek(self, bytes target):
         self._iter.Seek(Slice(target, len(target)))
