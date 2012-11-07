@@ -193,9 +193,9 @@ cdef class Iterator:
     cdef bool include_value
     cdef IteratorState state
 
-    def __cinit__(self, DB db not None, reverse=False, start=None, stop=None,
-            include_key=True, include_value=True, verify_checksums=None,
-            fill_cache=None):
+    def __cinit__(self, DB db not None, bool reverse, bytes start, bytes stop,
+            bool include_key, bool include_value, bool verify_checksums,
+            bool fill_cache):
         cdef ReadOptions read_options
 
         self.db = db
