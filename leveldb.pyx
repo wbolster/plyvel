@@ -297,25 +297,22 @@ cdef class Iterator:
         return out
 
     def move_to_begin(self):
-        """Move the iterator pointer to the begin of the range.
+        """Move the iterator pointer before the begin of the range.
 
         This "rewinds" the iterator, so that it is in the same state as
-        when first created.
+        when first created. This means calling .next() will return the
+        first entry.
         """
-        # self._iter.SeekToFirst()
-        # self.state = BEFORE_BEGIN
-        pass
+        self.state = BEFORE_BEGIN
 
     def move_to_end(self):
         """Move the iterator pointer past the end of the range.
 
-        This "fast-forwards" the iterator to the end. After this call
+        This "fast-forwards" the iterator past the end. After this call
         the iterator is exhausted, which means a call to .next() raises
-        StopIteration (but .prev() will work).
+        StopIteration, but .prev() will work.
         """
-        # self._iter.SeekToLast()
-        # self.state = PAST_END
-        pass
+        self.state = PAST_END
 
     def seek(self, bytes target):
         self._iter.Seek(Slice(target, len(target)))
