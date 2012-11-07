@@ -344,3 +344,20 @@ def test_range_empty_database():
             it.prev()
         with assert_raises(StopIteration):
             it.next()
+
+
+def test_iterator_single_entry():
+    with tmp_db('iterator_single_entry') as db:
+        key = 'key'
+        db.put(key, 'value')
+
+        it = db.iterator(include_value=False)
+        assert_equal(key, it.next())
+        assert_equal(key, it.prev())
+        assert_equal(key, it.next())
+        assert_equal(key, it.prev())
+        with assert_raises(StopIteration):
+            it.prev()
+        assert_equal(key, it.next())
+        with assert_raises(StopIteration):
+            it.next()
