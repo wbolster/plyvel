@@ -212,7 +212,7 @@ cdef class Iterator:
             read_options.fill_cache = fill_cache
 
         self._iter = db.db.NewIterator(read_options)
-        self.move_to_begin()
+        self.move_to_start()
 
     def __dealloc__(self):
         del self._iter
@@ -307,8 +307,8 @@ cdef class Iterator:
             self.state = IN_BETWEEN
         return out
 
-    def move_to_begin(self):
-        """Move the iterator pointer before the begin of the range.
+    def move_to_start(self):
+        """Move the pointer before the start key of the iterator.
 
         This "rewinds" the iterator, so that it is in the same state as
         when first created. This means calling .next() will return the
@@ -319,7 +319,7 @@ cdef class Iterator:
         else:
             self.state = BEFORE_START
 
-    def move_to_end(self):
+    def move_to_stop(self):
         """Move the iterator pointer past the end of the range.
 
         This "fast-forwards" the iterator past the end. After this call

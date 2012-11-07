@@ -256,13 +256,13 @@ def test_iterator_extremes(db, iter_kwargs, expected_values):
     first, second, third = expected_values
 
     # End of iterator
-    it.move_to_end()
+    it.move_to_stop()
     with assert_raises(StopIteration):
         it.next()
     assert_equal(third, it.prev())
 
     # Begin of iterator
-    it.move_to_begin()
+    it.move_to_start()
     with assert_raises(StopIteration):
         it.prev()
     assert_equal(first, next(it))
@@ -332,8 +332,8 @@ def test_range_iteration():
 def test_range_empty_database():
     with tmp_db('range_empty_database') as db:
         it = db.iterator()
-        it.move_to_begin()  # no-op (don't crash)
-        it.move_to_end()  # no-op (don't crash)
+        it.move_to_start()  # no-op (don't crash)
+        it.move_to_stop()  # no-op (don't crash)
 
         it = db.iterator()
         with assert_raises(StopIteration):
