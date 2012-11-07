@@ -138,7 +138,14 @@ cdef class DB:
         return Iterator(self, reverse=reverse, start=start, stop=stop,
                         include_key=include_key, include_value=include_value,
                         verify_checksums=verify_checksums,
-                        fill_cache=fill_cache)
+                        fill_cache=fill_cache, snapshot=None)
+
+    #
+    # Snapshots
+    #
+
+    def snapshot(self):
+        return Snapshot(self)
 
 
 cdef class WriteBatch:
@@ -200,7 +207,7 @@ cdef class Iterator:
 
     def __cinit__(self, DB db not None, bool reverse, bytes start, bytes stop,
             bool include_key, bool include_value, bool verify_checksums,
-            bool fill_cache):
+            bool fill_cache, Snapshot snapshot):
         cdef ReadOptions read_options
 
         self.db = db
@@ -218,6 +225,9 @@ cdef class Iterator:
 
         if fill_cache is not None:
             read_options.fill_cache = fill_cache
+
+        if snapshot is not None:
+            read_options.snapshot = snapshot.snapshot
 
         self._iter = db.db.NewIterator(read_options)
         self.move_to_start()
@@ -341,3 +351,25 @@ cdef class Iterator:
 
     def seek(self, bytes target):
         self._iter.Seek(Slice(target, len(target)))
+
+
+cdef class Snapshot:
+    cdef cpp_leveldb.Snapshot* snapshot
+    cdef DB db
+
+    def __cinit__(self, DB db not None):
+        self.db = db
+        self.snapshot = <cpp_leveldb.Snapshot*>db.db.GetSnapshot()
+
+    def __dealloc__(self):
+        self.db.db.ReleaseSnapshot(self.snapshot)
+
+    def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
+        raise NotImplementedError()
+
+    def iterator(self, reverse=False, start=None, stop=None, include_key=True,
+            include_value=True, verify_checksums=None, fill_cache=None):
+        return Iterator(self, reverse=reverse, start=start, stop=stop,
+                        include_key=include_key, include_value=include_value,
+                        verify_checksums=verify_checksums,
+                        fill_cache=fill_cache, snapshot=self)
