@@ -213,7 +213,11 @@ cdef class Iterator:
         return self
 
     cdef object current(self):
-        """Helper function to return the current iterator key/value."""
+        """Return the current iterator key/value.
+
+        This is an internal helper function that is not exposed in the
+        external Python API.
+        """
         cdef Slice key_slice
         cdef bytes key
         cdef Slice value_slice
@@ -241,6 +245,7 @@ cdef class Iterator:
         return out
 
     def __next__(self):
+        """Return the next iterator entry."""
         # XXX: Cython will also make a .next() method
 
         if not self._iter.Valid():
@@ -251,6 +256,7 @@ cdef class Iterator:
         return out
 
     def prev(self):
+        """Return the previous iterator entry."""
         if not self._iter.Valid():
             raise StopIteration
 
@@ -263,9 +269,20 @@ cdef class Iterator:
         return out
 
     def begin(self):
+        """Move the iterator pointer to the begin of the range.
+
+        This "rewinds" the iterator, so that it is in the same state as
+        when first created.
+        """
         self._iter.SeekToFirst()
 
     def end(self):
+        """Move the iterator pointer past the end of the range.
+
+        This "fast-forwards" the iterator to the end. After this call
+        the iterator is exhausted, which means a call to .next() raises
+        StopIteration (but .prev() will work).
+        """
         self._iter.SeekToLast()
 
     def seek(self, bytes target):
