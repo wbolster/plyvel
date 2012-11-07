@@ -305,8 +305,6 @@ cdef class Iterator:
             if not self._iter.Valid():
                 self.state = AFTER_STOP
                 raise StopIteration
-            return self.current()
-
         elif self.state == BEFORE_START:
             if self.start.empty():
                 self._iter.SeekToFirst()
@@ -316,10 +314,16 @@ cdef class Iterator:
                 # Iterator is empty
                 raise StopIteration
             self.state = IN_BETWEEN
-            return self.current()
+        elif self.state == AFTER_STOP:
+            raise StopIteration
 
-        assert self.state == AFTER_STOP
-        raise StopIteration
+        # Check range boundaries
+        if not self.stop.empty() and self.comparator.Compare(
+                self._iter.key(), self.stop) >= 0:
+            self.state = AFTER_STOP
+            raise StopIteration
+
+        return self.current()
 
     cdef real_prev(self):
         if self.state == BEFORE_START:
