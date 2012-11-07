@@ -214,8 +214,8 @@ cdef class Iterator:
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
     cdef IteratorDirection direction
-    cdef bytes start
-    cdef bytes stop
+    cdef Slice start
+    cdef Slice stop
     cdef bool include_key
     cdef bool include_value
     cdef IteratorState state
@@ -227,8 +227,8 @@ cdef class Iterator:
         self.db = db
         self.comparator = db.comparator
         self.direction = FORWARD if not reverse else REVERSE
-        self.start = start
-        self.stop = stop
+        self.start = Slice(start, len(start)) if start is not None else Slice()
+        self.stop = Slice(stop, len(stop)) if stop is not None else Slice()
         self.include_key = include_key
         self.include_value = include_value
 
@@ -308,7 +308,10 @@ cdef class Iterator:
             return self.current()
 
         elif self.state == BEFORE_START:
-            self._iter.SeekToFirst()
+            if self.start.empty():
+                self._iter.SeekToFirst()
+            else:
+                self._iter.Seek(self.start)
             if not self._iter.Valid():
                 # Iterator is empty
                 raise StopIteration
@@ -323,7 +326,10 @@ cdef class Iterator:
             raise StopIteration
 
         if self.state == AFTER_STOP:
-            self._iter.SeekToLast()
+            if self.stop.empty():
+                self._iter.SeekToLast()
+            else:
+                self._iter.Seek(self.stop)
             if not self._iter.Valid():
                 # Iterator is empty
                 raise StopIteration
