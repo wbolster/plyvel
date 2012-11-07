@@ -63,7 +63,7 @@ cdef extern from "leveldb/options.h" namespace "leveldb":
         kSnappyCompression
 
     cdef cppclass Options:
-        # Comparator* comparator
+        Comparator* comparator
         bool create_if_missing
         bool error_if_exists
         bool paranoid_checks
@@ -131,3 +131,10 @@ cdef extern from "leveldb/iterator.h" namespace "leveldb":
         Slice value()
         Status status()
         # void RegisterCleanup(CleanupFunction function, void* arg1, void* arg2);
+
+
+cdef extern from "leveldb/comparator.h" namespace "leveldb":
+
+    cdef cppclass Comparator:
+        int Compare(Slice& a, Slice&b)
+        const_char* Name()
