@@ -23,6 +23,10 @@ cdef void raise_for_status(Status st):
         raise Error(st.ToString())
 
 
+cdef inline int compare(Comparator* comparator, bytes a, bytes b):
+    return comparator.Compare(Slice(a, len(a)), Slice(b, len(b)))
+
+
 cdef enum IteratorState:
     BEFORE_START
     AFTER_STOP
