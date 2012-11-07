@@ -23,8 +23,8 @@ cdef void raise_for_status(Status st):
 
 
 cdef enum IteratorState:
-    BEFORE_BEGIN
-    PAST_END
+    BEFORE_START
+    AFTER_STOP
     IN_BETWEEN
 
 
@@ -274,11 +274,11 @@ cdef class Iterator:
         if self.state == IN_BETWEEN:
             self._iter.Next()
             if not self._iter.Valid():
-                self.state = PAST_END
+                self.state = AFTER_STOP
                 raise StopIteration
             return self.current()
 
-        elif self.state == BEFORE_BEGIN:
+        elif self.state == BEFORE_START:
             self._iter.SeekToFirst()
             if not self._iter.Valid():
                 # Iterator is empty
@@ -286,14 +286,14 @@ cdef class Iterator:
             self.state = IN_BETWEEN
             return self.current()
 
-        assert self.state == PAST_END
+        assert self.state == AFTER_STOP
         raise StopIteration
 
     cdef real_prev(self):
-        if self.state == BEFORE_BEGIN:
+        if self.state == BEFORE_START:
             raise StopIteration
 
-        if self.state == PAST_END:
+        if self.state == AFTER_STOP:
             self._iter.SeekToLast()
             if not self._iter.Valid():
                 # Iterator is empty
@@ -302,7 +302,7 @@ cdef class Iterator:
         out = self.current()
         self._iter.Prev()
         if not self._iter.Valid():
-            self.state = BEFORE_BEGIN
+            self.state = BEFORE_START
         else:
             self.state = IN_BETWEEN
         return out
@@ -315,9 +315,9 @@ cdef class Iterator:
         first entry.
         """
         if self.reverse:
-            self.state = PAST_END
+            self.state = AFTER_STOP
         else:
-            self.state = BEFORE_BEGIN
+            self.state = BEFORE_START
 
     def move_to_end(self):
         """Move the iterator pointer past the end of the range.
@@ -327,9 +327,9 @@ cdef class Iterator:
         StopIteration, but .prev() will work.
         """
         if self.reverse:
-            self.state = BEFORE_BEGIN
+            self.state = BEFORE_START
         else:
-            self.state = PAST_END
+            self.state = AFTER_STOP
 
     def seek(self, bytes target):
         self._iter.Seek(Slice(target, len(target)))
