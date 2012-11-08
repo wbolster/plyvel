@@ -100,7 +100,8 @@ cdef class DB:
 
     def __cinit__(self, bytes name, bool create_if_missing=True,
             bool error_if_exists=False, paranoid_checks=None,
-            int bloom_filter_bits=0):
+            write_buffer_size=None, max_open_files=None, block_size=None,
+            block_restart_interval=None, int bloom_filter_bits=0):
         """Open the underlying database handle
 
         :param str name: The name of the database
@@ -114,6 +115,18 @@ cdef class DB:
 
         if paranoid_checks is not None:
             options.paranoid_checks = paranoid_checks
+
+        if write_buffer_size is not None:
+            options.write_buffer_size = write_buffer_size
+
+        if max_open_files is not None:
+            options.max_open_files = max_open_files
+
+        if block_size is not None:
+            options.block_size = block_size
+
+        if block_restart_interval is not None:
+            options.block_restart_interval = block_restart_interval
 
         if bloom_filter_bits > 0:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)

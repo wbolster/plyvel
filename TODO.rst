@@ -15,11 +15,7 @@ Required before this library is to be taken seriously:
 
 * Option handling when opening databases:
 
-  * write_buffer_size
-  * max_open_files
   * block cache (LRU cache size)
-  * block_size
-  * block_restart_interval
   * compression (None or 'snappy')
 
 Lower priority tasks:
