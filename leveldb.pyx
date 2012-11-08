@@ -175,16 +175,16 @@ cdef class DB:
 
     def compact_range(self, bytes start=None, bytes stop=None):
         """Compact underlying storage for the specified key range."""
-        cdef Slice* start_slice = NULL
-        cdef Slice* stop_slice = NULL
+        cdef Slice start_slice
+        cdef Slice stop_slice
 
         if start is not None:
-            start_slice = new Slice(start, len(start))
+            start_slice = Slice(start, len(start))
 
         if stop is not None:
-            stop_slice = new Slice(stop, len(stop))
+            stop_slice = Slice(stop, len(stop))
 
-        self.db.CompactRange(start_slice, stop_slice)
+        self.db.CompactRange(&start_slice, &stop_slice)
 
 
 #
