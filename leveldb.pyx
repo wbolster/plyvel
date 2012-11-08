@@ -99,7 +99,8 @@ cdef class DB:
     cdef Comparator* comparator
 
     def __cinit__(self, bytes name, bool create_if_missing=True,
-            bool error_if_exists=False, int bloom_filter_bits=0):
+            bool error_if_exists=False, paranoid_checks=None,
+            int bloom_filter_bits=0):
         """Open the underlying database handle
 
         :param str name: The name of the database
@@ -110,6 +111,9 @@ cdef class DB:
         options = Options()
         options.create_if_missing = create_if_missing
         options.error_if_exists = error_if_exists
+
+        if paranoid_checks is not None:
+            options.paranoid_checks = paranoid_checks
 
         if bloom_filter_bits > 0:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)

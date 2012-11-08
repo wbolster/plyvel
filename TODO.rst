@@ -15,7 +15,6 @@ Required before this library is to be taken seriously:
 
 * Option handling when opening databases:
 
-  * paranoid_checks
   * write_buffer_size
   * max_open_files
   * block cache (LRU cache size)
