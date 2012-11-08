@@ -14,6 +14,7 @@ from cpp_leveldb cimport (
     Comparator,
     DestroyDB,
     NewBloomFilterPolicy,
+    NewLRUCache,
     Options,
     ReadOptions,
     RepairDB,
@@ -100,9 +101,9 @@ cdef class DB:
 
     def __cinit__(self, bytes name, bool create_if_missing=True,
             bool error_if_exists=False, paranoid_checks=None,
-            write_buffer_size=None, max_open_files=None, block_size=None,
-            block_restart_interval=None, compression='snappy',
-            int bloom_filter_bits=0):
+            write_buffer_size=None, max_open_files=None, lru_cache_size=None,
+            block_size=None, block_restart_interval=None,
+            compression='snappy', int bloom_filter_bits=0):
         """Open the underlying database handle
 
         :param str name: The name of the database
@@ -122,6 +123,9 @@ cdef class DB:
 
         if max_open_files is not None:
             options.max_open_files = max_open_files
+
+        if lru_cache_size is not None:
+            options.block_cache = NewLRUCache(lru_cache_size)
 
         if block_size is not None:
             options.block_size = block_size

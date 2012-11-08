@@ -71,7 +71,7 @@ cdef extern from "leveldb/options.h" namespace "leveldb":
         # Logger* info_log
         size_t write_buffer_size
         int max_open_files
-        # Cache* block_cache
+        Cache* block_cache
         size_t block_size
         int block_restart_interval
         CompressionType compression
@@ -148,3 +148,12 @@ cdef extern from "leveldb/filter_policy.h" namespace "leveldb":
         bool KeyMayMatch(Slice& key, Slice& filter) nogil
 
     FilterPolicy* NewBloomFilterPolicy(int bits_per_key) nogil
+
+
+cdef extern from "leveldb/cache.h" namespace "leveldb":
+
+    cdef cppclass Cache:
+        # Treat as opaque structure
+        pass
+
+    Cache* NewLRUCache(size_t capacity)
