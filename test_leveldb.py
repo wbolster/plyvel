@@ -326,6 +326,21 @@ def test_range_iteration():
             [],
             list(db.iterator(start='3', stop='0')))
 
+        # Only start
+        expected_values = ('3', '4', '5')
+        iter_kwargs = dict(start='3', include_key=False)
+        test_manual_iteration(db, iter_kwargs, expected_values)
+        test_iterator_single_step(db, iter_kwargs, expected_values)
+        test_iterator_extremes(db, iter_kwargs, expected_values)
+
+        # Only stop
+        expected_values = ('1', '2', '3')
+        iter_kwargs = dict(stop='4', include_key=False)
+        test_manual_iteration(db, iter_kwargs, expected_values)
+        test_iterator_single_step(db, iter_kwargs, expected_values)
+        test_iterator_extremes(db, iter_kwargs, expected_values)
+
+        # Both start and stop
         expected_values = ('2', '3', '4')
         iter_kwargs = dict(start='2', stop='5', include_key=False)
         test_manual_iteration(db, iter_kwargs, expected_values)
