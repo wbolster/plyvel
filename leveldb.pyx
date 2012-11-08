@@ -89,7 +89,8 @@ cdef class DB:
     cdef cpp_leveldb.DB* db
     cdef Comparator* comparator
 
-    def __cinit__(self, bytes name):
+    def __cinit__(self, bytes name, bool create_if_missing=True,
+            bool error_if_exists=False):
         """Open the underlying database handle
 
         :param str name: The name of the database
@@ -98,7 +99,8 @@ cdef class DB:
         cdef Status st
 
         options = Options()
-        options.create_if_missing = True
+        options.create_if_missing = create_if_missing
+        options.error_if_exists = error_if_exists
         self.comparator = <cpp_leveldb.Comparator*>options.comparator
         st = cpp_leveldb.DB_Open(options, name, &self.db)
         raise_for_status(st)
