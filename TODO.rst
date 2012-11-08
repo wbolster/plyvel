@@ -26,8 +26,6 @@ Required before this library is to be taken seriously:
   * compression (None or 'snappy')
   * filter_policy (number of bloom filter bits)
 
-* Check if/when iterator.status() should be checked
-
 Lower priority tasks:
 
 * Custom comparators (if desired at all)

@@ -319,6 +319,7 @@ cdef class Iterator:
             read_options.snapshot = snapshot.snapshot
 
         self._iter = db.db.NewIterator(read_options)
+        raise_for_status(self._iter.status())
         self.move_to_start()
 
     def __dealloc__(self):
@@ -395,6 +396,8 @@ cdef class Iterator:
         elif self.state == AFTER_STOP:
             raise StopIteration
 
+        raise_for_status(self._iter.status())
+
         # Check range boundaries
         if not self.stop.empty() and self.comparator.Compare(
                 self._iter.key(), self.stop) >= 0:
@@ -426,6 +429,8 @@ cdef class Iterator:
                 if not self._iter.Valid():
                     raise StopIteration
 
+        raise_for_status(self._iter.status())
+
         out = self.current()
         self._iter.Prev()
         if not self._iter.Valid():
@@ -436,6 +441,9 @@ cdef class Iterator:
             self.state = BEFORE_START
         else:
             self.state = IN_BETWEEN
+
+        raise_for_status(self._iter.status())
+
         return out
 
     def move_to_start(self):
