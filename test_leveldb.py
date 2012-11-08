@@ -441,3 +441,15 @@ def test_snapshot():
         assert_list_equal(
             ['b', 'c'],
             list(snapshot.iterator(include_value=False)))
+
+
+def test_compaction():
+    # This merely tests that the Python API works correctly, not that
+    # LevelDB actually compacts the range
+    with tmp_db('compaction') as db:
+        db.compact_range()
+        db.compact_range('a', 'b')
+        db.compact_range(start='a', stop='b')
+        db.compact_range(start='a', stop=None)
+        db.compact_range(start=None, stop='b')
+        db.compact_range(start=None, stop=None)

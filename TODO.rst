@@ -35,4 +35,3 @@ Lower priority tasks:
 
 * Custom comparators (if desired at all)
 * Wrap DB.GetApproximateSizes()
-* Wrap DB.CompactRange

@@ -153,6 +153,19 @@ cdef class DB:
     def snapshot(self):
         return Snapshot(self)
 
+    def compact_range(self, bytes start=None, bytes stop=None):
+        """Compact underlying storage for the specified key range."""
+        cdef Slice* start_slice = NULL
+        cdef Slice* stop_slice = NULL
+
+        if start is not None:
+            start_slice = new Slice(start, len(start))
+
+        if stop is not None:
+            stop_slice = new Slice(stop, len(stop))
+
+        self.db.CompactRange(start_slice, stop_slice)
+
 
 cdef class WriteBatch:
     """Write batch for batch put/delete operations.
