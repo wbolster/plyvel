@@ -331,16 +331,29 @@ cdef class Iterator:
 
         if self.state == AFTER_STOP:
             if self.stop.empty():
+                # No stop key, seek to last entry
                 self._iter.SeekToLast()
+                if not self._iter.Valid():
+                    # Iterator is empty
+                    raise StopIteration
             else:
+                # Stop key given: seek to it and move one step back
+                # (since the end of the range is exclusive)
                 self._iter.Seek(self.stop)
-            if not self._iter.Valid():
-                # Iterator is empty
-                raise StopIteration
+                if not self._iter.Valid():
+                    # Iterator is empty
+                    raise StopIteration
+                self._iter.Prev()
+                if not self._iter.Valid():
+                    raise StopIteration
 
         out = self.current()
         self._iter.Prev()
         if not self._iter.Valid():
+            self.state = BEFORE_START
+        elif not self.start.empty() and self.comparator.Compare(
+                self._iter.key(), self.start) < 0:
+            # Iterator is valid, but has moved before the 'start' key
             self.state = BEFORE_START
         else:
             self.state = IN_BETWEEN
