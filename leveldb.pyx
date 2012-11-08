@@ -46,7 +46,6 @@ class CorruptionError(Error):
     pass
 
 
-
 cdef void raise_for_status(Status st):
     if st.ok():
         return
@@ -59,20 +58,9 @@ cdef void raise_for_status(Status st):
     raise Error(st.ToString())
 
 
-cdef inline int compare(Comparator* comparator, bytes a, bytes b):
-    return comparator.Compare(Slice(a, len(a)), Slice(b, len(b)))
-
-
-cdef enum IteratorState:
-    BEFORE_START
-    AFTER_STOP
-    IN_BETWEEN
-
-
-cdef enum IteratorDirection:
-    FORWARD
-    REVERSE
-
+#
+# Utilities
+#
 
 cdef inline db_get(DB db, bytes key, ReadOptions read_options):
     cdef string value
@@ -86,6 +74,10 @@ cdef inline db_get(DB db, bytes key, ReadOptions read_options):
 
     return value
 
+
+#
+# Database
+#
 
 @cython.final
 cdef class DB:
@@ -194,6 +186,10 @@ cdef class DB:
         self.db.CompactRange(start_slice, stop_slice)
 
 
+#
+# Write batche
+#
+
 cdef class WriteBatch:
     """Write batch for batch put/delete operations.
 
@@ -246,6 +242,25 @@ cdef class WriteBatch:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.write()
+
+
+#
+# Iterator
+#
+
+cdef enum IteratorState:
+    BEFORE_START
+    AFTER_STOP
+    IN_BETWEEN
+
+
+cdef enum IteratorDirection:
+    FORWARD
+    REVERSE
+
+
+cdef inline int compare(Comparator* comparator, bytes a, bytes b):
+    return comparator.Compare(Slice(a, len(a)), Slice(b, len(b)))
 
 
 cdef class Iterator:
@@ -425,6 +440,10 @@ cdef class Iterator:
         # TODO: should this be in the public API?
         self._iter.Seek(Slice(target, len(target)))
 
+
+#
+# Snapshot
+#
 
 cdef class Snapshot:
     """Datebase snapshot.
