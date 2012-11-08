@@ -326,10 +326,11 @@ cdef class Iterator:
         return self.current()
 
     cdef real_prev(self):
-        if self.state == BEFORE_START:
+        if self.state == IN_BETWEEN:
+            pass
+        elif self.state == BEFORE_START:
             raise StopIteration
-
-        if self.state == AFTER_STOP:
+        elif self.state == AFTER_STOP:
             if self.stop.empty():
                 # No stop key, seek to last entry
                 self._iter.SeekToLast()
@@ -337,7 +338,7 @@ cdef class Iterator:
                     # Iterator is empty
                     raise StopIteration
             else:
-                # Stop key given: seek to it and move one step back
+                # Stop key specified: seek to it and move one step back
                 # (since the end of the range is exclusive)
                 self._iter.Seek(self.stop)
                 if not self._iter.Valid():
