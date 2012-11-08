@@ -29,7 +29,6 @@ Required before this library is to be taken seriously:
 * Wrap DestroyDB
 * Wrap RepairDB
 * Check if/when iterator.status() should be checked
-* Custom errors (extending main Error class) for different error types
 
 Lower priority tasks:
 

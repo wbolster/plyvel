@@ -18,18 +18,45 @@ __leveldb_version__ = '%d.%d' % (cpp_leveldb.kMajorVersion,
                                  cpp_leveldb.kMinorVersion)
 
 
-class Error(Exception):
-    """Main error class for all LevelDB errors
+#
+# Errors and error handling
+#
 
-    Other exceptions from this module subclass this class.
+class Error(Exception):
+    """Generic LevelDB error.
+
+    This class is also the "parent" error for other LevelDB errors
+    (IOError and CorruptionError). Other exceptions from this module
+    subclass this class.
     """
     pass
 
 
+class IOError(Error, IOError):
+    """LevelDB IO error
+
+    This class extends both the main LevelDB Error class from this
+    module and Python's built-in IOError.
+    """
+    pass
+
+
+class CorruptionError(Error):
+    """LevelDB corruption error"""
+    pass
+
+
+
 cdef void raise_for_status(Status st):
-    # TODO: add different error classes, depending on the error type
-    if not st.ok():
-        raise Error(st.ToString())
+    if st.ok():
+        return
+
+    if st.IsIOError():
+        raise IOError(st.ToString())
+    elif st.IsCorruption():
+        raise CorruptionError(st.ToString())
+
+    raise Error(st.ToString())
 
 
 cdef inline int compare(Comparator* comparator, bytes a, bytes b):
