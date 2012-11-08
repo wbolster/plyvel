@@ -15,8 +15,6 @@ Required before this library is to be taken seriously:
 
 * Option handling when opening databases:
 
-  * create_if_missing
-  * error_if_exists
   * paranoid_checks
   * write_buffer_size
   * max_open_files
