@@ -10,8 +10,16 @@ from libcpp.string cimport string
 from libcpp cimport bool
 
 cimport cpp_leveldb
-from cpp_leveldb cimport (Comparator, DestroyDB, Options, ReadOptions,
-                          RepairDB, Slice, Status, WriteOptions)
+from cpp_leveldb cimport (
+    Comparator,
+    DestroyDB,
+    Options,
+    ReadOptions,
+    RepairDB,
+    Slice,
+    Status,
+    WriteOptions,
+)
 
 
 __leveldb_version__ = '%d.%d' % (cpp_leveldb.kMajorVersion,
