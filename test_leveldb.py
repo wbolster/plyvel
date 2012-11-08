@@ -324,7 +324,11 @@ def test_range_iteration():
 
         assert_list_equal(
             [],
-            list(db.iterator(start='3', stop='0', include_value=False)))
+            list(db.iterator(start='3', stop='0')))
+
+        assert_list_equal(
+            [],
+            list(db.iterator(start='3', stop='0', reverse=True)))
 
         expected_values = ('2', '3', '4')
         iter_kwargs = dict(start='2', stop='5', include_key=False)
