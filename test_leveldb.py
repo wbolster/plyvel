@@ -360,8 +360,23 @@ def test_reverse_range_iteration():
             [],
             list(db.iterator(start='3', stop='0', reverse=True)))
 
+        # Only start
         expected_values = ('5', '4', '3')
         iter_kwargs = dict(start='3', reverse=True, include_value=False)
+        test_manual_iteration(db, iter_kwargs, expected_values)
+        test_iterator_single_step(db, iter_kwargs, expected_values)
+        test_iterator_extremes(db, iter_kwargs, expected_values)
+
+        # Only stop
+        expected_values = ('3', '2', '1')
+        iter_kwargs = dict(stop='4', reverse=True, include_value=False)
+        test_manual_iteration(db, iter_kwargs, expected_values)
+        test_iterator_single_step(db, iter_kwargs, expected_values)
+        test_iterator_extremes(db, iter_kwargs, expected_values)
+
+        # Both start and stop
+        expected_values = ('3', '2', '1')
+        iter_kwargs = dict(start='1', stop='4', reverse=True, include_value=False)
         test_manual_iteration(db, iter_kwargs, expected_values)
         test_iterator_single_step(db, iter_kwargs, expected_values)
         test_iterator_extremes(db, iter_kwargs, expected_values)
