@@ -1,3 +1,8 @@
+"""
+LevelDB module.
+
+Use LevelDB.DB() to create or open a database.
+"""
 
 cimport cython
 
@@ -14,6 +19,10 @@ __leveldb_version__ = '%d.%d' % (cpp_leveldb.kMajorVersion,
 
 
 class Error(Exception):
+    """Main error class for all LevelDB errors
+
+    Other exceptions from this module subclass this class.
+    """
     pass
 
 
@@ -53,7 +62,7 @@ cdef inline db_get(DB db, bytes key, ReadOptions read_options):
 
 @cython.final
 cdef class DB:
-    """LevelDB database
+    """LevelDB database.
 
     A LevelDB database is a persistent ordered map from keys to values.
     """
@@ -162,6 +171,10 @@ cdef class DB:
 
 
 cdef class WriteBatch:
+    """Write batch for batch put/delete operations.
+
+    Do not instantiate directly; use DB.batch(...) instead.
+    """
     cdef cpp_leveldb.WriteBatch* wb
     cdef WriteOptions write_options
     cdef DB db
@@ -180,7 +193,7 @@ cdef class WriteBatch:
     def put(self, bytes key, bytes value):
         """Set the value for specified key to the specified value.
 
-        See DB.put()
+        This is like DB.put(), but operates on the write batch instead.
         """
         self.wb.Put(
             Slice(key, len(key)),
@@ -189,7 +202,8 @@ cdef class WriteBatch:
     def delete(self, bytes key):
         """Delete the entry for the specified key.
 
-        See DB.delete()
+        This is like DB.delete(), but operates on the write batch
+        instead.
         """
         self.wb.Delete(Slice(key, len(key)))
 
@@ -211,6 +225,11 @@ cdef class WriteBatch:
 
 
 cdef class Iterator:
+    """Iterator for (ranges of) a database.
+
+    Do not instantiate directly; use DB.iterator(...) or
+    Snapshot.iterator() instead.
+    """
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
     cdef IteratorDirection direction
@@ -384,6 +403,14 @@ cdef class Iterator:
 
 
 cdef class Snapshot:
+    """Datebase snapshot.
+
+    Do not keep unnecessary references to instances of this class around
+    longer than needed, because LevelDB will not release the resources
+    required for this snapshot until a snapshot is released.
+
+    Do not instantiate directly; use DB.snapshot(...) instead.
+    """
     cdef cpp_leveldb.Snapshot* snapshot
     cdef DB db
 
