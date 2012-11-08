@@ -346,7 +346,7 @@ def test_reverse_range_iteration():
             list(db.iterator(start='3', stop='0', reverse=True)))
 
         expected_values = ('5', '4', '3')
-        iter_kwargs = dict(stop='2', reverse=True, include_value=False)
+        iter_kwargs = dict(start='3', reverse=True, include_value=False)
         test_manual_iteration(db, iter_kwargs, expected_values)
         test_iterator_single_step(db, iter_kwargs, expected_values)
         test_iterator_extremes(db, iter_kwargs, expected_values)
