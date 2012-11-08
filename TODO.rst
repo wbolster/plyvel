@@ -26,8 +26,6 @@ Required before this library is to be taken seriously:
   * compression (None or 'snappy')
   * filter_policy (number of bloom filter bits)
 
-* Wrap DestroyDB
-* Wrap RepairDB
 * Check if/when iterator.status() should be checked
 
 Lower priority tasks:

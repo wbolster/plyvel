@@ -10,8 +10,8 @@ from libcpp.string cimport string
 from libcpp cimport bool
 
 cimport cpp_leveldb
-from cpp_leveldb cimport (Comparator, Options, ReadOptions, Slice, Status,
-                          WriteOptions)
+from cpp_leveldb cimport (Comparator, DestroyDB, Options, ReadOptions,
+                          RepairDB, Slice, Status, WriteOptions)
 
 
 __leveldb_version__ = '%d.%d' % (cpp_leveldb.kMajorVersion,
@@ -185,6 +185,24 @@ cdef class DB:
             stop_slice = Slice(stop, len(stop))
 
         self.db.CompactRange(&start_slice, &stop_slice)
+
+
+def destroy_db(bytes name):
+    """Destroy the specified database."""
+    # TODO: support Options
+    cdef Options options = Options()
+    cdef Status st
+    st = DestroyDB(name, options)
+    raise_for_status(st)
+
+
+def repair_db(bytes name):
+    """Repair the specified database."""
+    # TODO: support Options
+    cdef Options options = Options()
+    cdef Status st
+    st = RepairDB(name, options)
+    raise_for_status(st)
 
 
 #

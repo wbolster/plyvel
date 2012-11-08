@@ -1,9 +1,9 @@
 
 from contextlib import contextmanager
 from itertools import izip
-from os import mkdir, rmdir
-from shutil import rmtree
-from tempfile import mkdtemp
+import os
+import shutil
+import tempfile
 
 from nose.tools import (
     assert_equal,
@@ -24,7 +24,7 @@ TEST_DB_DIR = 'testdb/'
 #
 
 def tmp_dir(name):
-    return mkdtemp(prefix=name + '-', dir=TEST_DB_DIR)
+    return tempfile.mkdtemp(prefix=name + '-', dir=TEST_DB_DIR)
 
 
 @contextmanager
@@ -33,7 +33,7 @@ def tmp_db(name):
     db = DB(dir_name)
     yield db
     del db
-    rmtree(dir_name)
+    shutil.rmtree(dir_name)
 
 
 #
@@ -42,7 +42,7 @@ def tmp_db(name):
 
 def setup():
     try:
-        mkdir(TEST_DB_DIR)
+        os.mkdir(TEST_DB_DIR)
     except OSError as exc:
         if exc.errno == 17:
             # Directory already exists; ignore
@@ -53,7 +53,7 @@ def setup():
 
 def teardown():
     try:
-        rmdir(TEST_DB_DIR)
+        os.rmdir(TEST_DB_DIR)
     except OSError as exc:
         if exc.errno == 39:
             # Directory not empty; some tests failed
@@ -453,3 +453,24 @@ def test_compaction():
         db.compact_range(start='a', stop=None)
         db.compact_range(start=None, stop='b')
         db.compact_range(start=None, stop=None)
+
+
+def test_repair_db():
+    dir_name = tmp_dir('repair')
+    db = DB(dir_name)
+    db.put('foo', 'bar')
+    del db
+    leveldb.repair_db(dir_name)
+    db = DB(dir_name)
+    assert_equal('bar', db.get('foo'))
+    del db
+    shutil.rmtree(dir_name)
+
+
+def test_destroy_db():
+    dir_name = tmp_dir('destroy')
+    db = DB(dir_name)
+    db.put('foo', 'bar')
+    del db
+    leveldb.destroy_db(dir_name)
+    assert not os.path.lexists(dir_name)
