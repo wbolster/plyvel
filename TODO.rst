@@ -4,7 +4,6 @@ TODO
 
 Required before this library is to be taken seriously:
 
-* Range iteration (with start and stop keys)
 * Seeking to (or before) specific keys in iterators
 * Decent error handling when opening a database fails
 * Decent packaging/releasing (setup.py)
