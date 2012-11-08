@@ -130,16 +130,16 @@ cdef class DB:
         :param bytes value:
         :param bool sync:
         """
-
         cdef Status st
-        cdef WriteOptions write_options
+        cdef WriteOptions write_options = WriteOptions()
 
         if sync is not None:
             write_options.sync = sync
 
-        st = self.db.Put(write_options,
-                         Slice(key, len(key)),
-                         Slice(value, len(value)))
+        st = self.db.Put(
+            write_options,
+            Slice(key, len(key)),
+            Slice(value, len(value)))
         raise_for_status(st)
 
     def delete(self, bytes key, *, sync=None):
@@ -148,7 +148,7 @@ cdef class DB:
         :param bytes key:
         """
         cdef Status st
-        cdef WriteOptions write_options
+        cdef WriteOptions write_options = WriteOptions()
 
         if sync is not None:
             write_options.sync = sync
@@ -164,10 +164,11 @@ cdef class DB:
 
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
             include_value=True, verify_checksums=None, fill_cache=None):
-        return Iterator(self, reverse=reverse, start=start, stop=stop,
-                        include_key=include_key, include_value=include_value,
-                        verify_checksums=verify_checksums,
-                        fill_cache=fill_cache, snapshot=None)
+        return Iterator(
+            self, reverse=reverse, start=start, stop=stop,
+            include_key=include_key, include_value=include_value,
+            verify_checksums=verify_checksums, fill_cache=fill_cache,
+            snapshot=None)
 
     def snapshot(self):
         return Snapshot(self)
@@ -202,6 +203,7 @@ cdef class WriteBatch:
     def __cinit__(self, DB db not None, *, sync=None):
         self.db = db
 
+        self.write_options = WriteOptions()
         if sync is not None:
             self.write_options.sync = sync
 
@@ -476,7 +478,8 @@ cdef class Snapshot:
 
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
             include_value=True, verify_checksums=None, fill_cache=None):
-        return Iterator(self.db, reverse=reverse, start=start, stop=stop,
-                        include_key=include_key, include_value=include_value,
-                        verify_checksums=verify_checksums,
-                        fill_cache=fill_cache, snapshot=self)
+        return Iterator(
+            self.db, reverse=reverse, start=start, stop=stop,
+            include_key=include_key, include_value=include_value,
+            verify_checksums=verify_checksums, fill_cache=fill_cache,
+            snapshot=self)
