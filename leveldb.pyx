@@ -109,9 +109,9 @@ cdef class DB:
         options = Options()
         options.create_if_missing = create_if_missing
         options.error_if_exists = error_if_exists
-        self.comparator = <cpp_leveldb.Comparator*>options.comparator
         st = cpp_leveldb.DB_Open(options, name, &self.db)
         raise_for_status(st)
+        self.comparator = <cpp_leveldb.Comparator*>options.comparator
 
     def __dealloc__(self):
         del self.db
