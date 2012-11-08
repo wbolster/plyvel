@@ -289,8 +289,8 @@ def test_forward_iteration():
         test_iterator_extremes(db, iter_kwargs, expected_values)
 
 
-def test_backward_iteration():
-    with tmp_db('backward_iteration') as db:
+def test_reverse_iteration():
+    with tmp_db('reverse_iteration') as db:
         db.put('1', '1')
         db.put('2', '2')
         db.put('3', '3')
@@ -326,15 +326,24 @@ def test_range_iteration():
             [],
             list(db.iterator(start='3', stop='0')))
 
-        assert_list_equal(
-            [],
-            list(db.iterator(start='3', stop='0', reverse=True)))
-
         expected_values = ('2', '3', '4')
         iter_kwargs = dict(start='2', stop='5', include_key=False)
         test_manual_iteration(db, iter_kwargs, expected_values)
         test_iterator_single_step(db, iter_kwargs, expected_values)
         test_iterator_extremes(db, iter_kwargs, expected_values)
+
+
+def test_reverse_range_iteration():
+    with tmp_db('reverse_range_iteration') as db:
+        db.put('1', '1')
+        db.put('2', '2')
+        db.put('3', '3')
+        db.put('4', '4')
+        db.put('5', '5')
+
+        assert_list_equal(
+            [],
+            list(db.iterator(start='3', stop='0', reverse=True)))
 
         expected_values = ('5', '4', '3')
         iter_kwargs = dict(stop='2', reverse=True, include_value=False)
