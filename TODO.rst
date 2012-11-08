@@ -16,7 +16,6 @@ Required before this library is to be taken seriously:
 * Option handling when opening databases:
 
   * block cache (LRU cache size)
-  * compression (None or 'snappy')
 
 Lower priority tasks:
 

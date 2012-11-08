@@ -101,7 +101,8 @@ cdef class DB:
     def __cinit__(self, bytes name, bool create_if_missing=True,
             bool error_if_exists=False, paranoid_checks=None,
             write_buffer_size=None, max_open_files=None, block_size=None,
-            block_restart_interval=None, int bloom_filter_bits=0):
+            block_restart_interval=None, compression='snappy',
+            int bloom_filter_bits=0):
         """Open the underlying database handle
 
         :param str name: The name of the database
@@ -127,6 +128,13 @@ cdef class DB:
 
         if block_restart_interval is not None:
             options.block_restart_interval = block_restart_interval
+
+        if compression is None:
+            options.compression = cpp_leveldb.kNoCompression
+        elif compression == b'snappy':
+            options.compression = cpp_leveldb.kSnappyCompression
+        else:
+            raise ValueError("'compression' arg must be None or 'snappy'")
 
         if bloom_filter_bits > 0:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
