@@ -23,37 +23,37 @@ cdef extern from "leveldb/db.h" namespace "leveldb":
     cdef cppclass Range:
         Slice start
         Slice limit
-        Range()
-        Range(Slice& s, Slice& l)
+        Range() nogil
+        Range(Slice& s, Slice& l) nogil
 
     cdef cppclass DB:
-        Status Put(WriteOptions& options, Slice& key, Slice& value)
-        Status Delete(WriteOptions& options, Slice& key)
-        Status Write(WriteOptions& options, WriteBatch* updates)
-        Status Get(ReadOptions& options, Slice& key, string* value)
-        Iterator* NewIterator(ReadOptions& options)
-        Snapshot* GetSnapshot()
-        void ReleaseSnapshot(Snapshot* snapshot)
-        bool GetProperty(Slice& property, string* value)
-        void GetApproximateSizes(Range* range, int n, uint64_t* sizes)
-        void CompactRange(Slice* begin, Slice* end)
+        Status Put(WriteOptions& options, Slice& key, Slice& value) nogil
+        Status Delete(WriteOptions& options, Slice& key) nogil
+        Status Write(WriteOptions& options, WriteBatch* updates) nogil
+        Status Get(ReadOptions& options, Slice& key, string* value) nogil
+        Iterator* NewIterator(ReadOptions& options) nogil
+        Snapshot* GetSnapshot() nogil
+        void ReleaseSnapshot(Snapshot* snapshot) nogil
+        bool GetProperty(Slice& property, string* value) nogil
+        void GetApproximateSizes(Range* range, int n, uint64_t* sizes) nogil
+        void CompactRange(Slice* begin, Slice* end) nogil
 
     # The DB::open() method is static, and hence not a member of the DB
     # class defined above
-    Status DB_Open "leveldb::DB::Open"(Options& options, string& name, DB** dbptr)
+    Status DB_Open "leveldb::DB::Open"(Options& options, string& name, DB** dbptr) nogil
 
-    cdef Status DestroyDB(string& name, Options& options)
-    cdef Status RepairDB(string& dbname, Options& options)
+    cdef Status DestroyDB(string& name, Options& options) nogil
+    cdef Status RepairDB(string& dbname, Options& options) nogil
 
 
 cdef extern from "leveldb/status.h" namespace "leveldb":
 
     cdef cppclass Status:
-        bool ok()
-        bool IsNotFound()
-        bool IsCorruption()
-        bool IsIOError()
-        string ToString()
+        bool ok() nogil
+        bool IsNotFound() nogil
+        bool IsCorruption() nogil
+        bool IsIOError() nogil
+        string ToString() nogil
 
 
 cdef extern from "leveldb/options.h" namespace "leveldb":
@@ -76,65 +76,65 @@ cdef extern from "leveldb/options.h" namespace "leveldb":
         int block_restart_interval
         CompressionType compression
         # FilterPolicy* filter_policy
-        Options()
+        Options() nogil
 
     cdef cppclass ReadOptions:
         bool verify_checksums
         bool fill_cache
         Snapshot* snapshot
-        ReadOptions()
+        ReadOptions() nogil
 
     cdef cppclass WriteOptions:
         bool sync
-        WriteOptions()
+        WriteOptions() nogil
 
 
 cdef extern from "leveldb/slice.h" namespace "leveldb":
 
     cdef cppclass Slice:
-        Slice()
-        Slice(const_char* d, size_t n)
-        Slice(string& s)
-        Slice(const_char* s)
-        const_char* data()
-        size_t size()
-        bool empty()
-        # char operator[](size_t n)
-        void clear()
-        void remove_prefix(size_t n)
-        string ToString()
-        int compare(Slice& b)
-        bool starts_with(Slice& x)
+        Slice() nogil
+        Slice(const_char* d, size_t n) nogil
+        Slice(string& s) nogil
+        Slice(const_char* s) nogil
+        const_char* data() nogil
+        size_t size() nogil
+        bool empty() nogil
+        # char operator[](size_t n) nogil
+        void clear() nogil
+        void remove_prefix(size_t n) nogil
+        string ToString() nogil
+        int compare(Slice& b) nogil
+        bool starts_with(Slice& x) nogil
 
 
 cdef extern from "leveldb/write_batch.h" namespace "leveldb":
 
     cdef cppclass WriteBatch:
-        WriteBatch()
-        void Put(Slice& key, Slice& value)
-        void Delete(Slice& key)
-        void Clear()
+        WriteBatch() nogil
+        void Put(Slice& key, Slice& value) nogil
+        void Delete(Slice& key) nogil
+        void Clear() nogil
         # Status Iterate(Handler* handler) const
 
 
 cdef extern from "leveldb/iterator.h" namespace "leveldb":
 
     cdef cppclass Iterator:
-        Iterator()
-        bool Valid()
-        void SeekToFirst()
-        void SeekToLast()
-        void Seek(Slice& target)
-        void Next()
-        void Prev()
-        Slice key()
-        Slice value()
-        Status status()
+        Iterator() nogil
+        bool Valid() nogil
+        void SeekToFirst() nogil
+        void SeekToLast() nogil
+        void Seek(Slice& target) nogil
+        void Next() nogil
+        void Prev() nogil
+        Slice key() nogil
+        Slice value() nogil
+        Status status() nogil
         # void RegisterCleanup(CleanupFunction function, void* arg1, void* arg2);
 
 
 cdef extern from "leveldb/comparator.h" namespace "leveldb":
 
     cdef cppclass Comparator:
-        int Compare(Slice& a, Slice&b)
-        const_char* Name()
+        int Compare(Slice& a, Slice&b) nogil
+        const_char* Name() nogil
