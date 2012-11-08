@@ -144,7 +144,7 @@ cdef extern from "leveldb/filter_policy.h" namespace "leveldb":
 
     cdef cppclass FilterPolicy:
         const_char* Name() nogil
-        void CreateFilter(Slice* keys, int n, string* dst)
-        bool KeyMayMatch(Slice& key, Slice& filter)
+        void CreateFilter(Slice* keys, int n, string* dst) nogil
+        bool KeyMayMatch(Slice& key, Slice& filter) nogil
 
     FilterPolicy* NewBloomFilterPolicy(int bits_per_key) nogil
