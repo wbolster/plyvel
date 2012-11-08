@@ -24,7 +24,6 @@ Required before this library is to be taken seriously:
   * block_size
   * block_restart_interval
   * compression (None or 'snappy')
-  * filter_policy (number of bloom filter bits)
 
 Lower priority tasks:
 

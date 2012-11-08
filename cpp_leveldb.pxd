@@ -75,7 +75,7 @@ cdef extern from "leveldb/options.h" namespace "leveldb":
         size_t block_size
         int block_restart_interval
         CompressionType compression
-        # FilterPolicy* filter_policy
+        FilterPolicy* filter_policy
         Options() nogil
 
     cdef cppclass ReadOptions:
@@ -138,3 +138,13 @@ cdef extern from "leveldb/comparator.h" namespace "leveldb":
     cdef cppclass Comparator:
         int Compare(Slice& a, Slice&b) nogil
         const_char* Name() nogil
+
+
+cdef extern from "leveldb/filter_policy.h" namespace "leveldb":
+
+    cdef cppclass FilterPolicy:
+        const_char* Name() nogil
+        void CreateFilter(Slice* keys, int n, string* dst)
+        bool KeyMayMatch(Slice& key, Slice& filter)
+
+    FilterPolicy* NewBloomFilterPolicy(int bits_per_key) nogil
