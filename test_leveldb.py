@@ -80,7 +80,6 @@ def teardown():
 
 def test_version():
     v = leveldb.__leveldb_version__
-    assert isinstance(v, basestring)
     assert v.startswith('1.')
 
 
@@ -91,7 +90,7 @@ def test_open():
         with assert_raises(leveldb.IOError):
             DB(name)
 
-    with tmp_db(u'úñîçøđê_name') as db:
+    with tmp_db('úñîçøđê_name') as db:
         pass
 
     with tmp_db('no_create', create=False) as name:
