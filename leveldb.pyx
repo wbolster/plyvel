@@ -158,10 +158,15 @@ cdef class DB:
 
         if compression is None:
             options.compression = cpp_leveldb.kNoCompression
-        elif compression == b'snappy':
-            options.compression = cpp_leveldb.kSnappyCompression
         else:
-            raise ValueError("'compression' arg must be None or 'snappy'")
+            if isinstance(compression, bytes):
+                compression = compression.decode('UTF-8')
+            if not isinstance(compression, unicode):
+                raise TypeError("'compression' must be None or a string")
+            if compression == u'snappy':
+                options.compression = cpp_leveldb.kSnappyCompression
+            else:
+                raise ValueError("'compression' must be None or 'snappy'")
 
         if bloom_filter_bits > 0:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
@@ -271,7 +276,7 @@ def repair_db(name):
     # TODO: support Options
     cdef Options options = Options()
     cdef Status st
-    cdef string fsname 
+    cdef string fsname
 
     fsname = to_file_system_name(name)
     st = RepairDB(fsname, options)
