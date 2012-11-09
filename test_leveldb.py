@@ -1,10 +1,15 @@
 
 from contextlib import contextmanager
-from itertools import izip
 import os
 import shutil
 import stat
 import tempfile
+
+try:
+    from itertools import izip
+except ImportError:
+    # Python 3
+    izip = zip
 
 from nose.tools import (
     assert_equal,
