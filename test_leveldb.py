@@ -28,11 +28,14 @@ def tmp_dir(name):
 
 
 @contextmanager
-def tmp_db(name):
+def tmp_db(name, create=True):
     dir_name = tmp_dir(name)
-    db = DB(dir_name)
-    yield db
-    del db
+    if create:
+        db = DB(dir_name)
+        yield db
+        del db
+    else:
+        yield dir_name
     shutil.rmtree(dir_name)
 
 
@@ -72,11 +75,32 @@ def test_version():
     assert v.startswith('1.')
 
 
-# TODO: use different directories for open/close tests
-# def test_open_close():
-#     somedb = DB(TEST_DB_DIR2)
-#     print somedb
-#     del somedb
+def test_open():
+    with tmp_db('read_only_dir', create=False) as name:
+        # Opening a DB in a read-only dir should not work
+        os.chmod(name, 0500)
+        with assert_raises(leveldb.IOError):
+            DB(name)
+
+    with tmp_db('no_create', create=False) as name:
+        with assert_raises(leveldb.Error):
+            DB(name, create_if_missing=False)
+
+    with tmp_db('exists', create=False) as name:
+        db = DB(name)
+        del db
+        with assert_raises(leveldb.Error):
+            DB(name, error_if_exists=True)
+
+    with assert_raises(ValueError):
+        DB('invalid_compression', compression='foobar')
+
+    with tmp_db('many_options', create=False) as name:
+        DB(name, create_if_missing=True, error_if_exists=False,
+           paranoid_checks=True, write_buffer_size=16 * 1024 * 1024,
+           max_open_files=512, lru_cache_size=64 * 1024 * 1024,
+           block_size=2 * 1024, block_restart_interval=32,
+           compression='snappy', bloom_filter_bits=10)
 
 
 def test_put():
