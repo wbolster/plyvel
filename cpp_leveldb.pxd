@@ -156,4 +156,4 @@ cdef extern from "leveldb/cache.h" namespace "leveldb":
         # Treat as opaque structure
         pass
 
-    Cache* NewLRUCache(size_t capacity)
+    Cache* NewLRUCache(size_t capacity) nogil
