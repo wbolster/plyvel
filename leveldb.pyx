@@ -56,15 +56,17 @@ class CorruptionError(Error):
     pass
 
 
-cdef void raise_for_status(Status st):
+cdef int raise_for_status(Status st) except -1:
     if st.ok():
-        return
+        return 0
 
     if st.IsIOError():
         raise IOError(st.ToString())
-    elif st.IsCorruption():
+
+    if st.IsCorruption():
         raise CorruptionError(st.ToString())
 
+    # Generic fallback
     raise Error(st.ToString())
 
 
