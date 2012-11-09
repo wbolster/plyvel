@@ -328,7 +328,7 @@ def test_forward_iteration():
         db.put(b'2', b'2')
         db.put(b'3', b'3')
 
-        expected_values = ('1', '2', '3')
+        expected_values = (b'1', b'2', b'3')
         iter_kwargs = dict(include_key=False)
         test_manual_iteration(db, iter_kwargs, expected_values)
         test_iterator_single_step(db, iter_kwargs, expected_values)
@@ -341,7 +341,7 @@ def test_reverse_iteration():
         db.put(b'2', b'2')
         db.put(b'3', b'3')
 
-        expected_values = ('3', '2', '1')
+        expected_values = (b'3', b'2', b'1')
         iter_kwargs = dict(reverse=True, include_key=False)
         test_manual_iteration(db, iter_kwargs, expected_values)
         test_iterator_single_step(db, iter_kwargs, expected_values)
@@ -472,7 +472,7 @@ def test_snapshot():
         snapshot = db.snapshot()
         assert_equal(b'a', snapshot.get(b'a'))
         assert_list_equal(
-            ['a', 'b'],
+            [b'a', b'b'],
             list(snapshot.iterator(include_value=False)))
         assert_is_none(snapshot.get(b'c'))
         db.delete(b'a')
