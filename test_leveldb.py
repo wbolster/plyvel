@@ -14,6 +14,12 @@ except ImportError:
     # Python 3
     izip = zip
 
+try:
+    xrange
+except NameError:
+    # Python 3
+    xrange = range
+
 from nose.tools import (
     assert_equal,
     assert_is_none,
