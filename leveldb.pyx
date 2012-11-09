@@ -252,7 +252,7 @@ def repair_db(bytes name):
 
 
 #
-# Write batche
+# Write batch
 #
 
 cdef class WriteBatch:
