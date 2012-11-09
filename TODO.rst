@@ -12,10 +12,6 @@ Required before this library is to be taken seriously:
   * Installation instructions
   * Simple use
 
-* Option handling when opening databases:
-
-  * block cache (LRU cache size)
-
 Lower priority tasks:
 
 * Custom comparators (if desired at all)
