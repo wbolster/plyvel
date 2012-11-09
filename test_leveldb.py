@@ -268,7 +268,7 @@ def test_manual_iteration(db, iter_kwargs, expected_values):
 
     assert_equal(first, next(it))
     assert_equal(second, next(it))
-    assert_equal(third, it.next())
+    assert_equal(third, next(it))
     with assert_raises(StopIteration):
         next(it)
     with assert_raises(StopIteration):
@@ -287,11 +287,11 @@ def test_iterator_single_step(db, iter_kwargs, expected_values):
     assert_equal(first, it.prev())
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal(first, it.next())
-    assert_equal(second, it.next())
-    assert_equal(third, it.next())
+    assert_equal(first, next(it))
+    assert_equal(second, next(it))
+    assert_equal(third, next(it))
     with assert_raises(StopIteration):
-        it.next()
+        next(it)
     assert_equal(third, it.prev())
     assert_equal(second, it.prev())
 
@@ -304,7 +304,7 @@ def test_iterator_extremes(db, iter_kwargs, expected_values):
     # End of iterator
     it.move_to_stop()
     with assert_raises(StopIteration):
-        it.next()
+        next(it)
     assert_equal(third, it.prev())
 
     # Begin of iterator
@@ -428,13 +428,13 @@ def test_range_empty_database():
 
         it = db.iterator()
         with assert_raises(StopIteration):
-            it.next()
+            next(it)
 
         it = db.iterator()
         with assert_raises(StopIteration):
             it.prev()
         with assert_raises(StopIteration):
-            it.next()
+            next(it)
 
 
 def test_iterator_single_entry():
@@ -444,15 +444,15 @@ def test_iterator_single_entry():
         db.put(key, value)
 
         it = db.iterator(include_value=False)
-        assert_equal(key, it.next())
+        assert_equal(key, next(it))
         assert_equal(key, it.prev())
-        assert_equal(key, it.next())
+        assert_equal(key, next(it))
         assert_equal(key, it.prev())
         with assert_raises(StopIteration):
             it.prev()
-        assert_equal(key, it.next())
+        assert_equal(key, next(it))
         with assert_raises(StopIteration):
-            it.next()
+            next(it)
 
 
 def test_snapshot():
