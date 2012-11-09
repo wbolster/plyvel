@@ -580,6 +580,9 @@ cdef class Snapshot:
 
         return db_get(self.db, key, read_options)
 
+    def __iter__(self):
+        return self.iterator()
+
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
             include_value=True, verify_checksums=None, fill_cache=None):
         return Iterator(

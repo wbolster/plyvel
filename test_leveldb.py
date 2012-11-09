@@ -489,6 +489,10 @@ def test_snapshot():
             [b'b', b'c'],
             list(snapshot.iterator(include_value=False)))
 
+        # Snapshots are directly iterable, just like DB
+        for entry in snapshot:
+            pass
+
 
 def test_compaction():
     # This merely tests that the Python API works correctly, not that
