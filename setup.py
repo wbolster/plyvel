@@ -4,7 +4,7 @@ from setuptools.extension import Extension
 ext_modules = [
     Extension("leveldb",
               ["leveldb.cpp"],
-              libraries=["leveldb"])
+              libraries=["leveldb", "snappy"])
 ]
 
 setup(name="leveldb-cython",
