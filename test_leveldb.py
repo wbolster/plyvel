@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from itertools import izip
 import os
 import shutil
+import stat
 import tempfile
 
 from nose.tools import (
@@ -78,7 +79,7 @@ def test_version():
 def test_open():
     with tmp_db('read_only_dir', create=False) as name:
         # Opening a DB in a read-only dir should not work
-        os.chmod(name, 0500)
+        os.chmod(name, stat.S_IRUSR | stat.S_IXUSR)
         with assert_raises(leveldb.IOError):
             DB(name)
 
