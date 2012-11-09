@@ -1,3 +1,4 @@
+# encoding: UTF-8
 
 from contextlib import contextmanager
 import os
@@ -88,6 +89,9 @@ def test_open():
         with assert_raises(leveldb.IOError):
             DB(name)
 
+    with tmp_db(u'úñîçøđê_name') as db:
+        pass
+
     with tmp_db('no_create', create=False) as name:
         with assert_raises(leveldb.Error):
             DB(name, create_if_missing=False)
@@ -97,6 +101,9 @@ def test_open():
         del db
         with assert_raises(leveldb.Error):
             DB(name, error_if_exists=True)
+
+    with assert_raises(TypeError):
+        DB(123)
 
     with assert_raises(ValueError):
         DB('invalid_compression', compression='foobar')

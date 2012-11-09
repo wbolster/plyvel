@@ -4,6 +4,8 @@ LevelDB module.
 Use LevelDB.DB() to create or open a database.
 """
 
+import sys
+
 cimport cython
 
 from libcpp.string cimport string
@@ -87,6 +89,22 @@ cdef inline db_get(DB db, bytes key, ReadOptions read_options):
     return value
 
 
+cdef bytes to_file_system_name(name):
+    if isinstance(name, bytes):
+        return name
+
+    if not isinstance(name, unicode):
+        raise TypeError(
+            "'name' arg must be a byte string or a unicode string")
+
+    encoding = sys.getfilesystemencoding() or 'ascii'
+    try:
+        return name.encode(encoding)
+    except UnicodeEncodeError as exc:
+        raise ValueError(
+            "Cannot convert unicode 'name' to a file system name: %s" % exc)
+
+
 #
 # Database
 #
@@ -101,7 +119,7 @@ cdef class DB:
     cdef cpp_leveldb.DB* db
     cdef Comparator* comparator
 
-    def __cinit__(self, bytes name, bool create_if_missing=True,
+    def __cinit__(self, name, bool create_if_missing=True,
             bool error_if_exists=False, paranoid_checks=None,
             write_buffer_size=None, max_open_files=None, lru_cache_size=None,
             block_size=None, block_restart_interval=None,
@@ -112,6 +130,9 @@ cdef class DB:
         """
         cdef Options options
         cdef Status st
+        cdef string fsname
+
+        fsname = to_file_system_name(name)
 
         options = Options()
         options.create_if_missing = create_if_missing
@@ -145,7 +166,7 @@ cdef class DB:
         if bloom_filter_bits > 0:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
 
-        st = cpp_leveldb.DB_Open(options, name, &self.db)
+        st = cpp_leveldb.DB_Open(options, fsname, &self.db)
         raise_for_status(st)
         self.comparator = <cpp_leveldb.Comparator*>options.comparator
 
@@ -233,21 +254,27 @@ cdef class DB:
         self.db.CompactRange(&start_slice, &stop_slice)
 
 
-def destroy_db(bytes name):
+def destroy_db(name):
     """Destroy the specified database."""
     # TODO: support Options
     cdef Options options = Options()
     cdef Status st
-    st = DestroyDB(name, options)
+    cdef string fsname
+
+    fsname = to_file_system_name(name)
+    st = DestroyDB(fsname, options)
     raise_for_status(st)
 
 
-def repair_db(bytes name):
+def repair_db(name):
     """Repair the specified database."""
     # TODO: support Options
     cdef Options options = Options()
     cdef Status st
-    st = RepairDB(name, options)
+    cdef string fsname 
+
+    fsname = to_file_system_name(name)
+    st = RepairDB(fsname, options)
     raise_for_status(st)
 
 
