@@ -130,8 +130,8 @@ def test_put():
         db.put(b'foo', b'bar', sync=True)
 
         for i in xrange(1000):
-            key = b'key-%d' % i
-            value = b'value-%d' % i
+            key = ('key-%d' % i).encode('UTF-8')
+            value = ('value-%d' % i).encode('UTF-8')
             db.put(key, value)
 
         assert_raises(TypeError, db.put, b'foo', 12)
@@ -187,7 +187,7 @@ def test_batch():
         # Prepare a batch with some data
         batch = db.batch()
         for i in xrange(1000):
-            batch.put(b'batch-key-%d' % i, b'value')
+            batch.put(('batch-key-%d' % i).encode('UTF-8'), b'value')
 
         # Delete a key that was also set in the same (pending) batch
         batch.delete(b'batch-key-2')
@@ -235,7 +235,9 @@ def test_iteration():
     with tmp_db('iteration') as db:
         entries = []
         for i in xrange(100):
-            entry = (b'%03d' % i, b'%03d' % i)
+            entry = (
+                ('%03d' % i).encode('UTF-8'),
+                ('%03d' % i).encode('UTF-8'))
             entries.append(entry)
 
         for k, v in entries:
