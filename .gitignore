@@ -1,4 +1,6 @@
 build/
+.coverage
+dist/
 leveldb.cpp
-leveldb.so
+leveldb*.so
 testdb/
