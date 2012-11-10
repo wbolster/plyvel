@@ -7,7 +7,7 @@ all:
 
 clean:
 	python setup.py clean
-	$(RM) leveldb.cpp leveldb.so
+	$(RM) leveldb.cpp leveldb*.so
 	$(RM) -r testdb/
 
 test: all
