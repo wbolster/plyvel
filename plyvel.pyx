@@ -1,3 +1,5 @@
+# cython: embedsignature=True
+
 """
 LevelDB module.
 
