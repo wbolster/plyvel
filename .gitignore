@@ -1,6 +1,6 @@
 build/
 .coverage
 dist/
-leveldb.cpp
-leveldb*.so
+plyvel.cpp
+plyvel*.so
 testdb/

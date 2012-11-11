@@ -3,13 +3,13 @@ from setuptools.extension import Extension
 
 ext_modules = [
     Extension(
-        'leveldb',
-        ['leveldb.cpp'],
+        'plyvel',
+        ['plyvel.cpp'],
         libraries=['leveldb', 'snappy'])
 ]
 
 setup(
-    name='leveldb-cython',
+    name='plyvel',
     version='0.1dev',
     author="Wouter Bolsterlee",
     author_email="uws@xs4all.nl",

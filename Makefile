@@ -2,13 +2,13 @@
 .PHONY: all clean test
 
 all:
-	cython --cplus leveldb.pyx
+	cython --cplus plyvel.pyx
 	python setup.py build_ext --inplace --force
 
 clean:
 	python setup.py clean
-	$(RM) leveldb.cpp leveldb*.so
+	$(RM) plyvel.cpp plyvel*.so
 	$(RM) -r testdb/
 
 test: all
-	python $$(which nosetests) -v test_leveldb.py
+	python $$(which nosetests) -v test_plyvel.py

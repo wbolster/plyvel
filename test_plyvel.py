@@ -28,8 +28,8 @@ from nose.tools import (
     assert_raises,
     nottest)
 
-import leveldb
-from leveldb import DB
+import plyvel
+from plyvel import DB
 
 TEST_DB_DIR = 'testdb/'
 
@@ -85,7 +85,7 @@ def teardown():
 #
 
 def test_version():
-    v = leveldb.__leveldb_version__
+    v = plyvel.__leveldb_version__
     assert v.startswith('1.')
 
 
@@ -93,20 +93,20 @@ def test_open():
     with tmp_db('read_only_dir', create=False) as name:
         # Opening a DB in a read-only dir should not work
         os.chmod(name, stat.S_IRUSR | stat.S_IXUSR)
-        with assert_raises(leveldb.IOError):
+        with assert_raises(plyvel.IOError):
             DB(name)
 
     with tmp_db('úñîçøđê_name') as db:
         pass
 
     with tmp_db('no_create', create=False) as name:
-        with assert_raises(leveldb.Error):
+        with assert_raises(plyvel.Error):
             DB(name, create_if_missing=False)
 
     with tmp_db('exists', create=False) as name:
         db = DB(name)
         del db
-        with assert_raises(leveldb.Error):
+        with assert_raises(plyvel.Error):
             DB(name, error_if_exists=True)
 
     with assert_raises(TypeError):
@@ -511,7 +511,7 @@ def test_repair_db():
     db = DB(dir_name)
     db.put(b'foo', b'bar')
     del db
-    leveldb.repair_db(dir_name)
+    plyvel.repair_db(dir_name)
     db = DB(dir_name)
     assert_equal(b'bar', db.get(b'foo'))
     del db
@@ -523,5 +523,5 @@ def test_destroy_db():
     db = DB(dir_name)
     db.put(b'foo', b'bar')
     del db
-    leveldb.destroy_db(dir_name)
+    plyvel.destroy_db(dir_name)
     assert not os.path.lexists(dir_name)
