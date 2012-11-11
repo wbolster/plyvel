@@ -15,6 +15,7 @@ from libcpp cimport bool
 
 cimport cpp_leveldb
 from cpp_leveldb cimport (
+    Cache,
     Comparator,
     DestroyDB,
     NewBloomFilterPolicy,
@@ -120,6 +121,7 @@ cdef class DB:
 
     cdef cpp_leveldb.DB* db
     cdef Comparator* comparator
+    cdef Cache* cache
 
     def __cinit__(self, name, bool create_if_missing=True,
             bool error_if_exists=False, paranoid_checks=None,
@@ -150,7 +152,8 @@ cdef class DB:
             options.max_open_files = max_open_files
 
         if lru_cache_size is not None:
-            options.block_cache = NewLRUCache(lru_cache_size)
+            self.cache = NewLRUCache(lru_cache_size)
+            options.block_cache = self.cache
 
         if block_size is not None:
             options.block_size = block_size
@@ -179,6 +182,8 @@ cdef class DB:
 
     def __dealloc__(self):
         del self.db
+        if self.cache is not NULL:
+            del self.cache
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
         """Get the value for specified key (or None if not found)
