@@ -1,12 +1,11 @@
-Plyvel: Python bindings for LevelDB using Cython
-================================================
+Plyvel
+======
 
-**Note:** this project is a work in progress and not yet fully functional!
+**Plyvel** is a fast and feature-rich Python interface to LevelDB_.
 
-This package provides LevelDB_ bindings for both Python 2 and Python 3, built
-using Cython_. Most parts of the LevelDB API can used in a Pythonic way, e.g.
-with clean iterators for the RangeIter() API and things like context managers
-(``with`` blocks) for the WriteBatch API.
+Plyvel has a rich feature set, high performance, and a friendly Pythonic API.
+See the documentation_ or `project page`_ for more information.
 
 .. _LevelDB: http://code.google.com/p/leveldb/
-.. _Cython: http://cython.org/
+.. _Documentation: https://plyvel.readthedocs.org/
+.. _`Project page`: https://github.com/wbolster/plyvel
