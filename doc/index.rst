@@ -20,7 +20,7 @@ Plyvel's key features are:
 
 * **High performance**
 
-  Plyvel executes all performance-critical code at C speed (using Cython),
+  Plyvel executes all performance-critical code at C speed (using Cython_),
   making it well suited for high performance applications.
 
 * **Friendly Pythonic API**
@@ -30,6 +30,8 @@ Plyvel's key features are:
   or performance of the underlying LevelDB C++ API.
 
 .. _LevelDB: http://code.google.com/p/leveldb/
+.. _Cython: http://cython.org/
+
 
 Documentation overview
 ======================
@@ -45,7 +47,9 @@ Documentation overview
 External links
 ==============
 
-* `Source code <https://github.com/wbolster/plyvel>`_ (Github)
+* `Online documentation <https://plyvel.readthedocs.org/>`_ (Read the docs)
+* `Project page <https://github.com/wbolster/plyvel>`_ with source code and
+  issue tracker (Github)
 
 
 Indices and tables
@@ -54,4 +58,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
