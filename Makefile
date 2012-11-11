@@ -1,9 +1,15 @@
 
-.PHONY: all clean test
+.PHONY: all doc clean test
 
 all:
 	cython --cplus plyvel.pyx
 	python setup.py build_ext --inplace --force
+
+doc:
+	python setup.py build_sphinx
+	@echo
+	@echo Generated documentation: "file://"$$(readlink -f doc/build/html/index.html)
+	@echo
 
 clean:
 	python setup.py clean
