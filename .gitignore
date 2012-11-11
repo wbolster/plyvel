@@ -3,4 +3,5 @@ build/
 dist/
 plyvel.cpp
 plyvel*.so
+plyvel.egg-info/
 testdb/
