@@ -1,7 +1,9 @@
 
-.PHONY: all doc clean test
+.PHONY: all ext doc clean test
 
-all:
+all: ext doc test
+
+ext:
 	cython --cplus plyvel.pyx
 	python setup.py build_ext --inplace --force
 
@@ -16,5 +18,5 @@ clean:
 	$(RM) plyvel.cpp plyvel*.so
 	$(RM) -r testdb/
 
-test: all
+test: ext
 	python $$(which nosetests) -v test_plyvel.py
