@@ -3,14 +3,49 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Plyvel's documentation!
-==================================
+======
+Plyvel
+======
 
-Contents:
+**Plyvel** is a fast and feature-rich Python interface to LevelDB_.
+
+Plyvel's key features are:
+
+* **Rich feature set**
+
+  Plyvel wraps most of the LevelDB C++ API, so in addition to basic features
+  like getting, putting and deleting data, Plyvel allows you to use write
+  batches, database snapshots, very flexible iterators, bloom filters, custom
+  cache sizes, and other goodness LevelDB has to offer.
+
+* **High performance**
+
+  Plyvel executes all performance-critical code at C speed (using Cython),
+  making it well suited for high performance applications.
+
+* **Friendly Pythonic API**
+
+  Plyvel has a friendly and well-designed API that uses Python idioms like
+  iterators, context managers (``with`` blocks), without sacrificing the power
+  or performance of the underlying LevelDB C++ API.
+
+.. _LevelDB: http://code.google.com/p/leveldb/
+
+Documentation overview
+======================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
+   installation
+   tutorial
+   api
+
+
+External links
+==============
+
+* `Source code <https://github.com/wbolster/plyvel>`_ (Github)
 
 
 Indices and tables
