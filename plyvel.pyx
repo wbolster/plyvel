@@ -304,7 +304,7 @@ cdef class WriteBatch:
 
     Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
     """
-    cdef leveldb.WriteBatch* wb
+    cdef leveldb.WriteBatch* write_batch
     cdef WriteOptions write_options
     cdef DB db
 
@@ -315,17 +315,17 @@ cdef class WriteBatch:
         if sync is not None:
             self.write_options.sync = sync
 
-        self.wb = new leveldb.WriteBatch()
+        self.write_batch = new leveldb.WriteBatch()
 
     def __dealloc__(self):
-        del self.wb
+        del self.write_batch
 
     def put(self, bytes key, bytes value):
         """Set the value for specified key to the specified value.
 
         This is like DB.put(), but operates on the write batch instead.
         """
-        self.wb.Put(
+        self.write_batch.Put(
             Slice(key, len(key)),
             Slice(value, len(value)))
 
@@ -335,16 +335,16 @@ cdef class WriteBatch:
         This is like DB.delete(), but operates on the write batch
         instead.
         """
-        self.wb.Delete(Slice(key, len(key)))
+        self.write_batch.Delete(Slice(key, len(key)))
 
     def clear(self):
         """Clear the batch"""
-        self.wb.Clear()
+        self.write_batch.Clear()
 
     def write(self):
         """Write the batch to the database"""
         cdef Status st
-        st = self.db._db.Write(self.write_options, self.wb)
+        st = self.db._db.Write(self.write_options, self.write_batch)
         raise_for_status(st)
 
     def __enter__(self):
