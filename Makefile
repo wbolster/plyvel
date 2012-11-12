@@ -7,7 +7,7 @@ ext:
 	cython --cplus plyvel.pyx
 	python setup.py build_ext --inplace --force
 
-doc:
+doc: ext
 	python setup.py build_sphinx
 	@echo
 	@echo Generated documentation: "file://"$$(readlink -f doc/build/html/index.html)
