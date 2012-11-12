@@ -562,7 +562,11 @@ cdef class Iterator:
 #
 
 cdef class Snapshot:
-    """Datebase snapshot.
+    """Database snapshot.
+
+    A snapshot provides a consistent view over keys and values. After
+    making a snapshot, puts and deletes on the database will not be
+    visible by the snapshot.
 
     Do not keep unnecessary references to instances of this class around
     longer than needed, because LevelDB will not release the resources
