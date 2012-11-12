@@ -516,6 +516,9 @@ cdef class Iterator:
 
         raise_for_status(self._iter.status())
 
+        # Unlike .next(), first obtain the value, then move the iterator
+        # pointer (not the other way around), so that repeatedly calling
+        # .prev() and .next() will work as designed.
         out = self.current()
         self._iter.Prev()
         if not self._iter.Valid():
