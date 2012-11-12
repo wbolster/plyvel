@@ -1,9 +1,9 @@
 # cython: embedsignature=True
 
 """
-LevelDB module.
+Plyvel, a Python LevelDB interface.
 
-Use LevelDB.DB() to create or open a database.
+Use plyvel.DB() to create or open a database.
 """
 
 import sys
