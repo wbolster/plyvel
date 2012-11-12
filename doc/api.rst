@@ -18,6 +18,11 @@ Plyvel uses standard exceptions like ``TypeError`` and ``ValueError`` as much as
 poissble. For LevelDB specific errors, Plyvel may raise a few custom exceptions:
 :py:class:`Error`, :py:class:`IOError`, and :py:class:`CorruptionError`.
 
+Most of the terminology in the Plyvel API comes straight from the LevelDB API.
+See the LevelDB documentation and the LevelDB header files
+(``$prefix/include/leveldb/*.h``) for more detailed explanations of all flags
+and options.
+
 
 Database
 ========
