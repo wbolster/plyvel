@@ -21,13 +21,13 @@ Plyvel's key features are:
 * **High performance**
 
   Plyvel executes all performance-critical code at C speed (using Cython_),
-  making it well suited for high performance applications.
+  which means Plyvel is a good fit for high performance applications.
 
 * **Friendly Pythonic API**
 
   Plyvel has a friendly and well-designed API that uses Python idioms like
-  iterators, context managers (``with`` blocks), without sacrificing the power
-  or performance of the underlying LevelDB C++ API.
+  iterators and context managers (``with`` blocks), without sacrificing the
+  power or performance of the underlying LevelDB C++ API.
 
 .. _LevelDB: http://code.google.com/p/leveldb/
 .. _Cython: http://cython.org/
