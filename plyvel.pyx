@@ -123,7 +123,7 @@ cdef class DB:
     cdef Comparator* comparator
     cdef Cache* cache
 
-    def __cinit__(self, name, bool create_if_missing=False,
+    def __init__(self, name, bool create_if_missing=False,
             bool error_if_exists=False, paranoid_checks=None,
             write_buffer_size=None, max_open_files=None, lru_cache_size=None,
             block_size=None, block_restart_interval=None,
@@ -294,6 +294,7 @@ def repair_db(name):
 # Write batch
 #
 
+@cython.final
 cdef class WriteBatch:
     """Write batch for batch put/delete operations.
 
@@ -308,7 +309,7 @@ cdef class WriteBatch:
     cdef WriteOptions write_options
     cdef DB db
 
-    def __cinit__(self, DB db not None, *, sync=None):
+    def __init__(self, DB db not None, *, sync=None):
         self.db = db
 
         self.write_options = WriteOptions()
@@ -373,6 +374,7 @@ cdef inline int compare(Comparator* comparator, bytes a, bytes b):
     return comparator.Compare(Slice(a, len(a)), Slice(b, len(b)))
 
 
+@cython.final
 cdef class Iterator:
     """Iterator for (ranges of) a database.
 
@@ -389,7 +391,7 @@ cdef class Iterator:
     cdef IteratorState state
     cdef Comparator* comparator
 
-    def __cinit__(self, DB db not None, bool reverse, bytes start, bytes stop,
+    def __init__(self, DB db not None, bool reverse, bytes start, bytes stop,
             bool include_key, bool include_value, bool verify_checksums,
             bool fill_cache, Snapshot snapshot):
         self.db = db
@@ -566,6 +568,7 @@ cdef class Iterator:
 # Snapshot
 #
 
+@cython.final
 cdef class Snapshot:
     """Database snapshot.
 
@@ -582,7 +585,7 @@ cdef class Snapshot:
     cdef cpp_leveldb.Snapshot* snapshot
     cdef DB db
 
-    def __cinit__(self, DB db not None):
+    def __init__(self, DB db not None):
         self.db = db
         self.snapshot = <cpp_leveldb.Snapshot*>db.db.GetSnapshot()
 
