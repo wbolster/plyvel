@@ -297,7 +297,12 @@ def repair_db(name):
 cdef class WriteBatch:
     """Write batch for batch put/delete operations.
 
-    Do not instantiate directly; use DB.batch(...) instead.
+    Instances of this class can be used as context managers (Python's
+    ``with`` block). When the ``with`` block ends, the write batch will
+    automatically be written to the database without an explicit call to
+    :py:meth:`WriteBatch.write`.
+
+    Do not instantiate directly; use :py:meth:`DB.batch` instead.
     """
     cdef cpp_leveldb.WriteBatch* wb
     cdef WriteOptions write_options
@@ -371,8 +376,8 @@ cdef inline int compare(Comparator* comparator, bytes a, bytes b):
 cdef class Iterator:
     """Iterator for (ranges of) a database.
 
-    Do not instantiate directly; use DB.iterator(...) or
-    Snapshot.iterator() instead.
+    Do not instantiate directly; use :py:meth:`DB.iterator` or
+    :py:meth:`Snapshot.iterator` instead.
     """
     cdef DB db
     cdef cpp_leveldb.Iterator* _iter
