@@ -5,7 +5,7 @@ ext_modules = [
     Extension(
         'plyvel',
         ['plyvel.cpp'],
-        libraries=['leveldb', 'snappy'])
+        libraries=['leveldb'])
 ]
 
 setup(
