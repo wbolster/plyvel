@@ -503,6 +503,7 @@ cdef class Iterator:
                 if not self._iter.Valid():
                     # Iterator is empty
                     raise StopIteration
+                raise_for_status(self._iter.status())
             else:
                 # Stop key specified: seek to it and move one step back
                 # (since the end of the range is exclusive)
@@ -513,8 +514,7 @@ cdef class Iterator:
                 self._iter.Prev()
                 if not self._iter.Valid():
                     raise StopIteration
-
-        raise_for_status(self._iter.status())
+                raise_for_status(self._iter.status())
 
         # Unlike .next(), first obtain the value, then move the iterator
         # pointer (not the other way around), so that repeatedly calling
