@@ -9,7 +9,6 @@ Required before this library is to be taken seriously:
 * Decide on a license
 * Documentation
 
-  * Installation instructions
   * Simple use
 
 * Transaction-like behaviour for write batches
