@@ -29,6 +29,13 @@ Plyvel's key features are:
   iterators and context managers (``with`` blocks), without sacrificing the
   power or performance of the underlying LevelDB C++ API.
 
+* **Python 2 and Python 3 compatibility**
+
+  Plyvel works with both Python 2 and Python 3. The only caveat is that Python 3
+  uses unicode strings by default, while Plyvel expects byte strings. Just use
+  explicit ``b'byte strings'`` for both Python 2 and Python 3 and everything
+  will be fine.
+
 .. _LevelDB: http://code.google.com/p/leveldb/
 .. _Cython: http://cython.org/
 
