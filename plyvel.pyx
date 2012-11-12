@@ -13,8 +13,8 @@ cimport cython
 from libcpp.string cimport string
 from libcpp cimport bool
 
-cimport cpp_leveldb
-from cpp_leveldb cimport (
+cimport leveldb
+from leveldb cimport (
     Cache,
     Comparator,
     DestroyDB,
@@ -29,8 +29,7 @@ from cpp_leveldb cimport (
 )
 
 
-__leveldb_version__ = '%d.%d' % (cpp_leveldb.kMajorVersion,
-                                 cpp_leveldb.kMinorVersion)
+__leveldb_version__ = '%d.%d' % (leveldb.kMajorVersion, leveldb.kMinorVersion)
 
 
 #
@@ -119,7 +118,7 @@ cdef class DB:
     A LevelDB database is a persistent ordered map from keys to values.
     """
 
-    cdef cpp_leveldb.DB* db
+    cdef leveldb.DB* db
     cdef Comparator* comparator
     cdef Cache* cache
 
@@ -162,23 +161,23 @@ cdef class DB:
             options.block_restart_interval = block_restart_interval
 
         if compression is None:
-            options.compression = cpp_leveldb.kNoCompression
+            options.compression = leveldb.kNoCompression
         else:
             if isinstance(compression, bytes):
                 compression = compression.decode('UTF-8')
             if not isinstance(compression, unicode):
                 raise TypeError("'compression' must be None or a string")
             if compression == u'snappy':
-                options.compression = cpp_leveldb.kSnappyCompression
+                options.compression = leveldb.kSnappyCompression
             else:
                 raise ValueError("'compression' must be None or 'snappy'")
 
         if bloom_filter_bits > 0:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
 
-        st = cpp_leveldb.DB_Open(options, fsname, &self.db)
+        st = leveldb.DB_Open(options, fsname, &self.db)
         raise_for_status(st)
-        self.comparator = <cpp_leveldb.Comparator*>options.comparator
+        self.comparator = <leveldb.Comparator*>options.comparator
 
     def __dealloc__(self):
         del self.db
@@ -305,7 +304,7 @@ cdef class WriteBatch:
 
     Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
     """
-    cdef cpp_leveldb.WriteBatch* wb
+    cdef leveldb.WriteBatch* wb
     cdef WriteOptions write_options
     cdef DB db
 
@@ -316,7 +315,7 @@ cdef class WriteBatch:
         if sync is not None:
             self.write_options.sync = sync
 
-        self.wb = new cpp_leveldb.WriteBatch()
+        self.wb = new leveldb.WriteBatch()
 
     def __dealloc__(self):
         del self.wb
@@ -382,7 +381,7 @@ cdef class Iterator:
     :py:meth:`Snapshot.iterator` instead.
     """
     cdef DB db
-    cdef cpp_leveldb.Iterator* _iter
+    cdef leveldb.Iterator* _iter
     cdef IteratorDirection direction
     cdef Slice start
     cdef Slice stop
@@ -582,12 +581,12 @@ cdef class Snapshot:
 
     Do not instantiate directly; use DB.snapshot(...) instead.
     """
-    cdef cpp_leveldb.Snapshot* snapshot
+    cdef leveldb.Snapshot* snapshot
     cdef DB db
 
     def __init__(self, DB db not None):
         self.db = db
-        self.snapshot = <cpp_leveldb.Snapshot*>db.db.GetSnapshot()
+        self.snapshot = <leveldb.Snapshot*>db.db.GetSnapshot()
 
     def __dealloc__(self):
         self.db.db.ReleaseSnapshot(self.snapshot)
