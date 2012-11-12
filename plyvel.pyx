@@ -235,7 +235,7 @@ cdef class DB:
         st = self.db.Delete(write_options, Slice(key, len(key)))
         raise_for_status(st)
 
-    def batch(self, *, sync=None):
+    def write_batch(self, *, sync=None):
         return WriteBatch(self, sync=sync)
 
     def __iter__(self):
@@ -298,11 +298,11 @@ cdef class WriteBatch:
     """Write batch for batch put/delete operations.
 
     Instances of this class can be used as context managers (Python's
-    ``with`` block). When the ``with`` block ends, the write batch will
-    automatically be written to the database without an explicit call to
-    :py:meth:`WriteBatch.write`.
+    ``with`` block). When the ``with`` block terminates, the write batch
+    will automatically write itself to the database without an explicit
+    call to :py:meth:`WriteBatch.write`.
 
-    Do not instantiate directly; use :py:meth:`DB.batch` instead.
+    Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
     """
     cdef cpp_leveldb.WriteBatch* wb
     cdef WriteOptions write_options

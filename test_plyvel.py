@@ -182,10 +182,10 @@ def test_null_bytes():
         assert_is_none(db.get(key))
 
 
-def test_batch():
-    with tmp_db('batch') as db:
+def test_write_batch():
+    with tmp_db('write_batch') as db:
         # Prepare a batch with some data
-        batch = db.batch()
+        batch = db.write_batch()
         for i in xrange(1000):
             batch.put(('batch-key-%d' % i).encode('UTF-8'), b'value')
 
@@ -201,14 +201,14 @@ def test_batch():
         assert_is_none(db.get(b'batch-key-2'))
 
         # Batches can be cleared
-        batch = db.batch()
+        batch = db.write_batch()
         batch.put(b'this-is-never-saved', b'')
         batch.clear()
         batch.write()
         assert_is_none(db.get(b'this-is-never-saved'))
 
         # Batches take write options
-        batch = db.batch(sync=True)
+        batch = db.write_batch(sync=True)
         batch.put(b'batch-key-sync', b'')
         batch.write()
 
@@ -217,7 +217,7 @@ def test_batch_context_manager():
     with tmp_db('batch_context_manager') as db:
         key = b'batch-key'
         assert_is_none(db.get(key))
-        with db.batch() as b:
+        with db.write_batch() as b:
             b.put(key, b'')
         assert_is_not_none(db.get(key))
 
@@ -225,7 +225,7 @@ def test_batch_context_manager():
         key = b'batch-key-exception'
         assert_is_none(db.get(key))
         with assert_raises(ValueError):
-            with db.batch() as b:
+            with db.write_batch() as b:
                 b.put(key, b'')
                 raise ValueError()
         assert_is_not_none(db.get(key))
