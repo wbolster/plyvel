@@ -12,6 +12,8 @@ Required before this library is to be taken seriously:
   * Installation instructions
   * Simple use
 
+* Transaction-like behaviour for write batches
+
 Lower priority tasks:
 
 * Custom comparators (if desired at all)
