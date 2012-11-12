@@ -46,7 +46,7 @@ def tmp_dir(name):
 def tmp_db(name, create=True):
     dir_name = tmp_dir(name)
     if create:
-        db = DB(dir_name)
+        db = DB(dir_name, create_if_missing=True, error_if_exists=True)
         yield db
         del db
     else:
@@ -104,7 +104,7 @@ def test_open():
             DB(name, create_if_missing=False)
 
     with tmp_db('exists', create=False) as name:
-        db = DB(name)
+        db = DB(name, create_if_missing=True)
         del db
         with assert_raises(plyvel.Error):
             DB(name, error_if_exists=True)
@@ -508,7 +508,7 @@ def test_compaction():
 
 def test_repair_db():
     dir_name = tmp_dir('repair')
-    db = DB(dir_name)
+    db = DB(dir_name, create_if_missing=True)
     db.put(b'foo', b'bar')
     del db
     plyvel.repair_db(dir_name)
@@ -520,7 +520,7 @@ def test_repair_db():
 
 def test_destroy_db():
     dir_name = tmp_dir('destroy')
-    db = DB(dir_name)
+    db = DB(dir_name, create_if_missing=True)
     db.put(b'foo', b'bar')
     del db
     plyvel.destroy_db(dir_name)

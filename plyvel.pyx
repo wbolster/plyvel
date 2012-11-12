@@ -123,7 +123,7 @@ cdef class DB:
     cdef Comparator* comparator
     cdef Cache* cache
 
-    def __cinit__(self, name, bool create_if_missing=True,
+    def __cinit__(self, name, bool create_if_missing=False,
             bool error_if_exists=False, paranoid_checks=None,
             write_buffer_size=None, max_open_files=None, lru_cache_size=None,
             block_size=None, block_restart_interval=None,
