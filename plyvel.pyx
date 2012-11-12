@@ -82,7 +82,7 @@ cdef inline db_get(DB db, bytes key, ReadOptions read_options):
     cdef string value
     cdef Status st
 
-    st = db.db.Get(read_options, Slice(key, len(key)), &value)
+    st = db._db.Get(read_options, Slice(key, len(key)), &value)
 
     if st.IsNotFound():
         return None
@@ -118,7 +118,7 @@ cdef class DB:
     A LevelDB database is a persistent ordered map from keys to values.
     """
 
-    cdef leveldb.DB* db
+    cdef leveldb.DB* _db
     cdef Comparator* comparator
     cdef Cache* cache
 
@@ -175,12 +175,12 @@ cdef class DB:
         if bloom_filter_bits > 0:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
 
-        st = leveldb.DB_Open(options, fsname, &self.db)
+        st = leveldb.DB_Open(options, fsname, &self._db)
         raise_for_status(st)
         self.comparator = <leveldb.Comparator*>options.comparator
 
     def __dealloc__(self):
-        del self.db
+        del self._db
         if self.cache is not NULL:
             del self.cache
 
@@ -214,7 +214,7 @@ cdef class DB:
         if sync is not None:
             write_options.sync = sync
 
-        st = self.db.Put(
+        st = self._db.Put(
             write_options,
             Slice(key, len(key)),
             Slice(value, len(value)))
@@ -231,7 +231,7 @@ cdef class DB:
         if sync is not None:
             write_options.sync = sync
 
-        st = self.db.Delete(write_options, Slice(key, len(key)))
+        st = self._db.Delete(write_options, Slice(key, len(key)))
         raise_for_status(st)
 
     def write_batch(self, *, sync=None):
@@ -262,7 +262,7 @@ cdef class DB:
         if stop is not None:
             stop_slice = Slice(stop, len(stop))
 
-        self.db.CompactRange(&start_slice, &stop_slice)
+        self._db.CompactRange(&start_slice, &stop_slice)
 
 
 def destroy_db(name):
@@ -344,7 +344,7 @@ cdef class WriteBatch:
     def write(self):
         """Write the batch to the database"""
         cdef Status st
-        st = self.db.db.Write(self.write_options, self.wb)
+        st = self.db._db.Write(self.write_options, self.wb)
         raise_for_status(st)
 
     def __enter__(self):
@@ -409,7 +409,7 @@ cdef class Iterator:
         if snapshot is not None:
             read_options.snapshot = snapshot.snapshot
 
-        self._iter = db.db.NewIterator(read_options)
+        self._iter = db._db.NewIterator(read_options)
         raise_for_status(self._iter.status())
         self.move_to_start()
 
@@ -586,10 +586,10 @@ cdef class Snapshot:
 
     def __init__(self, DB db not None):
         self.db = db
-        self.snapshot = <leveldb.Snapshot*>db.db.GetSnapshot()
+        self.snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
 
     def __dealloc__(self):
-        self.db.db.ReleaseSnapshot(self.snapshot)
+        self.db._db.ReleaseSnapshot(self.snapshot)
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
         cdef ReadOptions read_options
