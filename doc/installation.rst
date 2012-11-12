@@ -1,5 +1,5 @@
 ==================
-Installation Guide
+Installation guide
 ==================
 
 .. highlight:: sh
