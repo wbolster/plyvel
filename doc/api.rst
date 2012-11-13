@@ -31,60 +31,111 @@ Database
 
    LevelDB database
 
-   A LevelDB database is a persistent ordered map from keys to values.
-
-
    .. py:method:: __init__(name, create_if_missing=False, error_if_exists=False, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0)
 
-      Open the underlying database handle
+      Open the underlying database handle.
 
-      :param str name: The name of the database
+      Most of the arguments have the same name as the the corresponding LevelDB
+      parameters; see the LevelDB documentation for details about the exact
+      meaning. Argument that can be `None` are only propagated to LevelDB if
+      specified, e.g. not specifying a `write_buffer_size` means the LevelDB
+      defaults are used.
+
+      :param str name: name of the database (directory name)
+      :param bool create_if_missing: whether a new database should be created if
+                                     needed
+      :param bool error_if_exists: whether to raise an exception if the database
+                                   already exists
+      :param bool paranoid_checks: whether to enable paranoid checks
+      :param int write_buffer_size: size of the write buffer (in bytes)
+      :param int max_open_files: maximum number of files to keep open
+      :param int lru_cache_size: size of the LRU cache (in bytes)
+      :param int block_size: block size (in bytes)
+      :param int block_restart_interval: block restart interval for delta
+                                         encoding of keys
+      :param compression: whether to use Snappy compression (enabled by default)
+      :param int bloom_filter_bits: the number of bits to use for a bloom
+                                    filter; the default of 0 means that no bloom
+                                    filter will be used
 
 
    .. py:method:: get(key, verify_checksums=None, fill_cache=None)
 
-      Get the value for specified key (or None if not found)
+      Get the value for the specified key, or `None` if no value was set.
 
-      :param bytes key:
-      :param bool verify_checksums:
-      :param bool fill_cache:
+      :param bytes key: key to retrieve
+      :param bool verify_checksums: whether to verify checksums
+      :param bool fill_cache: whether to fill the cache
+      :return: value for the specified key, or `None` if not found
       :rtype: bytes
 
 
    .. py:method:: put(key, value, sync=None)
 
-      Set the value for specified key to the specified value.
+      Set a value for the specified key.
 
-      :param bytes key:
-      :param bytes value:
-      :param bool sync:
+      :param bytes key: key to set
+      :param bytes value: value to set
+      :param bool sync: whether to use synchronous writes
 
 
    .. py:method:: write_batch(sync=None)
 
-      (TODO)
+      Create a new :py:class:`WriteBatch` instance for this database.
+
+      This method does not write a batch to the database! Use
+      :py:meth:`WriteBatch.write` for that, or use a ``with`` block:
+
+          with db.write_batch() as b:
+              b.put(b'key', b'value')
+
+      See the :py:class:`WriteBatch` API for more information.
+
+      :param bool sync: whether to use synchronous writes
+      :return: new :py:class:`WriteBatch` instance
+      :rtype: :py:class:`WriteBatch`
 
 
    .. py:method:: iterator(reverse=False, start=None, stop=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
 
-      (TODO)
+      Create a new :py:class:`Iterator` instance for this database.
+
+      See the :py:class:`Iterator` API for more information.
+
+      :param bool reverse: whether the iterator should iterate in reverse order
+      :param bytes start: the start key (inclusive) of the iterator range
+                          (optional)
+      :param bytes stop: the stop key (exclusive) of the iterator range
+                         (optional)
+      :param bool include_key: whether to include keys in the returned data
+      :param bool include_value: whether to include values in the returned data
+      :param bool verify_checksums: whether to verify checksums
+      :param bool fill_cache: whether to fill the cache
+      :return: new :py:class:`Iterator` instance
+      :rtype: :py:class:`Iterator`
 
 
    .. py:method:: snapshot()
 
-      (TODO)
+      Create a new :py:class:`Snapshot` instance for this database.
+
+      See the :py:class:`Snapshot` API for more information.
 
 
    .. method: delete(key, sync=None)
 
-      Delete the entry for the specified key.
+      Delete the key/value pair for the specified key.
 
-      :param bytes key:
+      :param bytes key: key to delete
+      :param bool sync: whether to use synchronous writes
 
 
    .. py:method:: compact_range(start=None, stop=None)
 
       Compact underlying storage for the specified key range.
+
+      :param bytes start: the start key of range to compact (optional)
+      :param bytes stop: the stop key of range to compact (optinoal)
 
 
 Additionally, existing databases can be repaired or destroyed using these module
@@ -94,10 +145,14 @@ level functions:
 
    Repair the specified database.
 
+   :param str name: name of the database (directory name)
+
 
 .. function:: destroy_db(name)
 
    Destroy the specified database.
+
+   :param str name: name of the database (directory name)
 
 
 Write batch
@@ -117,14 +172,14 @@ Write batch
 
    .. py:method:: put(key, value)
 
-      Set the value for specified key to the specified value.
+      Set a value for the specified key.
 
       This is like :py:meth:`DB.put`, but operates on the write batch instead.
 
 
    .. py:method:: delete(key)
 
-      Delete the entry for the specified key.
+      Delete the key/value pair for the specified key.
 
       This is like :py:meth:`DB.delete`, but operates on the write batch
       instead.
@@ -134,10 +189,14 @@ Write batch
 
       Clear the batch.
 
+      This discards all updates buffered in this write batch.
+
 
    .. py:method:: write()
 
-      Write the batch to the database.
+      Write the batch to the associated database. If you use the write batch as
+      a context manager (in a ``with`` block), this method will be invoked
+      automatically.
 
 
 Snapshot
@@ -160,10 +219,14 @@ Snapshot
 
    .. py:method:: get(key, verify_checksums=None, fill_cache=None)
 
+      Get the value for the specified key, or `None` if no value was set.
+
       Same as :py:meth:`DB.get`, but operates on the snapshot instead.
 
 
    .. py:method:: iterator(reverse=False, start=None, stop=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
+
+      Create a new :py:class:`Iterator` instance for this snapshot.
 
       Same as :py:meth:`DB.iterator`, but operates on the snapshot instead.
 
@@ -186,22 +249,26 @@ Iterator
 
       Move one step back and return the previous entry.
 
+      This returns the same value as the most recent :py:func:`next` call (if
+      any).
+
 
    .. py:method:: seek_to_start()
 
-      Move the pointer before the start key of the iterator.
+      Move the iterator to the start key (or the begin).
 
       This "rewinds" the iterator, so that it is in the same state as when first
-      created. This means calling .next() will return the first entry.
+      created. This means calling :py:func:`next` afterwards will return the
+      first entry.
 
 
    .. py:method:: seek_to_stop()
 
-      Move the iterator pointer past the end of the range.
+      Move the iterator to the stop key (or the end).
 
       This "fast-forwards" the iterator past the end. After this call the
-      iterator is exhausted, which means a call to .next() raises StopIteration,
-      but .prev() will work.
+      iterator is exhausted, which means a call to :py:func:`next` raises
+      StopIteration, but :py:meth:`~Iterator.prev` will work.
 
 
 Errors
