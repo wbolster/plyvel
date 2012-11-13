@@ -4,15 +4,20 @@ Tutorial
 
 .. py:currentmodule:: plyvel
 
-This tutorial gives an overview of Plyvel. Basic familiarity with LevelDB is
-assumed; visit the `LevelDB homepage`_ for more information.
+This tutorial gives an overview of Plyvel. It covers opening and closing
+databases, storing and retrieving data, working with write batches, using
+snapshots, and iterating over your data.
+
+Note: Basic familiarity with LevelDB is assumed; visit the `LevelDB homepage`_
+for more information about its features and design.
 
 .. _`LevelDB homepage`: http://code.google.com/p/leveldb/
+
 
 Getting started
 ===============
 
-After :doc:`installing Plyvel <installation>`, we can start by importing the
+After :doc:`installing Plyvel <installation>`, we can simply import the
 ``plyvel`` module::
 
     >>> import plyvel
@@ -102,9 +107,10 @@ batches are perfect for bulk loading data. Let's write some data::
     >>> wb.write()
 
 Since write batches are committed in an atomic way, either the complete batch is
-written, or none of it, so if your machine crashes while LevelDB writes the
+written, or not at all, so if your machine crashes while LevelDB writes the
 batch to disk, the database will not end up containing partial or inconsistent
-data.
+data. This makes write batches very useful for multiple modifications to the
+database that should be applied as a group.
 
 Write batches can also act as context managers. The following code does the same
 as the example above, but there is no call to :py:meth:`WriteBatch.write`
@@ -153,7 +159,149 @@ collector comes by to clean it up. Alternatively, you can delete it yourself::
 Iterators
 =========
 
-TODO: this section is yet to be written.
+All key/value pairs in a LevelDB database will be sorted by key. Because of
+this, data can be efficiently retrieved in sorted order. This is what iterators
+are for. Iterators allow you to efficiently iterate over all sorted key/value
+pairs in the database, or more likely, a range of the database.
+
+Let's fill the database with some data first:
+
+    >>> db.put(b'key-1', b'value-1')
+    >>> db.put(b'key-5', b'value-5')
+    >>> db.put(b'key-3', b'value-3')
+    >>> db.put(b'key-2', b'value-2')
+    >>> db.put(b'key-4', b'value-4')
+
+Now we can iterate over all data using a simple ``for`` loop, which will return
+all key/value pairs in lexicographical key order::
+
+    >>> for key, value in db:
+    ...     print(key)
+    ...     print(value)
+    ...
+    key-1
+    value-1
+    key-2
+    value-2
+    key-3
+    value-3
+    key-4
+    value-4
+    key-5
+
+While the complete database can be iterated over by just looping over the
+:py:class:`DB` instance, this is generally not useful. The
+:py:meth:`DB.iterator` method allows you to obtain more specific iterators. This
+method takes several optional arguments to specify how the iterator should
+behave.
+
+Iterating over a key range
+--------------------------
+
+Limiting the range of values that you want the iterator to iterate over can be
+achieved by supplying `start` and/or `stop` arguments::
+
+    >>> for key, value in db.iterator(start=b'key-2', stop=b'key-4'):
+    ...     print(key)
+    ...
+    key-2
+    key-3
+
+.. note::
+
+   Keep in mind that the start key is *inclusive* and the stop key is
+   *exclusive*. This is also how the Python built-in :py:func:`range` function
+   works.
+
+Any combination of `start` and `stop` arguments is possible. For example, to
+iterate from a specific start key until the end of the database::
+
+    >>> for key, value in db.iterator(start=b'key-3'):
+    ...     print(key)
+    ...
+    key-3
+    key-4
+    key-5
+
+Limiting the returned data
+--------------------------
+
+If you're only interested in either the key or the value, you can use the
+`include_key` and `include_value` arguments to omit data you don't need::
+
+    >>> list(db.iterator(start=b'key-2', stop=b'key-4', include_value=False))
+    ['key-2', 'key-3']
+    >>> list(db.iterator(start=b'key-2', stop=b'key-4', include_key=False))
+    ['value-2', 'value-3']
+
+Only requesting the data that you are interested in results in slightly faster
+iterators, since Plyvel will avoid unnecessary memory copies and object
+construction in this case.
+
+Iterating in reverse order
+--------------------------
+
+LevelDB also supports reverse iteration. Just set the `reverse` argument to
+`True` to obtain a reverse iterator::
+
+    >>> list(db.iterator(start=b'key-2', stop=b'key-4', include_value=False, reverse=True))
+    ['key-3', 'key-2']
+
+Note that the `start` and `stop` keys are the same; the only difference is the
+`reverse` argument.
+
+Iterating over snapshots
+------------------------
+
+LevelDB also supports iterating over snapshots using the
+:py:meth:`Snapshot.iterator` method. This method works exactly the same as
+:py:meth:`DB.iterator`, except that it operates on the snapshot instead of the
+complete database.
+
+Advanced iterator usage
+-----------------------
+
+In the examples above, we've only used Python's standard iteration methods using
+a ``for`` loop and the :py:func:`list` constructor. This suffices for most
+applications, but sometimes more advanced iterator tricks can be useful. Plyvel
+exposes pretty much all features of the LevelDB iterators using extra functions
+on the :py:class:`Iterator` instance that :py:meth:`DB.iterator` and
+:py:meth:`Snapshot.iterator` returns.
+
+For instance, you can step forward and backward over the same iterator. For
+forward stepping, Python's standard :py:func:`next` built-in function can be
+used (this is also what a standard ``for`` loop does). For backward stepping,
+you will need to call the :py:meth:`~Iterator.prev()` method on the iterator::
+
+    >>> it = db.iterator(include_value=False)
+    >>> next(it)
+    'key-1'
+    >>> next(it)
+    'key-2'
+    >>> next(it)
+    'key-3'
+    >>> it.prev()
+    'key-3'
+    >>> next(it)
+    'key-3'
+    >>> next(it)
+    'key-4'
+    >>> next(it)
+    'key-5'
+    >>> next(it)
+    Traceback (most recent call last):
+      ...
+    StopIteration
+
+    >>> it.prev()
+    'key-5'
+
+See the :py:class:`Iterator` API reference for more information about advanced
+iterator usage.
+
+Note that for reverse iterators, the definition of 'forward' and 'backward' is
+inverted, i.e. calling ``next(it)`` on a reverse iterator will return the key
+that sorts *before* the key that was most recently returned.
 
 
 .. rubric:: Next steps
