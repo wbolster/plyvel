@@ -308,15 +308,22 @@ def test_iterator_single_step(db, iter_kwargs, expected_values):
 def test_iterator_extremes(db, iter_kwargs, expected_values):
     it = db.iterator(**iter_kwargs)
     first, second, third = expected_values
+    is_forward = not iter_kwargs.get('reverse', False)
 
     # End of iterator
-    it.seek_to_stop()
+    if is_forward:
+        it.seek_to_stop()
+    else:
+        it.seek_to_start()
     with assert_raises(StopIteration):
         next(it)
     assert_equal(third, it.prev())
 
     # Begin of iterator
-    it.seek_to_start()
+    if is_forward:
+        it.seek_to_start()
+    else:
+        it.seek_to_stop()
     with assert_raises(StopIteration):
         it.prev()
     assert_equal(first, next(it))

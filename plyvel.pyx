@@ -354,8 +354,11 @@ cdef class Iterator:
             read_options.snapshot = snapshot.snapshot
 
         self._iter = db._db.NewIterator(read_options)
+        if self.direction == FORWARD:
+            self.seek_to_start()
+        else:
+            self.seek_to_stop()
         raise_for_status(self._iter.status())
-        self.seek_to_start()
 
     def __dealloc__(self):
         del self._iter
@@ -484,10 +487,10 @@ cdef class Iterator:
         return out
 
     def seek_to_start(self):
-        self.state = BEFORE_START if self.direction == FORWARD else AFTER_STOP
+        self.state = BEFORE_START
 
     def seek_to_stop(self):
-        self.state = AFTER_STOP if self.direction == FORWARD else BEFORE_START
+        self.state = AFTER_STOP
 
     def seek(self, bytes target):
         # TODO: should this be in the public API?
