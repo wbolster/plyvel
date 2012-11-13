@@ -470,6 +470,47 @@ def test_iterator_single_entry():
             next(it)
 
 
+def test_iterator_seeking():
+    with tmp_db('iterator_seeking') as db:
+        db.put(b'1', b'1')
+        db.put(b'2', b'2')
+        db.put(b'3', b'3')
+        db.put(b'4', b'4')
+        db.put(b'5', b'5')
+
+        it = db.iterator(include_value=False)
+        it.seek_to_start()
+        with assert_raises(StopIteration):
+            it.prev()
+        assert_equal(b'1', next(it))
+        it.seek_to_start()
+        assert_equal(b'1', next(it))
+        it.seek_to_stop()
+        with assert_raises(StopIteration):
+            next(it)
+        assert_equal(b'5', it.prev())
+
+        # Seek to a specific key
+        it.seek(b'2')
+        assert_equal(b'2', next(it))
+        it.seek(b'2')
+        assert_equal(b'1', it.prev())
+
+        # Seek to keys that sort between/before/after existing keys
+        it.seek(b'123')
+        assert_equal(b'2', next(it))
+        it.seek(b'6')
+        with assert_raises(StopIteration):
+            next(it)
+        it.seek(b'0')
+        with assert_raises(StopIteration):
+            it.prev()
+        assert_equal(b'1', next(it))
+        it.seek(b'4')
+        it.seek(b'3')
+        assert_equal(b'3', next(it))
+
+
 def test_snapshot():
     with tmp_db('snapshot') as db:
         db.put(b'a', b'a')
