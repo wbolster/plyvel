@@ -49,6 +49,7 @@ Documentation overview
    installation
    tutorial
    api
+   license
 
 
 External links

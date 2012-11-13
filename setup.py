@@ -14,4 +14,7 @@ setup(
     author="Wouter Bolsterlee",
     author_email="uws@xs4all.nl",
     ext_modules=ext_modules,
+    classifiers=[
+        "License :: OSI Approved :: BSD License",
+    ]
 )
