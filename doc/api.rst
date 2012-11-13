@@ -187,7 +187,7 @@ Iterator
       Move one step back and return the previous entry.
 
 
-   .. py:method:: move_to_start()
+   .. py:method:: seek_to_start()
 
       Move the pointer before the start key of the iterator.
 
@@ -195,7 +195,7 @@ Iterator
       created. This means calling .next() will return the first entry.
 
 
-   .. py:method:: move_to_stop()
+   .. py:method:: seek_to_stop()
 
       Move the iterator pointer past the end of the range.
 

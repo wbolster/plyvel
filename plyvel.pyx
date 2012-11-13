@@ -355,7 +355,7 @@ cdef class Iterator:
 
         self._iter = db._db.NewIterator(read_options)
         raise_for_status(self._iter.status())
-        self.move_to_start()
+        self.seek_to_start()
 
     def __dealloc__(self):
         del self._iter
@@ -483,10 +483,10 @@ cdef class Iterator:
 
         return out
 
-    def move_to_start(self):
+    def seek_to_start(self):
         self.state = BEFORE_START if self.direction == FORWARD else AFTER_STOP
 
-    def move_to_stop(self):
+    def seek_to_stop(self):
         self.state = AFTER_STOP if self.direction == FORWARD else BEFORE_START
 
     def seek(self, bytes target):
