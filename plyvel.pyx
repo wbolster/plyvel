@@ -1,5 +1,15 @@
 # cython: embedsignature=True
 
+#
+# Note about API documentation:
+#
+# The API reference for all classes and methods is maintained in
+# a separate file: doc/api.rst. The Sphinx 'autodoc' feature does not
+# work too well for this project (requires module compilation, chokes on
+# syntax differences, does not work with documentation hosting sites).
+# Make sure the API reference and the actual code are kept in sync!
+#
+
 """
 Plyvel, a Python LevelDB interface.
 
@@ -37,26 +47,14 @@ __leveldb_version__ = '%d.%d' % (leveldb.kMajorVersion, leveldb.kMinorVersion)
 #
 
 class Error(Exception):
-    """Generic LevelDB error.
-
-    This class is also the "parent" error for other LevelDB errors
-    (IOError and CorruptionError). Other exceptions from this module
-    subclass this class.
-    """
     pass
 
 
 class IOError(Error, IOError):
-    """LevelDB IO error
-
-    This class extends both the main LevelDB Error class from this
-    module and Python's built-in IOError.
-    """
     pass
 
 
 class CorruptionError(Error):
-    """LevelDB corruption error"""
     pass
 
 
@@ -113,11 +111,6 @@ cdef bytes to_file_system_name(name):
 
 @cython.final
 cdef class DB:
-    """LevelDB database.
-
-    A LevelDB database is a persistent ordered map from keys to values.
-    """
-
     cdef leveldb.DB* _db
     cdef Comparator* comparator
     cdef Cache* cache
@@ -127,10 +120,6 @@ cdef class DB:
             write_buffer_size=None, max_open_files=None, lru_cache_size=None,
             block_size=None, block_restart_interval=None,
             compression='snappy', int bloom_filter_bits=0):
-        """Open the underlying database handle
-
-        :param str name: The name of the database
-        """
         cdef Options options
         cdef Status st
         cdef string fsname
@@ -185,13 +174,6 @@ cdef class DB:
             del self.cache
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
-        """Get the value for specified key (or None if not found)
-
-        :param bytes key:
-        :param bool verify_checksums:
-        :param bool fill_cache:
-        :rtype: bytes
-        """
         cdef ReadOptions read_options
 
         if verify_checksums is not None:
@@ -202,12 +184,6 @@ cdef class DB:
         return db_get(self, key, read_options)
 
     def put(self, bytes key, bytes value, *, sync=None):
-        """Set the value for specified key to the specified value.
-
-        :param bytes key:
-        :param bytes value:
-        :param bool sync:
-        """
         cdef Status st
         cdef WriteOptions write_options = WriteOptions()
 
@@ -221,10 +197,6 @@ cdef class DB:
         raise_for_status(st)
 
     def delete(self, bytes key, *, sync=None):
-        """Delete the entry for the specified key.
-
-        :param bytes key:
-        """
         cdef Status st
         cdef WriteOptions write_options = WriteOptions()
 
@@ -252,7 +224,6 @@ cdef class DB:
         return Snapshot(self)
 
     def compact_range(self, bytes start=None, bytes stop=None):
-        """Compact underlying storage for the specified key range."""
         cdef Slice start_slice
         cdef Slice stop_slice
 
@@ -265,20 +236,7 @@ cdef class DB:
         self._db.CompactRange(&start_slice, &stop_slice)
 
 
-def destroy_db(name):
-    """Destroy the specified database."""
-    # TODO: support Options
-    cdef Options options = Options()
-    cdef Status st
-    cdef string fsname
-
-    fsname = to_file_system_name(name)
-    st = DestroyDB(fsname, options)
-    raise_for_status(st)
-
-
 def repair_db(name):
-    """Repair the specified database."""
     # TODO: support Options
     cdef Options options = Options()
     cdef Status st
@@ -289,21 +247,23 @@ def repair_db(name):
     raise_for_status(st)
 
 
+def destroy_db(name):
+    # TODO: support Options
+    cdef Options options = Options()
+    cdef Status st
+    cdef string fsname
+
+    fsname = to_file_system_name(name)
+    st = DestroyDB(fsname, options)
+    raise_for_status(st)
+
+
 #
 # Write batch
 #
 
 @cython.final
 cdef class WriteBatch:
-    """Write batch for batch put/delete operations.
-
-    Instances of this class can be used as context managers (Python's
-    ``with`` block). When the ``with`` block terminates, the write batch
-    will automatically write itself to the database without an explicit
-    call to :py:meth:`WriteBatch.write`.
-
-    Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
-    """
     cdef leveldb.WriteBatch* write_batch
     cdef WriteOptions write_options
     cdef DB db
@@ -321,28 +281,17 @@ cdef class WriteBatch:
         del self.write_batch
 
     def put(self, bytes key, bytes value):
-        """Set the value for specified key to the specified value.
-
-        This is like DB.put(), but operates on the write batch instead.
-        """
         self.write_batch.Put(
             Slice(key, len(key)),
             Slice(value, len(value)))
 
     def delete(self, bytes key):
-        """Delete the entry for the specified key.
-
-        This is like DB.delete(), but operates on the write batch
-        instead.
-        """
         self.write_batch.Delete(Slice(key, len(key)))
 
     def clear(self):
-        """Clear the batch"""
         self.write_batch.Clear()
 
     def write(self):
-        """Write the batch to the database"""
         cdef Status st
         st = self.db._db.Write(self.write_options, self.write_batch)
         raise_for_status(st)
@@ -375,11 +324,6 @@ cdef inline int compare(Comparator* comparator, bytes a, bytes b):
 
 @cython.final
 cdef class Iterator:
-    """Iterator for (ranges of) a database.
-
-    Do not instantiate directly; use :py:meth:`DB.iterator` or
-    :py:meth:`Snapshot.iterator` instead.
-    """
     cdef DB db
     cdef leveldb.Iterator* _iter
     cdef IteratorDirection direction
@@ -463,7 +407,6 @@ cdef class Iterator:
             return self.real_prev()
 
     def prev(self):
-        """Return the previous iterator entry."""
         if self.direction == FORWARD:
             return self.real_prev()
         else:
@@ -541,21 +484,9 @@ cdef class Iterator:
         return out
 
     def move_to_start(self):
-        """Move the pointer before the start key of the iterator.
-
-        This "rewinds" the iterator, so that it is in the same state as
-        when first created. This means calling .next() will return the
-        first entry.
-        """
         self.state = BEFORE_START if self.direction == FORWARD else AFTER_STOP
 
     def move_to_stop(self):
-        """Move the iterator pointer past the end of the range.
-
-        This "fast-forwards" the iterator past the end. After this call
-        the iterator is exhausted, which means a call to .next() raises
-        StopIteration, but .prev() will work.
-        """
         self.state = AFTER_STOP if self.direction == FORWARD else BEFORE_START
 
     def seek(self, bytes target):
@@ -569,18 +500,6 @@ cdef class Iterator:
 
 @cython.final
 cdef class Snapshot:
-    """Database snapshot.
-
-    A snapshot provides a consistent view over keys and values. After
-    making a snapshot, puts and deletes on the database will not be
-    visible by the snapshot.
-
-    Do not keep unnecessary references to instances of this class around
-    longer than needed, because LevelDB will not release the resources
-    required for this snapshot until a snapshot is released.
-
-    Do not instantiate directly; use DB.snapshot(...) instead.
-    """
     cdef leveldb.Snapshot* snapshot
     cdef DB db
 
