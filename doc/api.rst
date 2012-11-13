@@ -83,13 +83,10 @@ Database
 
       Create a new :py:class:`WriteBatch` instance for this database.
 
-      This method does not write a batch to the database! Use
-      :py:meth:`WriteBatch.write` for that, or use a ``with`` block:
-
-          with db.write_batch() as b:
-              b.put(b'key', b'value')
-
       See the :py:class:`WriteBatch` API for more information.
+
+      Note that this method does not write a batch to the database; it only
+      creates a new write batch instance.
 
       :param bool sync: whether to use synchronous writes
       :return: new :py:class:`WriteBatch` instance
@@ -165,7 +162,10 @@ Write batch
    Instances of this class can be used as context managers (Python's ``with``
    block). When the ``with`` block terminates, the write batch will
    automatically write itself to the database without an explicit call to
-   :py:meth:`WriteBatch.write`.
+   :py:meth:`WriteBatch.write`::
+
+      with db.write_batch() as b:
+          b.put(b'key', b'value')
 
    Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
 
