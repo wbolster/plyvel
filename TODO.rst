@@ -6,8 +6,6 @@ Required before this library is to be taken seriously:
 
 * Decent packaging/releasing (setup.py)
 * Transaction-like behaviour for write batches
-* Handle Options args in repair_db() and destroy_db() (only those that make
-  sense)
 
 Lower priority tasks:
 

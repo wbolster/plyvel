@@ -138,18 +138,18 @@ Database
 Additionally, existing databases can be repaired or destroyed using these module
 level functions:
 
-.. function:: repair_db(name)
+.. py:function:: repair_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0)
 
    Repair the specified database.
 
-   :param str name: name of the database (directory name)
+   See :py:class:`DB` for a description of the arguments.
 
 
-.. function:: destroy_db(name)
+.. py:function:: destroy_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0)
 
    Destroy the specified database.
 
-   :param str name: name of the database (directory name)
+   See :py:class:`DB` for a description of the arguments.
 
 
 Write batch
