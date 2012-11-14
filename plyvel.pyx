@@ -159,7 +159,7 @@ cdef class DB:
     cdef Comparator* comparator
     cdef Cache* cache
 
-    def __init__(self, name, bool create_if_missing=False,
+    def __init__(self, name, *, bool create_if_missing=False,
                  bool error_if_exists=False, paranoid_checks=None,
                  write_buffer_size=None, max_open_files=None,
                  lru_cache_size=None, block_size=None,
@@ -218,23 +218,24 @@ cdef class DB:
         raise_for_status(st)
 
     def write_batch(self, *, sync=None):
-        return WriteBatch(self, sync=sync)
+        return WriteBatch(db=self, sync=sync)
 
     def __iter__(self):
         return self.iterator()
 
-    def iterator(self, reverse=False, start=None, stop=None, include_key=True,
-                 include_value=True, verify_checksums=None, fill_cache=None):
+    def iterator(self, *, reverse=False, start=None, stop=None,
+                 include_key=True, include_value=True, verify_checksums=None,
+                 fill_cache=None):
         return Iterator(
-            self, reverse=reverse, start=start, stop=stop,
+            db=self, reverse=reverse, start=start, stop=stop,
             include_key=include_key, include_value=include_value,
             verify_checksums=verify_checksums, fill_cache=fill_cache,
             snapshot=None)
 
     def snapshot(self):
-        return Snapshot(self)
+        return Snapshot(db=self)
 
-    def compact_range(self, bytes start=None, bytes stop=None):
+    def compact_range(self, *, bytes start=None, bytes stop=None):
         cdef Slice start_slice
         cdef Slice stop_slice
 
@@ -279,7 +280,7 @@ cdef class WriteBatch:
     cdef WriteOptions write_options
     cdef DB db
 
-    def __init__(self, DB db not None, *, sync=None):
+    def __init__(self, *, DB db not None, sync=None):
         self.db = db
 
         self.write_options = WriteOptions()
@@ -348,9 +349,9 @@ cdef class Iterator:
     cdef IteratorState state
     cdef Comparator* comparator
 
-    def __init__(self, DB db not None, bool reverse, bytes start, bytes stop,
-                 bool include_key, bool include_value, bool verify_checksums,
-                 bool fill_cache, Snapshot snapshot):
+    def __init__(self, *, DB db not None, bool reverse, bytes start,
+                 bytes stop, bool include_key, bool include_value,
+                 bool verify_checksums, bool fill_cache, Snapshot snapshot):
         self.db = db
         self.comparator = db.comparator
         self.direction = FORWARD if not reverse else REVERSE
@@ -552,7 +553,7 @@ cdef class Snapshot:
     cdef leveldb.Snapshot* snapshot
     cdef DB db
 
-    def __init__(self, DB db not None):
+    def __init__(self, *, DB db not None):
         self.db = db
         self.snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
 
@@ -572,10 +573,11 @@ cdef class Snapshot:
     def __iter__(self):
         return self.iterator()
 
-    def iterator(self, reverse=False, start=None, stop=None, include_key=True,
-                 include_value=True, verify_checksums=None, fill_cache=None):
+    def iterator(self, *, reverse=False, start=None, stop=None,
+                 include_key=True, include_value=True, verify_checksums=None,
+                 fill_cache=None):
         return Iterator(
-            self.db, reverse=reverse, start=start, stop=stop,
+            db=self.db, reverse=reverse, start=start, stop=stop,
             include_key=include_key, include_value=include_value,
             verify_checksums=verify_checksums, fill_cache=fill_cache,
             snapshot=self)
