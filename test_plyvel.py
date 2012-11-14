@@ -510,6 +510,16 @@ def test_iterator_seeking():
         it.seek(b'3')
         assert_equal(b'3', next(it))
 
+        # Seek in a reverse iterator
+        it = db.iterator(include_value=False, reverse=True)
+        it.seek(b'6')
+        assert_equal(b'5', next(it))
+        assert_equal(b'4', next(it))
+        it.seek(b'1')
+        with assert_raises(StopIteration):
+            next(it)
+        assert_equal(b'1', it.prev())
+
 
 def test_snapshot():
     with tmp_db('snapshot') as db:
