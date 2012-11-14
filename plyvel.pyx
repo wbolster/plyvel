@@ -105,6 +105,50 @@ cdef bytes to_file_system_name(name):
             "Cannot convert unicode 'name' to a file system name: %s" % exc)
 
 
+cdef int parse_options(Options *options, bool create_if_missing,
+                       bool error_if_exists, object paranoid_checks,
+                       object write_buffer_size, object max_open_files,
+                       object lru_cache_size, object block_size,
+                       object block_restart_interval, object compression,
+                       int bloom_filter_bits) except -1:
+
+    options.create_if_missing = create_if_missing
+    options.error_if_exists = error_if_exists
+
+    if paranoid_checks is not None:
+        options.paranoid_checks = paranoid_checks
+
+    if write_buffer_size is not None:
+        options.write_buffer_size = write_buffer_size
+
+    if max_open_files is not None:
+        options.max_open_files = max_open_files
+
+    if lru_cache_size is not None:
+        options.block_cache = NewLRUCache(lru_cache_size)
+
+    if block_size is not None:
+        options.block_size = block_size
+
+    if block_restart_interval is not None:
+        options.block_restart_interval = block_restart_interval
+
+    if compression is None:
+        options.compression = leveldb.kNoCompression
+    else:
+        if isinstance(compression, bytes):
+            compression = compression.decode('UTF-8')
+        if not isinstance(compression, unicode):
+            raise TypeError("'compression' must be None or a string")
+        if compression == u'snappy':
+            options.compression = leveldb.kSnappyCompression
+        else:
+            raise ValueError("'compression' must be None or 'snappy'")
+
+    if bloom_filter_bits > 0:
+        options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
+
+
 #
 # Database
 #
@@ -125,47 +169,13 @@ cdef class DB:
         cdef string fsname
 
         fsname = to_file_system_name(name)
-
-        options = Options()
-        options.create_if_missing = create_if_missing
-        options.error_if_exists = error_if_exists
-
-        if paranoid_checks is not None:
-            options.paranoid_checks = paranoid_checks
-
-        if write_buffer_size is not None:
-            options.write_buffer_size = write_buffer_size
-
-        if max_open_files is not None:
-            options.max_open_files = max_open_files
-
-        if lru_cache_size is not None:
-            self.cache = NewLRUCache(lru_cache_size)
-            options.block_cache = self.cache
-
-        if block_size is not None:
-            options.block_size = block_size
-
-        if block_restart_interval is not None:
-            options.block_restart_interval = block_restart_interval
-
-        if compression is None:
-            options.compression = leveldb.kNoCompression
-        else:
-            if isinstance(compression, bytes):
-                compression = compression.decode('UTF-8')
-            if not isinstance(compression, unicode):
-                raise TypeError("'compression' must be None or a string")
-            if compression == u'snappy':
-                options.compression = leveldb.kSnappyCompression
-            else:
-                raise ValueError("'compression' must be None or 'snappy'")
-
-        if bloom_filter_bits > 0:
-            options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
-
+        parse_options(
+            &options, create_if_missing, error_if_exists, paranoid_checks,
+            write_buffer_size, max_open_files, lru_cache_size, block_size,
+            block_restart_interval, compression, bloom_filter_bits)
         st = leveldb.DB_Open(options, fsname, &self._db)
         raise_for_status(st)
+        self.cache = options.block_cache
         self.comparator = <leveldb.Comparator*>options.comparator
 
     def __dealloc__(self):
