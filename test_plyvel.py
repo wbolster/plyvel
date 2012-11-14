@@ -112,8 +112,15 @@ def test_open():
     with assert_raises(TypeError):
         DB(123)
 
+    with assert_raises(TypeError):
+        DB('invalid_option_types', write_buffer_size='invalid')
+
+    with assert_raises(TypeError):
+        DB('invalid_option_types', lru_cache_size='invalid')
+
     with assert_raises(ValueError):
-        DB('invalid_compression', compression='foobar')
+        DB('invalid_compression', compression='invalid',
+           create_if_missing=True)
 
     with tmp_db('many_options', create=False) as name:
         DB(name, create_if_missing=True, error_if_exists=False,
