@@ -612,15 +612,11 @@ def test_snapshot():
 
 
 def test_compaction():
-    # This merely tests that the Python API works correctly, not that
-    # LevelDB actually compacts the range
     with tmp_db('compaction') as db:
         db.compact_range()
-        db.compact_range(b'a', b'b')
         db.compact_range(start=b'a', stop=b'b')
-        db.compact_range(start=b'a', stop=None)
-        db.compact_range(start=None, stop=b'b')
-        db.compact_range(start=None, stop=None)
+        db.compact_range(start=b'a')
+        db.compact_range(stop=b'b')
 
 
 def test_repair_db():
