@@ -648,3 +648,29 @@ def test_destroy_db():
     del db
     plyvel.destroy_db(dir_name)
     assert not os.path.lexists(dir_name)
+
+
+def test_threading():
+    from threading import Thread, current_thread
+
+    with tmp_db('threading') as db:
+
+        N_PUTS = 1000
+        N_THREADS = 10
+
+        def bulk_insert(db):
+            name = current_thread().name
+            v = name.encode('ascii') * 500
+            for n in xrange(N_PUTS):
+                rev = '{:x}'.format(n)[::-1]
+                k = '{}: {}'.format(rev, name).encode('ascii')
+                db.put(k, v)
+
+        threads = []
+        for n in xrange(N_THREADS):
+            t = Thread(target=bulk_insert, kwargs=dict(db=db))
+            threads.append(t)
+            t.start()
+
+        for t in threads:
+            t.join()
