@@ -279,6 +279,14 @@ Iterator
       StopIteration, but :py:meth:`~Iterator.prev` will work.
 
 
+   .. py:method:: seek(target)
+
+      Move the iterator to teh specified `target`.
+
+      This moves the iterator to the the first key that sorts equal or before
+      the specified `target` within the iterator range (`start` and `stop`).
+
+
 Errors
 ======
 
