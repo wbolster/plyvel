@@ -311,6 +311,7 @@ cdef enum IteratorState:
     BEFORE_START
     AFTER_STOP
     IN_BETWEEN
+    IN_BETWEEN_ALREADY_POSITIONED
 
 
 cdef enum IteratorDirection:
@@ -421,6 +422,8 @@ cdef class Iterator:
             if not self._iter.Valid():
                 self.state = AFTER_STOP
                 raise StopIteration
+        elif self.state == IN_BETWEEN_ALREADY_POSITIONED:
+            pass
         elif self.state == BEFORE_START:
             if self.start.empty():
                 self._iter.SeekToFirst()
@@ -446,6 +449,14 @@ cdef class Iterator:
     cdef real_prev(self):
         if self.state == IN_BETWEEN:
             pass
+        elif self.state == IN_BETWEEN_ALREADY_POSITIONED:
+            assert self._iter.Valid()
+            self._iter.Prev()
+            if not self._iter.Valid():
+                # The .seek() resulted in the first key in the database
+                self.state = BEFORE_START
+                raise StopIteration
+            raise_for_status(self._iter.status())
         elif self.state == BEFORE_START:
             raise StopIteration
         elif self.state == AFTER_STOP:
@@ -493,8 +504,15 @@ cdef class Iterator:
         self.state = AFTER_STOP
 
     def seek(self, bytes target):
-        # TODO: should this be in the public API?
-        self._iter.Seek(Slice(target, len(target)))
+        cdef Slice target_slice = Slice(target, len(target))
+        self._iter.Seek(target_slice)
+        if not self._iter.Valid():
+            # Moved past the end
+            self.state = AFTER_STOP
+            return
+
+        self.state = IN_BETWEEN_ALREADY_POSITIONED
+        raise_for_status(self._iter.status())
 
 
 #
