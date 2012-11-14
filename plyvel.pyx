@@ -518,9 +518,18 @@ cdef class Iterator:
 
     def seek(self, bytes target):
         cdef Slice target_slice = Slice(target, len(target))
+
+        # Seek only within the start/stop bounds
+        if self.has_start and self.comparator.Compare(
+                target_slice, self.start_slice) < 0:
+            target_slice = self.start_slice
+        if self.has_stop and self.comparator.Compare(
+                target_slice, self.stop_slice) > 0:
+            target_slice = self.stop_slice
+
         self._iter.Seek(target_slice)
         if not self._iter.Valid():
-            # Moved past the end
+            # Moved past the end (or empty database)
             self.state = AFTER_STOP
             return
 
