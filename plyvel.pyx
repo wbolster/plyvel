@@ -79,8 +79,10 @@ cdef int raise_for_status(Status st) except -1:
 cdef inline db_get(DB db, bytes key, ReadOptions read_options):
     cdef string value
     cdef Status st
+    cdef Slice key_slice = Slice(key, len(key))
 
-    st = db._db.Get(read_options, Slice(key, len(key)), &value)
+    with nogil:
+        st = db._db.Get(read_options, key_slice, &value)
 
     if st.IsNotFound():
         return None
@@ -111,6 +113,7 @@ cdef int parse_options(Options *options, bool create_if_missing,
                        object lru_cache_size, object block_size,
                        object block_restart_interval, object compression,
                        int bloom_filter_bits) except -1:
+    cdef int c_lru_cache_size
 
     options.create_if_missing = create_if_missing
     options.error_if_exists = error_if_exists
@@ -125,7 +128,9 @@ cdef int parse_options(Options *options, bool create_if_missing,
         options.max_open_files = max_open_files
 
     if lru_cache_size is not None:
-        options.block_cache = NewLRUCache(lru_cache_size)
+        c_lru_cache_size = lru_cache_size
+        with nogil:
+            options.block_cache = NewLRUCache(c_lru_cache_size)
 
     if block_size is not None:
         options.block_size = block_size
@@ -146,7 +151,8 @@ cdef int parse_options(Options *options, bool create_if_missing,
             raise ValueError("'compression' must be None or 'snappy'")
 
     if bloom_filter_bits > 0:
-        options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
+        with nogil:
+            options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
 
 
 #
@@ -174,7 +180,8 @@ cdef class DB:
             &options, create_if_missing, error_if_exists, paranoid_checks,
             write_buffer_size, max_open_files, lru_cache_size, block_size,
             block_restart_interval, compression, bloom_filter_bits)
-        st = leveldb.DB_Open(options, fsname, &self._db)
+        with nogil:
+            st = leveldb.DB_Open(options, fsname, &self._db)
         raise_for_status(st)
         self.cache = options.block_cache
         self.comparator = <leveldb.Comparator*>options.comparator
@@ -195,16 +202,16 @@ cdef class DB:
         return db_get(self, key, read_options)
 
     def put(self, bytes key, bytes value, *, sync=None):
-        cdef Status st
         cdef WriteOptions write_options = WriteOptions()
+        cdef Slice key_slice = Slice(key, len(key))
+        cdef Slice value_slice = Slice(value, len(value))
+        cdef Status st
 
         if sync is not None:
             write_options.sync = sync
 
-        st = self._db.Put(
-            write_options,
-            Slice(key, len(key)),
-            Slice(value, len(value)))
+        with nogil:
+            st = self._db.Put(write_options, key_slice, value_slice)
         raise_for_status(st)
 
     def delete(self, bytes key, *, sync=None):
@@ -214,7 +221,9 @@ cdef class DB:
         if sync is not None:
             write_options.sync = sync
 
-        st = self._db.Delete(write_options, Slice(key, len(key)))
+        cdef Slice key_slice = Slice(key, len(key))
+        with nogil:
+            st = self._db.Delete(write_options, key_slice)
         raise_for_status(st)
 
     def write_batch(self, *, transaction=False, sync=None):
@@ -245,7 +254,8 @@ cdef class DB:
         if stop is not None:
             stop_slice = Slice(stop, len(stop))
 
-        self._db.CompactRange(&start_slice, &stop_slice)
+        with nogil:
+            self._db.CompactRange(&start_slice, &stop_slice)
 
 
 def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,
@@ -263,7 +273,8 @@ def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,
         &options, create_if_missing, error_if_exists, paranoid_checks,
         write_buffer_size, max_open_files, lru_cache_size, block_size,
         block_restart_interval, compression, bloom_filter_bits)
-    st = RepairDB(fsname, options)
+    with nogil:
+        st = RepairDB(fsname, options)
     raise_for_status(st)
 
 
@@ -282,7 +293,8 @@ def destroy_db(name, *, paranoid_checks=None, write_buffer_size=None,
         &options, create_if_missing, error_if_exists, paranoid_checks,
         write_buffer_size, max_open_files, lru_cache_size, block_size,
         block_restart_interval, compression, bloom_filter_bits)
-    st = DestroyDB(fsname, options)
+    with nogil:
+        st = DestroyDB(fsname, options)
     raise_for_status(st)
 
 
@@ -311,19 +323,24 @@ cdef class WriteBatch:
         del self.write_batch
 
     def put(self, bytes key, bytes value):
-        self.write_batch.Put(
-            Slice(key, len(key)),
-            Slice(value, len(value)))
+        cdef Slice key_slice = Slice(key, len(key))
+        cdef Slice value_slice = Slice(value, len(value))
+        with nogil:
+            self.write_batch.Put(key_slice, value_slice)
 
     def delete(self, bytes key):
-        self.write_batch.Delete(Slice(key, len(key)))
+        cdef Slice key_slice = Slice(key, len(key))
+        with nogil:
+            self.write_batch.Delete(key_slice)
 
     def clear(self):
-        self.write_batch.Clear()
+        with nogil:
+            self.write_batch.Clear()
 
     def write(self):
         cdef Status st
-        st = self.db._db.Write(self.write_options, self.write_batch)
+        with nogil:
+            st = self.db._db.Write(self.write_options, self.write_batch)
         raise_for_status(st)
 
     def __enter__(self):
@@ -401,7 +418,8 @@ cdef class Iterator:
         if snapshot is not None:
             read_options.snapshot = snapshot.snapshot
 
-        self._iter = db._db.NewIterator(read_options)
+        with nogil:
+            self._iter = db._db.NewIterator(read_options)
         if self.direction == FORWARD:
             self.seek_to_start()
         else:
@@ -461,7 +479,8 @@ cdef class Iterator:
 
     cdef real_next(self):
         if self.state == IN_BETWEEN:
-            self._iter.Next()
+            with nogil:
+                self._iter.Next()
             if not self._iter.Valid():
                 self.state = AFTER_STOP
                 raise StopIteration
@@ -469,9 +488,11 @@ cdef class Iterator:
             pass
         elif self.state == BEFORE_START:
             if self.has_start:
-                self._iter.Seek(self.start_slice)
+                with nogil:
+                    self._iter.Seek(self.start_slice)
             else:
-                self._iter.SeekToFirst()
+                with nogil:
+                    self._iter.SeekToFirst()
             if not self._iter.Valid():
                 # Iterator is empty
                 raise StopIteration
@@ -494,7 +515,8 @@ cdef class Iterator:
             pass
         elif self.state == IN_BETWEEN_ALREADY_POSITIONED:
             assert self._iter.Valid()
-            self._iter.Prev()
+            with nogil:
+                self._iter.Prev()
             if not self._iter.Valid():
                 # The .seek() resulted in the first key in the database
                 self.state = BEFORE_START
@@ -506,17 +528,20 @@ cdef class Iterator:
             if self.has_stop:
                 # Stop key specified: seek to it and move one step back
                 # (since the end of the range is exclusive)
-                self._iter.Seek(self.stop_slice)
+                with nogil:
+                    self._iter.Seek(self.stop_slice)
                 if not self._iter.Valid():
                     # Iterator is empty
                     raise StopIteration
-                self._iter.Prev()
+                with nogil:
+                    self._iter.Prev()
                 if not self._iter.Valid():
                     raise StopIteration
                 raise_for_status(self._iter.status())
             else:
                 # No stop key, seek to last entry
-                self._iter.SeekToLast()
+                with nogil:
+                    self._iter.SeekToLast()
                 if not self._iter.Valid():
                     # Iterator is empty
                     raise StopIteration
@@ -526,7 +551,8 @@ cdef class Iterator:
         # pointer (not the other way around), so that repeatedly calling
         # .prev() and .next() will work as designed.
         out = self.current()
-        self._iter.Prev()
+        with nogil:
+            self._iter.Prev()
         if not self._iter.Valid():
             self.state = BEFORE_START
         elif self.has_start and self.comparator.Compare(
@@ -556,7 +582,8 @@ cdef class Iterator:
                 target_slice, self.stop_slice) > 0:
             target_slice = self.stop_slice
 
-        self._iter.Seek(target_slice)
+        with nogil:
+            self._iter.Seek(target_slice)
         if not self._iter.Valid():
             # Moved past the end (or empty database)
             self.state = AFTER_STOP
@@ -577,10 +604,12 @@ cdef class Snapshot:
 
     def __init__(self, *, DB db not None):
         self.db = db
-        self.snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
+        with nogil:
+            self.snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
 
     def __dealloc__(self):
-        self.db._db.ReleaseSnapshot(self.snapshot)
+        with nogil:
+            self.db._db.ReleaseSnapshot(self.snapshot)
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
         cdef ReadOptions read_options
