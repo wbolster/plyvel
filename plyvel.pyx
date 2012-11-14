@@ -400,17 +400,13 @@ cdef class Iterator:
             value_slice = self._iter.value()
             value = value_slice.data()[:value_slice.size()]
 
-        # Build return value
         if self.include_key and self.include_value:
-            out = (key, value)
-        elif self.include_key:
-            out = key
-        elif self.include_value:
-            out = value
-        else:
-            out = None
-
-        return out
+            return (key, value)
+        if self.include_key:
+            return key
+        if self.include_value:
+            return value
+        return None
 
     def __next__(self):
         """Return the next iterator entry.
@@ -507,7 +503,6 @@ cdef class Iterator:
             self.state = IN_BETWEEN
 
         raise_for_status(self._iter.status())
-
         return out
 
     def seek_to_start(self):
