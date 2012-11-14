@@ -527,6 +527,8 @@ def test_iterator_seeking():
         assert_equal(b'2', next(it))
         it.seek(b'0')
         assert_equal(b'2', next(it))
+        it.seek_to_start()
+        assert_equal(b'2', next(it))
 
         # Seek in iterator with stop key
         it = db.iterator(stop=b'3', include_value=False)
@@ -537,6 +539,11 @@ def test_iterator_seeking():
         with assert_raises(StopIteration):
             next(it)
         it.seek(b'5')
+        assert_equal(b'2', it.prev())
+        it.seek_to_stop()
+        with assert_raises(StopIteration):
+            next(it)
+        it.seek_to_stop()
         assert_equal(b'2', it.prev())
 
         # Seek in iterator with both start and stop keys
@@ -556,6 +563,11 @@ def test_iterator_seeking():
         assert_equal(b'3', next(it))
         it.seek(b'1')
         assert_equal(b'2', it.prev())
+        it.seek_to_start()
+        with assert_raises(StopIteration):
+            next(it)
+        it.seek_to_stop()
+        assert_equal(b'3', next(it))
 
 
 def test_snapshot():
