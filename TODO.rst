@@ -6,7 +6,6 @@ Required before this library is to be taken seriously:
 
 * Seeking to (or before) specific keys in iterators
 * Decent packaging/releasing (setup.py)
-* Decide on a license
 * Expand docstrings/API docs
 * Transaction-like behaviour for write batches
 * Handle Options args in repair_db() and destroy_db() (only those that make
