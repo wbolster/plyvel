@@ -79,6 +79,14 @@ Database
       :param bool sync: whether to use synchronous writes
 
 
+   .. method:: delete(key, sync=None)
+
+      Delete the key/value pair for the specified key.
+
+      :param bytes key: key to delete
+      :param bool sync: whether to use synchronous writes
+
+
    .. py:method:: write_batch(sync=None)
 
       Create a new :py:class:`WriteBatch` instance for this database.
@@ -117,14 +125,6 @@ Database
       Create a new :py:class:`Snapshot` instance for this database.
 
       See the :py:class:`Snapshot` API for more information.
-
-
-   .. method: delete(key, sync=None)
-
-      Delete the key/value pair for the specified key.
-
-      :param bytes key: key to delete
-      :param bool sync: whether to use synchronous writes
 
 
    .. py:method:: compact_range(start=None, stop=None)
