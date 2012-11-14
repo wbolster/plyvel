@@ -4,7 +4,7 @@
 all: ext doc test
 
 ext:
-	cython --cplus plyvel.pyx
+	cython --cplus --fast-fail plyvel.pyx
 	python setup.py build_ext --inplace --force
 
 doc: ext
