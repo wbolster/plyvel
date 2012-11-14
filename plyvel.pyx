@@ -328,8 +328,8 @@ cdef class Iterator:
     cdef DB db
     cdef leveldb.Iterator* _iter
     cdef IteratorDirection direction
-    cdef Slice start
-    cdef Slice stop
+    cdef Slice start_slice
+    cdef Slice stop_slice
     cdef bool include_key
     cdef bool include_value
     cdef IteratorState state
@@ -341,8 +341,8 @@ cdef class Iterator:
         self.db = db
         self.comparator = db.comparator
         self.direction = FORWARD if not reverse else REVERSE
-        self.start = Slice(start, len(start)) if start is not None else Slice()
-        self.stop = Slice(stop, len(stop)) if stop is not None else Slice()
+        self.start_slice = Slice(start, len(start)) if start is not None else Slice()
+        self.stop_slice = Slice(stop, len(stop)) if stop is not None else Slice()
         self.include_key = include_key
         self.include_value = include_value
 
@@ -425,10 +425,10 @@ cdef class Iterator:
         elif self.state == IN_BETWEEN_ALREADY_POSITIONED:
             pass
         elif self.state == BEFORE_START:
-            if self.start.empty():
+            if self.start_slice.empty():
                 self._iter.SeekToFirst()
             else:
-                self._iter.Seek(self.start)
+                self._iter.Seek(self.start_slice)
             if not self._iter.Valid():
                 # Iterator is empty
                 raise StopIteration
@@ -439,8 +439,8 @@ cdef class Iterator:
         raise_for_status(self._iter.status())
 
         # Check range boundaries
-        if not self.stop.empty() and self.comparator.Compare(
-                self._iter.key(), self.stop) >= 0:
+        if not self.stop_slice.empty() and self.comparator.Compare(
+                self._iter.key(), self.stop_slice) >= 0:
             self.state = AFTER_STOP
             raise StopIteration
 
@@ -460,7 +460,7 @@ cdef class Iterator:
         elif self.state == BEFORE_START:
             raise StopIteration
         elif self.state == AFTER_STOP:
-            if self.stop.empty():
+            if self.stop_slice.empty():
                 # No stop key, seek to last entry
                 self._iter.SeekToLast()
                 if not self._iter.Valid():
@@ -470,7 +470,7 @@ cdef class Iterator:
             else:
                 # Stop key specified: seek to it and move one step back
                 # (since the end of the range is exclusive)
-                self._iter.Seek(self.stop)
+                self._iter.Seek(self.stop_slice)
                 if not self._iter.Valid():
                     # Iterator is empty
                     raise StopIteration
@@ -486,8 +486,8 @@ cdef class Iterator:
         self._iter.Prev()
         if not self._iter.Valid():
             self.state = BEFORE_START
-        elif not self.start.empty() and self.comparator.Compare(
-                self._iter.key(), self.start) < 0:
+        elif not self.start_slice.empty() and self.comparator.Compare(
+                self._iter.key(), self.start_slice) < 0:
             # Iterator is valid, but has moved before the 'start' key
             self.state = BEFORE_START
         else:
