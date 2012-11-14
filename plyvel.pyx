@@ -485,7 +485,7 @@ cdef class Iterator:
                 self.state = AFTER_STOP
                 raise StopIteration
         elif self.state == IN_BETWEEN_ALREADY_POSITIONED:
-            pass
+            self.state = IN_BETWEEN
         elif self.state == BEFORE_START:
             if self.has_start:
                 with nogil:

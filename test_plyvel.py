@@ -513,6 +513,8 @@ def test_iterator_seeking():
         # Seek to a specific key
         it.seek(b'2')
         assert_equal(b'2', next(it))
+        assert_equal(b'3', next(it))
+        assert_list_equal([b'4', b'5'], list(it))
         it.seek(b'2')
         assert_equal(b'1', it.prev())
 
