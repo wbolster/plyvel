@@ -19,4 +19,4 @@ clean:
 	$(RM) -r testdb/
 
 test: ext
-	python $$(which nosetests) -v test_plyvel.py
+	python $$(which nosetests) -v -s
