@@ -125,7 +125,7 @@ batch will still be written to the database. This means each modification using
 :py:meth:`~WriteBatch.put` or :py:meth:`~WriteBatch.delete` that happened before
 the exception was raised will be applied to the database::
 
-    >>> with db.write_batch(transaction=True) as wb:
+    >>> with db.write_batch() as wb:
     ...     wb.put(b'key-1', b'value-1')
     ...     raise ValueError("Something went wrong!")
     ...     wb.put(b'key-2', b'value-2')
