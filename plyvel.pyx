@@ -160,10 +160,11 @@ cdef class DB:
     cdef Cache* cache
 
     def __init__(self, name, bool create_if_missing=False,
-            bool error_if_exists=False, paranoid_checks=None,
-            write_buffer_size=None, max_open_files=None, lru_cache_size=None,
-            block_size=None, block_restart_interval=None,
-            compression='snappy', int bloom_filter_bits=0):
+                 bool error_if_exists=False, paranoid_checks=None,
+                 write_buffer_size=None, max_open_files=None,
+                 lru_cache_size=None, block_size=None,
+                 block_restart_interval=None, compression='snappy',
+                 int bloom_filter_bits=0):
         cdef Options options
         cdef Status st
         cdef string fsname
@@ -223,7 +224,7 @@ cdef class DB:
         return self.iterator()
 
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
-            include_value=True, verify_checksums=None, fill_cache=None):
+                 include_value=True, verify_checksums=None, fill_cache=None):
         return Iterator(
             self, reverse=reverse, start=start, stop=stop,
             include_key=include_key, include_value=include_value,
@@ -348,8 +349,8 @@ cdef class Iterator:
     cdef Comparator* comparator
 
     def __init__(self, DB db not None, bool reverse, bytes start, bytes stop,
-            bool include_key, bool include_value, bool verify_checksums,
-            bool fill_cache, Snapshot snapshot):
+                 bool include_key, bool include_value, bool verify_checksums,
+                 bool fill_cache, Snapshot snapshot):
         self.db = db
         self.comparator = db.comparator
         self.direction = FORWARD if not reverse else REVERSE
@@ -572,7 +573,7 @@ cdef class Snapshot:
         return self.iterator()
 
     def iterator(self, reverse=False, start=None, stop=None, include_key=True,
-            include_value=True, verify_checksums=None, fill_cache=None):
+                 include_value=True, verify_checksums=None, fill_cache=None):
         return Iterator(
             self.db, reverse=reverse, start=start, stop=stop,
             include_key=include_key, include_value=include_value,
