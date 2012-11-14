@@ -520,6 +520,43 @@ def test_iterator_seeking():
             next(it)
         assert_equal(b'1', it.prev())
 
+        # Seek in iterator with start key
+        it = db.iterator(start=b'2', include_value=False)
+        assert_equal(b'2', next(it))
+        it.seek(b'2')
+        assert_equal(b'2', next(it))
+        it.seek(b'0')
+        assert_equal(b'2', next(it))
+
+        # Seek in iterator with stop key
+        it = db.iterator(stop=b'3', include_value=False)
+        assert_equal(b'1', next(it))
+        it.seek(b'2')
+        assert_equal(b'2', next(it))
+        it.seek(b'5')
+        with assert_raises(StopIteration):
+            next(it)
+        it.seek(b'5')
+        assert_equal(b'2', it.prev())
+
+        # Seek in iterator with both start and stop keys
+        it = db.iterator(start=b'2', stop=b'5', include_value=False)
+        it.seek(b'0')
+        assert_equal(b'2', next(it))
+        it.seek(b'5')
+        with assert_raises(StopIteration):
+            next(it)
+        it.seek(b'5')
+        assert_equal(b'4', it.prev())
+
+        # Seek in reverse iterator with start and stop key
+        it = db.iterator(
+            reverse=True, start=b'2', stop=b'4', include_value=False)
+        it.seek(b'5')
+        assert_equal(b'3', next(it))
+        it.seek(b'1')
+        assert_equal(b'2', it.prev())
+
 
 def test_snapshot():
     with tmp_db('snapshot') as db:
