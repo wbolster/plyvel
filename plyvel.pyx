@@ -217,8 +217,8 @@ cdef class DB:
         st = self._db.Delete(write_options, Slice(key, len(key)))
         raise_for_status(st)
 
-    def write_batch(self, *, sync=None):
-        return WriteBatch(db=self, sync=sync)
+    def write_batch(self, *, transaction=False, sync=None):
+        return WriteBatch(db=self, transaction=transaction, sync=sync)
 
     def __iter__(self):
         return self.iterator()
@@ -295,9 +295,11 @@ cdef class WriteBatch:
     cdef leveldb.WriteBatch* write_batch
     cdef WriteOptions write_options
     cdef DB db
+    cdef bool transaction
 
-    def __init__(self, *, DB db not None, sync=None):
+    def __init__(self, *, DB db not None, bool transaction=False, sync=None):
         self.db = db
+        self.transaction = transaction
 
         self.write_options = WriteOptions()
         if sync is not None:
@@ -328,6 +330,10 @@ cdef class WriteBatch:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.transaction and exc_type is not None:
+            # Exception occurred in transaction; do not write the batch
+            return
+
         self.write()
 
 

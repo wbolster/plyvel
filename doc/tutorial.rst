@@ -120,9 +120,34 @@ anymore:
     ...     for i in xrange(100000):
     ...         wb.put(bytes(i), bytes(i) * 100)
 
-If an exception was raised somewhere in your ``with`` block, the values written
-to the batch will be saved in the database, so you won't lose previously written
-key/value pairs.
+If the ``with`` block raises an exception, pending modifications in the write
+batch will still be written to the database. This means each modification using
+:py:meth:`~WriteBatch.put` or :py:meth:`~WriteBatch.delete` that happened before
+the exception was raised will be applied to the database::
+
+    >>> with db.write_batch(transaction=True) as wb:
+    ...     wb.put(b'key-1', b'value-1')
+    ...     raise ValueError("Something went wrong!")
+    ...     wb.put(b'key-2', b'value-2')
+
+At this point the database contains ``key-1``, but not ``key-2``. Sometimes this
+behaviour is undesirable. If you want to discard all pending modifications in
+the write batch if an exception occurs, you can simply set the `transaction`
+argument::
+
+    >>> with db.write_batch(transaction=True) as wb:
+    ...     wb.put(b'key-3', b'value-3')
+    ...     raise ValueError("Something went wrong!")
+    ...     wb.put(b'key-4', b'value-4')
+
+In this case the database will not be modified, because the ``with`` block
+raised an exception. In this example this means that neither ``key-3`` nor
+``key-4`` will be saved.
+
+.. note::
+
+   Write batches will never silently catch exceptions. Exceptions will be
+   propagated regardless of the value of the `transaction` argument.
 
 
 Snapshots

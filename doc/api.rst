@@ -87,7 +87,7 @@ Database
       :param bool sync: whether to use synchronous writes
 
 
-   .. py:method:: write_batch(sync=None)
+   .. py:method:: write_batch(transaction=False, sync=None)
 
       Create a new :py:class:`WriteBatch` instance for this database.
 
@@ -96,6 +96,8 @@ Database
       Note that this method does not write a batch to the database; it only
       creates a new write batch instance.
 
+      :param bool transaction: whether to enable transaction-like behaviour when
+                               the batch is used in a ``with`` block
       :param bool sync: whether to use synchronous writes
       :return: new :py:class:`WriteBatch` instance
       :rtype: :py:class:`WriteBatch`
@@ -166,6 +168,12 @@ Write batch
 
       with db.write_batch() as b:
           b.put(b'key', b'value')
+
+   The `transaction` argument to :py:meth:`DB.write_batch` specifies whether the
+   batch should be written after an exception occurred in the ``with`` block. By
+   default, the batch is written (this is like a ``try`` statement with a
+   ``finally`` clause), but if transaction mode is enabled`, the batch will be
+   discarded (this is like a ``try`` statement with an ``else`` clause).
 
    Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
 

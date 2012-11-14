@@ -223,22 +223,32 @@ def test_write_batch():
         batch.write()
 
 
-def test_batch_context_manager():
-    with tmp_db('batch_context_manager') as db:
+def test_write_batch_context_manager():
+    with tmp_db('write_batch_context_manager') as db:
         key = b'batch-key'
         assert_is_none(db.get(key))
-        with db.write_batch() as b:
-            b.put(key, b'')
+        with db.write_batch() as wb:
+            wb.put(key, b'')
         assert_is_not_none(db.get(key))
 
         # Data should also be written when an exception is raised
         key = b'batch-key-exception'
         assert_is_none(db.get(key))
         with assert_raises(ValueError):
-            with db.write_batch() as b:
-                b.put(key, b'')
+            with db.write_batch() as wb:
+                wb.put(key, b'')
                 raise ValueError()
         assert_is_not_none(db.get(key))
+
+
+def test_write_batch_transaction():
+    with tmp_db('write_batch_transaction') as db:
+        with assert_raises(ValueError):
+            with db.write_batch(transaction=True) as wb:
+                wb.put(b'key', b'value')
+                raise ValueError()
+
+        assert_list_equal([], list(db.iterator()))
 
 
 def test_iteration():
