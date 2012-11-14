@@ -122,6 +122,9 @@ def test_open():
         DB('invalid_compression', compression='invalid',
            create_if_missing=True)
 
+    with tmp_db('no_compression', create=False) as name:
+        DB(name, compression=None, create_if_missing=True)
+
     with tmp_db('many_options', create=False) as name:
         DB(name, create_if_missing=True, error_if_exists=False,
            paranoid_checks=True, write_buffer_size=16 * 1024 * 1024,
