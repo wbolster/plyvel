@@ -20,3 +20,6 @@ clean:
 
 test: ext
 	python $$(which nosetests) -v -s
+
+dist: clean ext doc test
+	python setup.py sdist
