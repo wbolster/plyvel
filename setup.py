@@ -3,8 +3,8 @@ from setuptools.extension import Extension
 
 ext_modules = [
     Extension(
-        'plyvel',
-        ['plyvel.cpp'],
+        'plyvel._plyvel',
+        ['plyvel/_plyvel.cpp'],
         libraries=['leveldb'])
 ]
 
