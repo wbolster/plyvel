@@ -8,8 +8,8 @@ This tutorial gives an overview of Plyvel. It covers opening and closing
 databases, storing and retrieving data, working with write batches, using
 snapshots, and iterating over your data.
 
-Note: Basic familiarity with LevelDB is assumed; visit the `LevelDB homepage`_
-for more information about its features and design.
+Note: this tutorial assumes basic familiarity with LevelDB; visit the `LevelDB
+homepage`_ for more information about its features and design.
 
 .. _`LevelDB homepage`: http://code.google.com/p/leveldb/
 
