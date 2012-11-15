@@ -6,6 +6,11 @@ CURRENT_DIR = dirname(__file__)
 
 execfile(join(CURRENT_DIR, 'plyvel/_version.py'))
 
+
+def get_file_contents(filename):
+    with open(join(CURRENT_DIR, filename)) as fp:
+        return fp.read()
+
 ext_modules = [
     Extension(
         'plyvel._plyvel',
@@ -15,10 +20,14 @@ ext_modules = [
 
 setup(
     name='plyvel',
+    description="Plyvel, a fast and feature-rich Python interface to LevelDB",
+    long_description=get_file_contents('README.rst'),
+    url="https://github.com/wbolster/plyvel",
     version=__version__,
     author="Wouter Bolsterlee",
     author_email="uws@xs4all.nl",
     ext_modules=ext_modules,
+    license="BSD License",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
