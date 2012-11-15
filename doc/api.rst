@@ -2,8 +2,6 @@
 API reference
 =============
 
-.. py:currentmodule:: plyvel
-
 Plyvel exposes the :py:class:`DB` class as the main interface to LevelDB.
 Application code should create a :py:class:`DB` and use the appropriate methods
 on this instance to create write batches, snapshots, and iterators for that
