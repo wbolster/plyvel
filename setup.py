@@ -27,6 +27,7 @@ setup(
     author="Wouter Bolsterlee",
     author_email="uws@xs4all.nl",
     ext_modules=ext_modules,
+    packages=['plyvel'],
     license="BSD License",
     classifiers=[
         "Development Status :: 4 - Beta",
