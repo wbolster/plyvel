@@ -304,7 +304,7 @@ def destroy_db(name, *, paranoid_checks=None, write_buffer_size=None,
 
 @cython.final
 cdef class WriteBatch:
-    cdef leveldb.WriteBatch* write_batch
+    cdef leveldb.WriteBatch* _write_batch
     cdef WriteOptions write_options
     cdef DB db
     cdef bool transaction
@@ -317,30 +317,30 @@ cdef class WriteBatch:
         if sync is not None:
             self.write_options.sync = sync
 
-        self.write_batch = new leveldb.WriteBatch()
+        self._write_batch = new leveldb.WriteBatch()
 
     def __dealloc__(self):
-        del self.write_batch
+        del self._write_batch
 
     def put(self, bytes key, bytes value):
         cdef Slice key_slice = Slice(key, len(key))
         cdef Slice value_slice = Slice(value, len(value))
         with nogil:
-            self.write_batch.Put(key_slice, value_slice)
+            self._write_batch.Put(key_slice, value_slice)
 
     def delete(self, bytes key):
         cdef Slice key_slice = Slice(key, len(key))
         with nogil:
-            self.write_batch.Delete(key_slice)
+            self._write_batch.Delete(key_slice)
 
     def clear(self):
         with nogil:
-            self.write_batch.Clear()
+            self._write_batch.Clear()
 
     def write(self):
         cdef Status st
         with nogil:
-            st = self.db._db.Write(self.write_options, self.write_batch)
+            st = self.db._db.Write(self.write_options, self._write_batch)
         raise_for_status(st)
 
     def __enter__(self):
