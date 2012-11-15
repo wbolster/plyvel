@@ -1,5 +1,10 @@
+from os.path import join, dirname
 from setuptools import setup
 from setuptools.extension import Extension
+
+CURRENT_DIR = dirname(__file__)
+
+execfile(join(CURRENT_DIR, 'plyvel/_version.py'))
 
 ext_modules = [
     Extension(
@@ -10,7 +15,7 @@ ext_modules = [
 
 setup(
     name='plyvel',
-    version='0.1dev',
+    version=__version__,
     author="Wouter Bolsterlee",
     author_email="uws@xs4all.nl",
     ext_modules=ext_modules,
