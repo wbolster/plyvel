@@ -416,7 +416,7 @@ cdef class Iterator:
         if fill_cache is not None:
             read_options.fill_cache = fill_cache
         if snapshot is not None:
-            read_options.snapshot = snapshot.snapshot
+            read_options.snapshot = snapshot._snapshot
 
         with nogil:
             self._iter = db._db.NewIterator(read_options)
@@ -599,21 +599,21 @@ cdef class Iterator:
 
 @cython.final
 cdef class Snapshot:
-    cdef leveldb.Snapshot* snapshot
+    cdef leveldb.Snapshot* _snapshot
     cdef DB db
 
     def __init__(self, *, DB db not None):
         self.db = db
         with nogil:
-            self.snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
+            self._snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
 
     def __dealloc__(self):
         with nogil:
-            self.db._db.ReleaseSnapshot(self.snapshot)
+            self.db._db.ReleaseSnapshot(self._snapshot)
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
         cdef ReadOptions read_options
-        read_options.snapshot = self.snapshot
+        read_options.snapshot = self._snapshot
         if verify_checksums is not None:
             read_options.verify_checksums = verify_checksums
         if fill_cache is not None:
