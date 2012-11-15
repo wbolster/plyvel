@@ -22,6 +22,7 @@ except NameError:
 
 from nose.tools import (
     assert_equal,
+    assert_greater_equal,
     assert_is_none,
     assert_is_not_none,
     assert_list_equal,
@@ -629,6 +630,44 @@ def test_compaction():
         db.compact_range(start=b'a', stop=b'b')
         db.compact_range(start=b'a')
         db.compact_range(stop=b'b')
+
+
+def test_approximate_sizes():
+    with tmp_db('approximate_sizes', create=False) as name:
+
+        # Write some data to a fresh database
+        db = DB(name, create_if_missing=True, error_if_exists=True)
+        value = b'a' * 1000
+        with db.write_batch() as wb:
+            for i in xrange(1000):
+                key = bytes(i) * 1000
+                wb.put(key, value)
+
+        # Compact the database, so that pending write logs are
+        # (hopefully) flushed to sst files.
+        db.compact_range()
+
+        with assert_raises(TypeError):
+            db.approximate_size(1, 2)
+
+        with assert_raises(TypeError):
+            db.approximate_sizes(None)
+
+        with assert_raises(TypeError):
+            db.approximate_sizes((1, 2))
+
+        # Test single range
+        assert_greater_equal(db.approximate_size(b'1', b'2'), 0)
+
+        # Test multiple ranges
+        assert_list_equal([], db.approximate_sizes())
+        assert_greater_equal(db.approximate_sizes((b'1', b'2'))[0], 0)
+
+        ranges = [
+            (b'1', b'3'),
+            (b'', b'\xff'),
+        ]
+        assert_equal(len(ranges), len(db.approximate_sizes(*ranges)))
 
 
 def test_repair_db():

@@ -133,8 +133,35 @@ Database
 
       Compact underlying storage for the specified key range.
 
-      :param bytes start: the start key of range to compact (optional)
-      :param bytes stop: the stop key of range to compact (optinoal)
+      :param bytes start: start key of range to compact (optional)
+      :param bytes stop: stop key of range to compact (optional)
+
+
+   .. py:method:: approximate_size(start, stop)
+
+      Return the approximate file system size for the specified range.
+
+      :param bytes start: start key of the range
+      :param bytes stop: stop key of the range
+      :return: approximate size
+      :rtype: int
+
+
+   .. py:method:: approximate_sizes(\*ranges)
+
+      Return the approximate file system sizes for the specified ranges.
+
+      This method takes a variable number of arguments. Each argument denotes a
+      range as a `(start, stop)` tuple, where `start` and `stop` are both byte
+      strings. Example::
+
+         db.approximate_sizes(
+             (b'a-key', b'other-key'),
+             (b'some-other-key', b'yet-another-key'))
+
+      :param ranges: variable number of `(start, stop`) tuples
+      :return: approximate sizes for the specified ranges
+      :rtype: list
 
 
 Additionally, existing databases can be repaired or destroyed using these module

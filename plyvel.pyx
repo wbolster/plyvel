@@ -20,6 +20,8 @@ import sys
 
 cimport cython
 
+from libc.stdint cimport uint64_t
+from libc.stdlib cimport malloc, free
 from libcpp.string cimport string
 from libcpp cimport bool
 
@@ -31,6 +33,7 @@ from leveldb cimport (
     NewBloomFilterPolicy,
     NewLRUCache,
     Options,
+    Range,
     ReadOptions,
     RepairDB,
     Slice,
@@ -256,6 +259,31 @@ cdef class DB:
 
         with nogil:
             self._db.CompactRange(&start_slice, &stop_slice)
+
+    def approximate_size(self, bytes start not None, bytes stop not None):
+        return self.approximate_sizes((start, stop))[0]
+
+    def approximate_sizes(self, *ranges):
+        cdef int n_ranges = len(ranges)
+        cdef Range *c_ranges = <Range *>malloc(n_ranges * sizeof(Range))
+        cdef uint64_t *sizes = <uint64_t *>malloc(n_ranges * sizeof(uint64_t))
+        try:
+            for i in xrange(n_ranges):
+                start, stop = ranges[i]
+                if not isinstance(start, bytes) or not isinstance(stop, bytes):
+                    raise TypeError(
+                        "Start and stop of range must be byte strings")
+                c_ranges[i] = Range(
+                    Slice(start, len(start)),
+                    Slice(stop, len(stop)))
+
+            with nogil:
+                self._db.GetApproximateSizes(c_ranges, n_ranges, sizes)
+
+            return [sizes[i] for i in xrange(n_ranges)]
+        finally:
+            free(c_ranges)
+            free(sizes)
 
 
 def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,

@@ -9,4 +9,3 @@ Required before this library is to be taken seriously:
 Lower priority tasks:
 
 * Custom comparators (if desired at all)
-* Wrap DB.GetApproximateSizes()
