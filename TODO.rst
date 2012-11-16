@@ -2,10 +2,5 @@
 TODO
 ====
 
-Required before this library is to be taken seriously:
-
-* Decent packaging/releasing (setup.py)
-
-Lower priority tasks:
-
-* Custom comparators (if desired at all)
+* Drop most of the args to destroy_db, since those seem useless.
+* Add documentation for custom comparators written in Python.
