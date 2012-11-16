@@ -1,15 +1,10 @@
 # distutils: language = c++
 # distutils: libraries = leveldb
 
+from libc.stdint cimport uint64_t
 from libc.string cimport const_char
 from libcpp cimport bool
 from libcpp.string cimport string
-
-
-cdef extern from "stdint.h":
-    # XXX: Assume 64 bit; Cython will use the actual definition from
-    # "stdint.h" when compiling
-    ctypedef unsigned long long uint64_t
 
 
 cdef extern from "leveldb/db.h" namespace "leveldb":
