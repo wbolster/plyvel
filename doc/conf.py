@@ -16,9 +16,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-import os
+from os.path import join, dirname
 
-execfile(os.path.join(os.path.dirname(__file__), '../plyvel/_version.py'))
+with open(join(dirname(__file__), '../plyvel/_version.py')) as fp:
+    exec(fp.read(), globals(), locals())
 
 
 # -- General configuration -----------------------------------------------------

@@ -4,7 +4,8 @@ from setuptools.extension import Extension
 
 CURRENT_DIR = dirname(__file__)
 
-execfile(join(CURRENT_DIR, 'plyvel/_version.py'))
+with open(join(CURRENT_DIR, 'plyvel/_version.py')) as fp:
+    exec(fp.read(), globals(), locals())
 
 
 def get_file_contents(filename):
