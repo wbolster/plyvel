@@ -715,3 +715,55 @@ def test_threading():
 
         for t in threads:
             t.join()
+
+
+def test_invalid_comparator():
+
+    with tmp_db('invalid_comparator', create=False) as name:
+
+        with assert_raises(ValueError):
+            DB(name, comparator=None, comparator_name=b'invalid')
+
+        with assert_raises(TypeError):
+            DB(name,
+               comparator=lambda x, y: 1,
+               comparator_name=12)
+
+        with assert_raises(TypeError):
+            DB(name,
+               comparator=b'not-a-callable',
+               comparator_name=b'invalid')
+
+
+def test_comparator():
+    def comparator(a, b):
+        a = a.lower()
+        b = b.lower()
+        if a < b:
+            return -1
+        if a > b:
+            return 1
+        else:
+            return 0
+
+    comparator_name = b"CaseInsensitiveComparator"
+
+    with tmp_db('comparator', create=False) as name:
+        db = DB(name,
+                create_if_missing=True,
+                comparator=comparator,
+                comparator_name=comparator_name)
+
+        keys = [
+            b'aaa',
+            b'BBB',
+            b'ccc',
+        ]
+
+        with db.write_batch() as wb:
+            for key in keys:
+                wb.put(key, b'')
+
+        assert_list_equal(
+            sorted(keys, key=lambda s: s.lower()),
+            list(db.iterator(include_value=False)))

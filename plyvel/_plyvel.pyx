@@ -27,6 +27,7 @@ from libcpp cimport bool
 
 cimport leveldb
 from leveldb cimport (
+    BytewiseComparator,
     Cache,
     Comparator,
     DestroyDB,
@@ -40,6 +41,8 @@ from leveldb cimport (
     Status,
     WriteOptions,
 )
+
+from comparator cimport NewPlyvelCallbackComparator
 
 
 __leveldb_version__ = '%d.%d' % (leveldb.kMajorVersion, leveldb.kMinorVersion)
@@ -115,7 +118,8 @@ cdef int parse_options(Options *options, bool create_if_missing,
                        object write_buffer_size, object max_open_files,
                        object lru_cache_size, object block_size,
                        object block_restart_interval, object compression,
-                       int bloom_filter_bits) except -1:
+                       int bloom_filter_bits, object comparator,
+                       bytes comparator_name) except -1:
     cdef int c_lru_cache_size
 
     options.create_if_missing = create_if_missing
@@ -157,6 +161,17 @@ cdef int parse_options(Options *options, bool create_if_missing,
         with nogil:
             options.filter_policy = NewBloomFilterPolicy(bloom_filter_bits)
 
+    if (comparator is None) != (comparator_name is None):
+        raise ValueError(
+            "'comparator' and 'comparator_name' must be specified together")
+
+    if comparator is not None:
+        if not callable(comparator):
+            raise TypeError("custom comparator object must be callable")
+
+        options.comparator = NewPlyvelCallbackComparator(
+            comparator_name, comparator)
+
 
 #
 # Database
@@ -173,7 +188,8 @@ cdef class DB:
                  write_buffer_size=None, max_open_files=None,
                  lru_cache_size=None, block_size=None,
                  block_restart_interval=None, compression='snappy',
-                 int bloom_filter_bits=0):
+                 int bloom_filter_bits=0, object comparator=None,
+                 bytes comparator_name=None):
         cdef Options options
         cdef Status st
         cdef string fsname
@@ -182,7 +198,8 @@ cdef class DB:
         parse_options(
             &options, create_if_missing, error_if_exists, paranoid_checks,
             write_buffer_size, max_open_files, lru_cache_size, block_size,
-            block_restart_interval, compression, bloom_filter_bits)
+            block_restart_interval, compression, bloom_filter_bits, comparator,
+            comparator_name)
         with nogil:
             st = leveldb.DB_Open(options, fsname, &self._db)
         raise_for_status(st)
@@ -193,6 +210,9 @@ cdef class DB:
         del self._db
         if self.cache is not NULL:
             del self.cache
+        if self.comparator is not NULL:
+            if self.comparator is not BytewiseComparator():
+                del self.comparator
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
         cdef ReadOptions read_options
@@ -289,7 +309,8 @@ cdef class DB:
 def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,
               max_open_files=None, lru_cache_size=None, block_size=None,
               block_restart_interval=None, compression='snappy',
-              int bloom_filter_bits=0):
+              int bloom_filter_bits=0, comparator=None,
+              bytes comparator_name=None):
     cdef Options options = Options()
     cdef Status st
     cdef string fsname
@@ -300,7 +321,8 @@ def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,
     parse_options(
         &options, create_if_missing, error_if_exists, paranoid_checks,
         write_buffer_size, max_open_files, lru_cache_size, block_size,
-        block_restart_interval, compression, bloom_filter_bits)
+        block_restart_interval, compression, bloom_filter_bits, comparator,
+        comparator_name)
     with nogil:
         st = RepairDB(fsname, options)
     raise_for_status(st)
@@ -309,7 +331,8 @@ def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,
 def destroy_db(name, *, paranoid_checks=None, write_buffer_size=None,
                max_open_files=None, lru_cache_size=None, block_size=None,
                block_restart_interval=None, compression='snappy',
-               int bloom_filter_bits=0):
+               int bloom_filter_bits=0, comparator=None,
+               bytes comparator_name=None):
     cdef Options options = Options()
     cdef Status st
     cdef string fsname
@@ -320,7 +343,8 @@ def destroy_db(name, *, paranoid_checks=None, write_buffer_size=None,
     parse_options(
         &options, create_if_missing, error_if_exists, paranoid_checks,
         write_buffer_size, max_open_files, lru_cache_size, block_size,
-        block_restart_interval, compression, bloom_filter_bits)
+        block_restart_interval, compression, bloom_filter_bits, comparator,
+        comparator_name)
     with nogil:
         st = DestroyDB(fsname, options)
     raise_for_status(st)

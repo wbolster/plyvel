@@ -15,8 +15,10 @@ def get_file_contents(filename):
 ext_modules = [
     Extension(
         'plyvel._plyvel',
-        ['plyvel/_plyvel.cpp'],
-        libraries=['leveldb'])
+        sources=['plyvel/_plyvel.cpp', 'plyvel/comparator.cpp'],
+        libraries=['leveldb'],
+        extra_compile_args = ['-Wall'],
+    )
 ]
 
 setup(

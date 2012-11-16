@@ -134,6 +134,8 @@ cdef extern from "leveldb/comparator.h" namespace "leveldb":
         int Compare(Slice& a, Slice&b) nogil
         const_char* Name() nogil
 
+    Comparator* BytewiseComparator() nogil
+
 
 cdef extern from "leveldb/filter_policy.h" namespace "leveldb":
 
