@@ -380,6 +380,7 @@ cdef class WriteBatch:
             return
 
         self.write()
+        self.clear()
 
 
 #
