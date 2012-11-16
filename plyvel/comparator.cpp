@@ -40,10 +40,18 @@ public:
 
         gstate = PyGILState_Ensure();
 
-        /* Create two Python byte strings, and pass those as two positional
-         * arguments to the comparator callable. */
+        /* Create two Python byte strings */
         bytes_a = PyBytes_FromStringAndSize(a.data(), a.size());
         bytes_b = PyBytes_FromStringAndSize(b.data(), b.size());
+
+        if ((bytes_a == NULL) || (bytes_b == NULL)) {
+            PyErr_Print();
+            std::cerr << "FATAL ERROR: Plyvel comparator could not allocate byte strings" << std::endl;
+            std::cerr << "Aborting to avoid database corruption..." << std::endl;
+            abort();
+        }
+
+        /* Invoke comparator callable */
         compare_result = PyObject_CallFunctionObjArgs(comparator, bytes_a, bytes_b, 0);
 
         if (compare_result == NULL) {
