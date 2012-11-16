@@ -377,6 +377,7 @@ cdef class WriteBatch:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.transaction and exc_type is not None:
             # Exception occurred in transaction; do not write the batch
+            self.clear()
             return
 
         self.write()
