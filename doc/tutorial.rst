@@ -6,7 +6,7 @@ Tutorial
 
 This tutorial gives an overview of Plyvel. It covers opening and closing
 databases, storing and retrieving data, working with write batches, using
-snapshots, and iterating over your data.
+snapshots, iterating over your data, and implementing custom comparators.
 
 Note: this tutorial assumes basic familiarity with LevelDB; visit the `LevelDB
 homepage`_ for more information about its features and design.
@@ -328,6 +328,68 @@ that sorts *before* the key that was most recently returned.
 
 Additionally, Plyvel supports seeking on iterators. See the :py:class:`Iterator`
 API reference for more information about advanced iterator usage.
+
+
+Custom comparators
+==================
+
+LevelDB provides an ordered data store, which means all keys are stored in
+sorted order. By default, a byte-wise comparator that works like
+:c:func:`strcmp()` is used, but this behaviour can be changed by providing a
+custom comparator. Plyvel allows you to use a Python callable as a custom
+LevelDB comparator.
+
+The signature for a comparator callable is simple: it takes two byte strings and
+should return either a positive number, zero, or a negative number, depending on
+whether the first byte string is greater than, equal to or lesser than the
+second byte string. (These are the same semantics as the built-in
+:py:func:`cmp()`, which has been removed in Python 3 in favour of the so-called
+‘rich’ comparison method.)
+
+A simple comparator function for case insensitive comparisons might look like
+this::
+
+    def comparator(a, b):
+        a = a.lower()
+        b = b.lower()
+
+        if a < b:
+            # a sorts before b
+            return -1
+
+        if a > b:
+            # a sorts after b
+            return 1
+
+        # a and b are equal
+        return 0
+
+(This is a toy example. It only works properly for byte strings with characters
+in the ASCII range.)
+
+To use this comparator, pass the `comparator` and `comparator_name` arguments to
+the :py:class:`DB` constructor::
+
+    >>> db = DB('/path/to/database/',
+    ...         comparator=comparator,  # the function defined above
+    ...         comparator_name=b'CaseInsensitiveComparator')
+
+The comparator name, which must be a byte string, will be stored in the
+database. LevelDB refuses to open existing databases if the provided comparator
+name does not match the one in the database.
+
+LevelDB will invoked the comparator callable repeatedly during many of its
+operations, including storing and retrieving data, but also during background
+compactions. Background compaction uses threads that are ‘invisible’ from
+Python. This means that custom comparator callables *must not* raise any
+exceptions, since there is no proper way recover from those. If an exception
+happens anyway, Plyvel will print the traceback to `stderr` and immediately
+abort your program to avoid database corruption.
+
+A final thing to keep in mind is that custom comparators written in Python will
+come with a considerable performance impact. Experiments with simple Python
+comparator functions like the example below show a 4× slowdown for bulk writes
+compared to the built-in LevelDB comparator.
 
 
 .. rubric:: Next steps

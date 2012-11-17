@@ -29,7 +29,7 @@ Database
 
    LevelDB database
 
-   .. py:method:: __init__(name, create_if_missing=False, error_if_exists=False, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0)
+   .. py:method:: __init__(name, create_if_missing=False, error_if_exists=False, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
 
       Open the underlying database handle.
 
@@ -38,6 +38,8 @@ Database
       meaning. Argument that can be `None` are only propagated to LevelDB if
       specified, e.g. not specifying a `write_buffer_size` means the LevelDB
       defaults are used.
+
+      Most arguments are optional; only the database name is required.
 
       :param str name: name of the database (directory name)
       :param bool create_if_missing: whether a new database should be created if
@@ -55,6 +57,9 @@ Database
       :param int bloom_filter_bits: the number of bits to use for a bloom
                                     filter; the default of 0 means that no bloom
                                     filter will be used
+      :param callable comparator: a custom comparator callable that takes to
+                                  byte strings and returns an integer
+      :param bytes comparator_name: name for the custom comparator
 
 
    .. py:method:: get(key, verify_checksums=None, fill_cache=None)
@@ -165,14 +170,14 @@ Database
 Additionally, existing databases can be repaired or destroyed using these module
 level functions:
 
-.. py:function:: repair_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0)
+.. py:function:: repair_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
 
    Repair the specified database.
 
    See :py:class:`DB` for a description of the arguments.
 
 
-.. py:function:: destroy_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0)
+.. py:function:: destroy_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
 
    Destroy the specified database.
 

@@ -16,7 +16,7 @@ Plyvel's key features are:
   Plyvel wraps most of the LevelDB C++ API, so in addition to basic features
   like getting, putting and deleting data, Plyvel allows you to use write
   batches, database snapshots, very flexible iterators, bloom filters, custom
-  cache sizes, and other goodness LevelDB has to offer.
+  cache sizes, custom comparators, and other goodness LevelDB has to offer.
 
 * **High performance**
 
