@@ -322,12 +322,12 @@ you will need to call the :py:meth:`~Iterator.prev()` method on the iterator::
     >>> it.prev()
     'key-5'
 
-See the :py:class:`Iterator` API reference for more information about advanced
-iterator usage.
-
 Note that for reverse iterators, the definition of 'forward' and 'backward' is
 inverted, i.e. calling ``next(it)`` on a reverse iterator will return the key
 that sorts *before* the key that was most recently returned.
+
+Additionally, Plyvel supports seeking on iterators. See the :py:class:`Iterator`
+API reference for more information about advanced iterator usage.
 
 
 .. rubric:: Next steps
