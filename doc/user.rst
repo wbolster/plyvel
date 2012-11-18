@@ -2,8 +2,6 @@
 User guide
 ==========
 
-.. py:currentmodule:: plyvel
-
 This user guide gives an overview of Plyvel. It covers opening and closing
 databases, storing and retrieving data, working with write batches, using
 snapshots, iterating over your data, and implementing custom comparators.
@@ -17,12 +15,11 @@ homepage`_ for more information about its features and design.
 Getting started
 ===============
 
-After :doc:`installing Plyvel <installation>`, we can simply import the
-``plyvel`` module::
+After :doc:`installing Plyvel <installation>`, we can simply import ``plyvel``::
 
     >>> import plyvel
 
-Let's open a new database by creating a new :py:class:`plyvel.DB` instance::
+Let's open a new database by creating a new :py:class:`DB` instance::
 
     >>> db = plyvel.DB('/tmp/testdb/', create_if_missing=True)
 
