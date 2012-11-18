@@ -23,10 +23,10 @@ For the more traditionally minded: downloading a source tarball, unpacking it
 and installing it manually with ``python setup.py install`` should also work.
 
 Note that Plyvel requires an installed shared library for LevelDB at build time,
-so make sure you have a shared LevelDB library installed where the compiler and
-linker can find them. For Debian or Ubuntu something like ``apt-get install
-libleveldb1 libleveldb-dev`` should suffice, but any other installation method
-should do as well.
+so make sure you have a shared LevelDB library and the development headers
+installed where the compiler and linker can find them. For Debian or Ubuntu
+something like ``apt-get install libleveldb1 libleveldb-dev`` should suffice,
+but any other installation method should do as well.
 
 
 Verify that it works
