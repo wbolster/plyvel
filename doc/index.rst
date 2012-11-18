@@ -44,7 +44,7 @@ Documentation overview
    :maxdepth: 1
 
    installation
-   tutorial
+   user
    api
    license
 

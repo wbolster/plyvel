@@ -1,14 +1,14 @@
-========
-Tutorial
-========
+==========
+User guide
+==========
 
 .. py:currentmodule:: plyvel
 
-This tutorial gives an overview of Plyvel. It covers opening and closing
+This user guide gives an overview of Plyvel. It covers opening and closing
 databases, storing and retrieving data, working with write batches, using
 snapshots, iterating over your data, and implementing custom comparators.
 
-Note: this tutorial assumes basic familiarity with LevelDB; visit the `LevelDB
+Note: this document assumes basic familiarity with LevelDB; visit the `LevelDB
 homepage`_ for more information about its features and design.
 
 .. _`LevelDB homepage`: http://code.google.com/p/leveldb/

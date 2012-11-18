@@ -50,6 +50,6 @@ environment variables for the compiler and linker and try ``pip install
 
 .. rubric:: Next steps
 
-Continue with the :doc:`tutorial <tutorial>` to see how to use Plyvel.
+Continue with the :doc:`user guide <user>` to see how to use Plyvel.
 
 .. vim: set spell spelllang=en:
