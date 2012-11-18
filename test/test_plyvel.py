@@ -23,6 +23,7 @@ except NameError:
 from nose.tools import (
     assert_equal,
     assert_greater_equal,
+    assert_is_instance,
     assert_is_none,
     assert_is_not_none,
     assert_list_equal,
@@ -622,6 +623,25 @@ def test_snapshot():
         # Snapshots are directly iterable, just like DB
         for entry in snapshot:
             pass
+
+
+def test_property():
+    with tmp_db('property') as db:
+        with assert_raises(TypeError):
+            db.get_property()
+
+        with assert_raises(TypeError):
+            db.get_property(42)
+
+        assert_is_none(db.get_property(b'does-not-exist'))
+
+        properties = [
+            b'leveldb.stats',
+            b'leveldb.sstables',
+            b'leveldb.num-files-at-level0',
+        ]
+        for prop in properties:
+            assert_is_instance(db.get_property(prop), bytes)
 
 
 def test_compaction():

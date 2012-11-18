@@ -132,6 +132,18 @@ Database
       See the :py:class:`Snapshot` API for more information.
 
 
+   .. py:method:: get_property(name)
+
+      Get the specified property from LevelDB.
+
+      This returns the property value or `None` if no value is available.
+      Example property name: ``b'leveldb.stats'``.
+
+      :param bytes name: name of the property
+      :return: property value or `None`
+      :rtype: bytes
+
+
    .. py:method:: compact_range(start=None, stop=None)
 
       Compact underlying storage for the specified key range.

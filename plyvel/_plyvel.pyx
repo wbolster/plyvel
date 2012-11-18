@@ -267,6 +267,16 @@ cdef class DB:
     def snapshot(self):
         return Snapshot(db=self)
 
+    def get_property(self, bytes name not None):
+        cdef Slice sl = Slice(name, len(name))
+        cdef string value
+        cdef bool result
+
+        with nogil:
+            result = self._db.GetProperty(sl, &value)
+
+        return value if result else None
+
     def compact_range(self, *, bytes start=None, bytes stop=None):
         cdef Slice start_slice
         cdef Slice stop_slice
