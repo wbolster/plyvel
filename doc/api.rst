@@ -189,11 +189,11 @@ level functions:
    See :py:class:`DB` for a description of the arguments.
 
 
-.. py:function:: destroy_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
+.. py:function:: destroy_db(name)
 
    Destroy the specified database.
 
-   See :py:class:`DB` for a description of the arguments.
+   :param str name: name of the database (directory name)
 
 
 Write batch

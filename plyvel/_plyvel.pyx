@@ -338,23 +338,12 @@ def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,
     raise_for_status(st)
 
 
-def destroy_db(name, *, paranoid_checks=None, write_buffer_size=None,
-               max_open_files=None, lru_cache_size=None, block_size=None,
-               block_restart_interval=None, compression='snappy',
-               int bloom_filter_bits=0, comparator=None,
-               bytes comparator_name=None):
+def destroy_db(name):
     cdef Options options = Options()
     cdef Status st
     cdef string fsname
 
     fsname = to_file_system_name(name)
-    create_if_missing = False
-    error_if_exists = True
-    parse_options(
-        &options, create_if_missing, error_if_exists, paranoid_checks,
-        write_buffer_size, max_open_files, lru_cache_size, block_size,
-        block_restart_interval, compression, bloom_filter_bits, comparator,
-        comparator_name)
     with nogil:
         st = DestroyDB(fsname, options)
     raise_for_status(st)
