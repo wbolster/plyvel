@@ -75,7 +75,7 @@ Finally, to delete data from the database, use :py:meth:`DB.delete`::
 
 At this point our database is empty again. Note that, in addition to the basic
 use shown above, the :py:meth:`~DB.put`, :py:meth:`~DB.get`, and
-:py:meth:`~DB.delete` method accepts optional keyword arguments that influence
+:py:meth:`~DB.delete` methods accept optional keyword arguments that influence
 their behaviour, e.g. for synchronous writes or reads that will not fill the
 cache.
 
