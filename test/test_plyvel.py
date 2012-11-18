@@ -290,10 +290,12 @@ def test_iterator_return():
 
 
 @nottest
-def test_manual_iteration(db, iter_kwargs, expected_values):
-    it = db.iterator(**iter_kwargs)
+def test_iterator_behaviour(db, iter_kwargs, expected_values):
     first, second, third = expected_values
+    is_forward = not iter_kwargs.get('reverse', False)
 
+    # Simple iteration
+    it = db.iterator(**iter_kwargs)
     assert_equal(first, next(it))
     assert_equal(second, next(it))
     assert_equal(third, next(it))
@@ -303,12 +305,8 @@ def test_manual_iteration(db, iter_kwargs, expected_values):
         # second time may not cause a segfault
         next(it)
 
-
-@nottest
-def test_iterator_single_step(db, iter_kwargs, expected_values):
+    # Single steps, both next() and .prev()
     it = db.iterator(**iter_kwargs)
-    first, second, third = expected_values
-
     assert_equal(first, next(it))
     assert_equal(first, it.prev())
     assert_equal(first, next(it))
@@ -323,14 +321,8 @@ def test_iterator_single_step(db, iter_kwargs, expected_values):
     assert_equal(third, it.prev())
     assert_equal(second, it.prev())
 
-
-@nottest
-def test_iterator_extremes(db, iter_kwargs, expected_values):
-    it = db.iterator(**iter_kwargs)
-    first, second, third = expected_values
-    is_forward = not iter_kwargs.get('reverse', False)
-
     # End of iterator
+    it = db.iterator(**iter_kwargs)
     if is_forward:
         it.seek_to_stop()
     else:
@@ -340,6 +332,7 @@ def test_iterator_extremes(db, iter_kwargs, expected_values):
     assert_equal(third, it.prev())
 
     # Begin of iterator
+    it = db.iterator(**iter_kwargs)
     if is_forward:
         it.seek_to_start()
     else:
@@ -355,11 +348,10 @@ def test_forward_iteration():
         db.put(b'2', b'2')
         db.put(b'3', b'3')
 
-        expected_values = (b'1', b'2', b'3')
-        iter_kwargs = dict(include_key=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(include_key=False),
+            expected_values=(b'1', b'2', b'3'))
 
 
 def test_reverse_iteration():
@@ -368,11 +360,10 @@ def test_reverse_iteration():
         db.put(b'2', b'2')
         db.put(b'3', b'3')
 
-        expected_values = (b'3', b'2', b'1')
-        iter_kwargs = dict(reverse=True, include_key=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(reverse=True, include_key=False),
+            expected_values=(b'3', b'2', b'1'))
 
 
 def test_range_iteration():
@@ -400,25 +391,22 @@ def test_range_iteration():
             list(db.iterator(start=b'3', stop=b'0')))
 
         # Only start
-        expected_values = (b'3', b'4', b'5')
-        iter_kwargs = dict(start=b'3', include_key=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(start=b'3', include_key=False),
+            expected_values=(b'3', b'4', b'5'))
 
         # Only stop
-        expected_values = (b'1', b'2', b'3')
-        iter_kwargs = dict(stop=b'4', include_key=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(stop=b'4', include_key=False),
+            expected_values=(b'1', b'2', b'3'))
 
         # Both start and stop
-        expected_values = (b'2', b'3', b'4')
-        iter_kwargs = dict(start=b'2', stop=b'5', include_key=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(start=b'2', stop=b'5', include_key=False),
+            expected_values=(b'2', b'3', b'4'))
 
 
 def test_reverse_range_iteration():
@@ -434,25 +422,22 @@ def test_reverse_range_iteration():
             list(db.iterator(start=b'3', stop=b'0', reverse=True)))
 
         # Only start
-        expected_values = (b'5', b'4', b'3')
-        iter_kwargs = dict(start=b'3', reverse=True, include_value=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(start=b'3', reverse=True, include_value=False),
+            expected_values=(b'5', b'4', b'3'))
 
         # Only stop
-        expected_values = (b'3', b'2', b'1')
-        iter_kwargs = dict(stop=b'4', reverse=True, include_value=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(stop=b'4', reverse=True, include_value=False),
+            expected_values=(b'3', b'2', b'1'))
 
         # Both start and stop
-        expected_values = (b'3', b'2', b'1')
-        iter_kwargs = dict(start=b'1', stop=b'4', reverse=True, include_value=False)
-        test_manual_iteration(db, iter_kwargs, expected_values)
-        test_iterator_single_step(db, iter_kwargs, expected_values)
-        test_iterator_extremes(db, iter_kwargs, expected_values)
+        test_iterator_behaviour(
+            db,
+            iter_kwargs=dict(start=b'1', stop=b'4', reverse=True, include_value=False),
+            expected_values=(b'3', b'2', b'1'))
 
 
 def test_range_empty_database():
