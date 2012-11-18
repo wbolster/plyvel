@@ -45,7 +45,7 @@ def tmp_dir(name):
 
 
 @contextmanager
-def tmp_db(name, create=True):
+def tmp_db(name, create=True, delete=True):
     dir_name = tmp_dir(name)
     if create:
         db = DB(dir_name, create_if_missing=True, error_if_exists=True)
@@ -53,7 +53,9 @@ def tmp_db(name, create=True):
         del db
     else:
         yield dir_name
-    shutil.rmtree(dir_name)
+
+    if delete:
+        shutil.rmtree(dir_name)
 
 
 #
@@ -691,24 +693,22 @@ def test_approximate_sizes():
 
 
 def test_repair_db():
-    dir_name = tmp_dir('repair')
-    db = DB(dir_name, create_if_missing=True)
-    db.put(b'foo', b'bar')
-    del db
-    plyvel.repair_db(dir_name)
-    db = DB(dir_name)
-    assert_equal(b'bar', db.get(b'foo'))
-    del db
-    shutil.rmtree(dir_name)
+    with tmp_db('repair', create=False) as name:
+        db = DB(name, create_if_missing=True)
+        db.put(b'foo', b'bar')
+        del db
+        plyvel.repair_db(name)
+        db = DB(name)
+        assert_equal(b'bar', db.get(b'foo'))
 
 
 def test_destroy_db():
-    dir_name = tmp_dir('destroy')
-    db = DB(dir_name, create_if_missing=True)
-    db.put(b'foo', b'bar')
-    del db
-    plyvel.destroy_db(dir_name)
-    assert not os.path.lexists(dir_name)
+    with tmp_db('destroy', create=False, delete=False) as name:
+        db = DB(name, create_if_missing=True)
+        db.put(b'foo', b'bar')
+        del db
+        plyvel.destroy_db(name)
+        assert not os.path.lexists(name)
 
 
 def test_threading():
