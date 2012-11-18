@@ -637,15 +637,15 @@ def test_approximate_sizes():
 
         # Write some data to a fresh database
         db = DB(name, create_if_missing=True, error_if_exists=True)
-        value = b'a' * 1000
+        value = b'a' * 100
         with db.write_batch() as wb:
             for i in xrange(1000):
-                key = bytes(i) * 1000
+                key = bytes(i) * 100
                 wb.put(key, value)
 
-        # Compact the database, so that pending write logs are
-        # (hopefully) flushed to sst files.
-        db.compact_range()
+        # Delete and reopen the database
+        del wb, db
+        db = DB(name, create_if_missing=False)
 
         with assert_raises(TypeError):
             db.approximate_size(1, 2)
