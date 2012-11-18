@@ -40,22 +40,18 @@ TEST_DB_DIR = 'testdb/'
 # Utilities
 #
 
-def tmp_dir(name):
-    return tempfile.mkdtemp(prefix=name + '-', dir=TEST_DB_DIR)
-
-
 @contextmanager
-def tmp_db(name, create=True, delete=True):
-    dir_name = tmp_dir(name)
+def tmp_db(name_prefix, create=True, delete=True):
+    name = tempfile.mkdtemp(prefix=name_prefix + '-', dir=TEST_DB_DIR)
     if create:
-        db = DB(dir_name, create_if_missing=True, error_if_exists=True)
+        db = DB(name, create_if_missing=True, error_if_exists=True)
         yield db
         del db
     else:
-        yield dir_name
+        yield name
 
     if delete:
-        shutil.rmtree(dir_name)
+        shutil.rmtree(name)
 
 
 #
