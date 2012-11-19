@@ -385,8 +385,8 @@ LevelDB invokes the comparator callable repeatedly during many of its
 operations, including storing and retrieving data, but also during background
 compactions. Background compaction uses threads that are ‘invisible’ from
 Python. This means that custom comparator callables *must not* raise any
-exceptions, since there is no proper way recover from those. If an exception
-happens anyway, Plyvel will print the traceback to `stderr` and immediately
+exceptions, since there is no proper way to recover from those. If an exception
+happens nonetheless, Plyvel will print the traceback to `stderr` and immediately
 abort your program to avoid database corruption.
 
 A final thing to keep in mind is that custom comparators written in Python will
