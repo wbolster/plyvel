@@ -282,10 +282,10 @@ Note that the `start` and `stop` keys are the same; the only difference is the
 Iterating over snapshots
 ------------------------
 
-LevelDB also supports iterating over snapshots using the
-:py:meth:`Snapshot.iterator` method. This method works exactly the same as
-:py:meth:`DB.iterator`, except that it operates on the snapshot instead of the
-complete database.
+In addition to directly iterating over the database, LevelDB also supports
+iterating over snapshots using the :py:meth:`Snapshot.iterator` method. This
+method works exactly the same as :py:meth:`DB.iterator`, except that it operates
+on the snapshot instead of the complete database.
 
 Advanced iterator usage
 -----------------------
@@ -344,10 +344,10 @@ LevelDB comparator.
 
 The signature for a comparator callable is simple: it takes two byte strings and
 should return either a positive number, zero, or a negative number, depending on
-whether the first byte string is greater than, equal to or lesser than the
-second byte string. (These are the same semantics as the built-in
-:py:func:`cmp()`, which has been removed in Python 3 in favour of the so-called
-‘rich’ comparison method.)
+whether the first byte string is greater than, equal to or less than the second
+byte string. (These are the same semantics as the built-in :py:func:`cmp()`,
+which has been removed in Python 3 in favour of the so-called ‘rich’ comparison
+method.)
 
 A simple comparator function for case insensitive comparisons might look like
 this::
@@ -381,7 +381,7 @@ The comparator name, which must be a byte string, will be stored in the
 database. LevelDB refuses to open existing databases if the provided comparator
 name does not match the one in the database.
 
-LevelDB will invoked the comparator callable repeatedly during many of its
+LevelDB invokes the comparator callable repeatedly during many of its
 operations, including storing and retrieving data, but also during background
 compactions. Background compaction uses threads that are ‘invisible’ from
 Python. This means that custom comparator callables *must not* raise any
