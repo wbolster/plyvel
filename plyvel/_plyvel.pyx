@@ -256,10 +256,11 @@ cdef class DB:
         return self.iterator()
 
     def iterator(self, *, reverse=False, start=None, stop=None,
-                 include_key=True, include_value=True, verify_checksums=None,
-                 fill_cache=None):
+                 include_start=True, include_stop=False, include_key=True,
+                 include_value=True, verify_checksums=None, fill_cache=None):
         return Iterator(
             db=self, reverse=reverse, start=start, stop=stop,
+            include_start=include_start, include_stop=include_stop,
             include_key=include_key, include_value=include_value,
             verify_checksums=verify_checksums, fill_cache=fill_cache,
             snapshot=None)
@@ -432,18 +433,21 @@ cdef class Iterator:
     cdef DB db
     cdef leveldb.Iterator* _iter
     cdef IteratorDirection direction
-    cdef bool has_start
-    cdef bool has_stop
-    cdef Slice start_slice
-    cdef Slice stop_slice
-    cdef bool include_key
-    cdef bool include_value
     cdef IteratorState state
     cdef Comparator* comparator
+    cdef Slice start_slice
+    cdef Slice stop_slice
+    cdef bool has_start
+    cdef bool has_stop
+    cdef bool include_start
+    cdef bool include_stop
+    cdef bool include_key
+    cdef bool include_value
 
     def __init__(self, *, DB db not None, bool reverse, bytes start,
-                 bytes stop, bool include_key, bool include_value,
-                 bool verify_checksums, bool fill_cache, Snapshot snapshot):
+                 bytes stop, bool include_start, bool include_stop,
+                 bool include_key, bool include_value, bool verify_checksums,
+                 bool fill_cache, Snapshot snapshot):
         self.db = db
         self.comparator = db.comparator
         self.direction = FORWARD if not reverse else REVERSE
@@ -460,6 +464,8 @@ cdef class Iterator:
             self.has_stop = True
             self.stop_slice = Slice(stop, len(stop))
 
+        self.include_start = include_start
+        self.include_stop = include_stop
         self.include_key = include_key
         self.include_value = include_value
 
@@ -549,6 +555,12 @@ cdef class Iterator:
             if not self._iter.Valid():
                 # Iterator is empty
                 raise StopIteration
+            if self.has_start and not self.include_start:
+                # Start key is excluded, so skip past it
+                with nogil:
+                    self._iter.Next()
+                if not self._iter.Valid():
+                    raise StopIteration
             self.state = IN_BETWEEN
         elif self.state == AFTER_STOP:
             raise StopIteration
@@ -556,10 +568,11 @@ cdef class Iterator:
         raise_for_status(self._iter.status())
 
         # Check range boundaries
-        if self.has_stop and self.comparator.Compare(
-                self._iter.key(), self.stop_slice) >= 0:
-            self.state = AFTER_STOP
-            raise StopIteration
+        if self.has_stop:
+            n = 1 if self.include_stop else 0
+            if self.comparator.Compare(self._iter.key(), self.stop_slice) >= n:
+                self.state = AFTER_STOP
+                raise StopIteration
 
         return self.current()
 
@@ -579,17 +592,18 @@ cdef class Iterator:
             raise StopIteration
         elif self.state == AFTER_STOP:
             if self.has_stop:
-                # Stop key specified: seek to it and move one step back
-                # (since the end of the range is exclusive)
+                # Seek to stop key
                 with nogil:
                     self._iter.Seek(self.stop_slice)
                 if not self._iter.Valid():
                     # Iterator is empty
                     raise StopIteration
-                with nogil:
-                    self._iter.Prev()
-                if not self._iter.Valid():
-                    raise StopIteration
+                # Move one step back if stop is exclusive
+                if not self.include_stop:
+                    with nogil:
+                        self._iter.Prev()
+                    if not self._iter.Valid():
+                        raise StopIteration
                 raise_for_status(self._iter.status())
             else:
                 # No stop key, seek to last entry
@@ -607,13 +621,23 @@ cdef class Iterator:
         with nogil:
             self._iter.Prev()
         if not self._iter.Valid():
-            self.state = BEFORE_START
-        elif self.has_start and self.comparator.Compare(
-                self._iter.key(), self.start_slice) < 0:
-            # Iterator is valid, but has moved before the 'start' key
+            # Moved before the first key in the database
             self.state = BEFORE_START
         else:
-            self.state = IN_BETWEEN
+            if self.has_start:
+                # Check range boundaries
+                n = 0 if self.include_start else 1
+                if self.comparator.Compare(
+                        self._iter.key(), self.start_slice) >= n:
+                    # Iterator is valid and within range boundaries
+                    self.state = IN_BETWEEN
+                else:
+                    # Iterator is valid, but has moved before the
+                    # 'start' key
+                    self.state = BEFORE_START
+            else:
+                # Iterator is valid
+                self.state = IN_BETWEEN
 
         raise_for_status(self._iter.status())
         return out
@@ -627,7 +651,7 @@ cdef class Iterator:
     def seek(self, bytes target):
         cdef Slice target_slice = Slice(target, len(target))
 
-        # Seek only within the start/stop bounds
+        # Seek only within the start/stop boundaries
         if self.has_start and self.comparator.Compare(
                 target_slice, self.start_slice) < 0:
             target_slice = self.start_slice
@@ -678,10 +702,11 @@ cdef class Snapshot:
         return self.iterator()
 
     def iterator(self, *, reverse=False, start=None, stop=None,
-                 include_key=True, include_value=True, verify_checksums=None,
-                 fill_cache=None):
+                 include_start=True, include_stop=False, include_key=True,
+                 include_value=True, verify_checksums=None, fill_cache=None):
         return Iterator(
             db=self.db, reverse=reverse, start=start, stop=stop,
+            include_start=include_start, include_stop=include_stop,
             include_key=include_key, include_value=include_value,
             verify_checksums=verify_checksums, fill_cache=fill_cache,
             snapshot=self)

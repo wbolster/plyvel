@@ -106,7 +106,7 @@ Database
       :rtype: :py:class:`WriteBatch`
 
 
-   .. py:method:: iterator(reverse=False, start=None, stop=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
+   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
 
       Create a new :py:class:`Iterator` instance for this database.
 
@@ -117,6 +117,8 @@ Database
                           (optional)
       :param bytes stop: the stop key (exclusive) of the iterator range
                          (optional)
+      :param bool include_start: whether to include the start key in the range
+      :param bool include_stop: whether to include the stop key in the range
       :param bool include_key: whether to include keys in the returned data
       :param bool include_value: whether to include values in the returned data
       :param bool verify_checksums: whether to verify checksums
@@ -274,7 +276,7 @@ Snapshot
       Same as :py:meth:`DB.get`, but operates on the snapshot instead.
 
 
-   .. py:method:: iterator(reverse=False, start=None, stop=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
+   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
 
       Create a new :py:class:`Iterator` instance for this snapshot.
 

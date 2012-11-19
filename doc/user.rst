@@ -230,18 +230,24 @@ achieved by supplying `start` and/or `stop` arguments::
     key-2
     key-3
 
-.. note::
-
-   Keep in mind that the start key is *inclusive* and the stop key is
-   *exclusive*. This is also how the Python built-in :py:func:`range` function
-   works.
-
 Any combination of `start` and `stop` arguments is possible. For example, to
 iterate from a specific start key until the end of the database::
 
     >>> for key, value in db.iterator(start=b'key-3'):
     ...     print(key)
     ...
+    key-3
+    key-4
+    key-5
+
+By default the start key is *inclusive* and the stop key is *exclusive*. This
+matches the behaviour of Python's built-in :py:func:`range` function. If you
+want different behaviour, you can use the `include_start` and `include_stop`
+arguments::
+
+    >>> for key, value in db.iterator(start=b'key-2', include_start=False,
+    ...                               stop=b'key-5', include_stop=True):
+    ...     print(key)
     key-3
     key-4
     key-5
