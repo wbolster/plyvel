@@ -15,8 +15,11 @@ doc:
 
 clean:
 	python setup.py clean
-	$(RM) plyvel.cpp plyvel*.so
+	$(RM) plyvel/_plyvel.cpp plyvel/_plyvel*.so
 	$(RM) -r testdb/
+	$(RM) -r doc/build/
+	find . -name '*.py[co]' -delete
+	find . -name __pycache__ -delete
 
 test: ext
 	python $$(which nosetests) -v -s
