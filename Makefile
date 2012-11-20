@@ -18,6 +18,7 @@ clean:
 	$(RM) plyvel/_plyvel.cpp plyvel/_plyvel*.so
 	$(RM) -r testdb/
 	$(RM) -r doc/build/
+	$(RM) -r plyvel.egg-info/
 	find . -name '*.py[co]' -delete
 	find . -name __pycache__ -delete
 
