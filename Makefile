@@ -23,7 +23,7 @@ clean:
 	find . -name __pycache__ -delete
 
 test: ext
-	python $$(which nosetests) -v -s
+	python $$(which nosetests) -v -s $(TESTS)
 
 dist: clean ext doc test
 	python setup.py sdist
