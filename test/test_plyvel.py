@@ -133,6 +133,50 @@ def test_open():
            compression='snappy', bloom_filter_bits=10)
 
 
+def test_open_close():
+    with tmp_db('open_close', create=False) as name:
+        # Create a database with options that result in additional
+        # object allocation (e.g. LRU cache).
+        db = DB(name,
+                create_if_missing=True,
+                lru_cache_size=1024 * 1024,
+                bloom_filter_bits=10)
+        db.put(b'key', b'value')
+        wb = db.write_batch()
+        sn = db.snapshot()
+        it = db.iterator()
+        snapshot_it = sn.iterator()
+
+        # Close the database
+        db.close()
+        assert db.closed
+
+        # Expect runtime errors for operations on the database,
+        with assert_raises(RuntimeError):
+            db.get(b'key')
+        with assert_raises(RuntimeError):
+            db.put(b'key', b'value')
+        with assert_raises(RuntimeError):
+            db.delete(b'key')
+
+        # ... on write batches,
+        with assert_raises(RuntimeError):
+            wb.put(b'key', b'value')
+
+        # ... on snapshots,
+        with assert_raises(RuntimeError):
+            sn.get(b'key')
+
+        # ... on iterators,
+        with assert_raises(RuntimeError):
+            next(it)
+
+        # ... and on snapshot iterators,
+        with assert_raises(RuntimeError):
+            next(snapshot_it)
+
+
+
 def test_put():
     with tmp_db('put') as db:
         db.put(b'foo', b'bar')

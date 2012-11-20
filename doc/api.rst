@@ -66,6 +66,33 @@ Database
       :param bytes comparator_name: name for the custom comparator
 
 
+   .. py:method:: close()
+
+      Close the database.
+
+      This closes the database and releases associated resources such as open
+      file pointers and caches. Any further operations on the closed database
+      will raise a :py:exc:`RuntimeError`.
+
+      .. warning::
+
+         Closing a database while other threads are busy accessing the same
+         database may result in hard crashes, since database operations do not
+         perform any synchronisation/locking on the database object (for
+         performance reasons) and simply assume it is available (and open).
+         Applications should make sure not to close databases that are
+         concurrently used from other threads.
+
+      See the description for :cpp:func:`DB` in the LevelDB C++ API for more
+      information. This method deletes the underlying DB handle in the LevelDB
+      C++ API also frees other related objects.
+
+
+   .. py:attribute:: closed
+
+      Boolean attribute indicating whether the database is closed.
+
+
    .. py:method:: get(key, verify_checksums=None, fill_cache=None)
 
       Get the value for the specified key, or `None` if no value was set.

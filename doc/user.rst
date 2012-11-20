@@ -33,13 +33,23 @@ These settings, and many others, can be specified as arguments to the
 :py:class:`DB` constructor. For this tutorial we'll just use the LevelDB
 defaults.
 
-To close the database we just opened, you can just delete the variable that
-points to it::
+To close the database we just opened, use :py:meth:`DB.close` and inspect the
+``closed`` property::
+
+    >>> db.closed
+    False
+    >>> db.close()
+    >>> db.closed
+    True
+
+Alternatively, you can just delete the variable that points to it, but this
+might not close the database immediately, e.g. because active iterators are
+using it::
 
     >>> del db
 
 Note that the remainder of this tutorial assumes an open database, so you
-probably want to skip the above line if you're performing all the steps in this
+probably want to skip the above if you're performing all the steps in this
 tutorial yourself.
 
 
