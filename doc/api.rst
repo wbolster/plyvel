@@ -41,6 +41,10 @@ Database
 
       Most arguments are optional; only the database name is required.
 
+      See the descriptions for :cpp:class:`DB`, :cpp:func:`DB::Open`,
+      :cpp:class:`Cache`, :cpp:class:`FilterPolicy`, and :cpp:class:`Comparator`
+      in the LevelDB C++ API for more information.
+
       :param str name: name of the database (directory name)
       :param bool create_if_missing: whether a new database should be created if
                                      needed
@@ -66,6 +70,9 @@ Database
 
       Get the value for the specified key, or `None` if no value was set.
 
+      See the description for :cpp:func:`DB::Get` in the LevelDB C++ API for
+      more information.
+
       :param bytes key: key to retrieve
       :param bool verify_checksums: whether to verify checksums
       :param bool fill_cache: whether to fill the cache
@@ -77,6 +84,9 @@ Database
 
       Set a value for the specified key.
 
+      See the description for :cpp:func:`DB::Put` in the LevelDB C++ API for
+      more information.
+
       :param bytes key: key to set
       :param bytes value: value to set
       :param bool sync: whether to use synchronous writes
@@ -85,6 +95,9 @@ Database
    .. method:: delete(key, sync=None)
 
       Delete the key/value pair for the specified key.
+
+      See the description for :cpp:func:`DB::Delete` in the LevelDB C++ API for
+      more information.
 
       :param bytes key: key to delete
       :param bool sync: whether to use synchronous writes
@@ -141,6 +154,9 @@ Database
       This returns the property value or `None` if no value is available.
       Example property name: ``b'leveldb.stats'``.
 
+      See the description for :cpp:func:`DB::GetProperty` in the LevelDB C++ API
+      for more information.
+
       :param bytes name: name of the property
       :return: property value or `None`
       :rtype: bytes
@@ -150,6 +166,9 @@ Database
 
       Compact underlying storage for the specified key range.
 
+      See the description for :cpp:func:`DB::CompactRange` in the LevelDB C++
+      API for more information.
+
       :param bytes start: start key of range to compact (optional)
       :param bytes stop: stop key of range to compact (optional)
 
@@ -157,6 +176,9 @@ Database
    .. py:method:: approximate_size(start, stop)
 
       Return the approximate file system size for the specified range.
+
+      See the description for :cpp:func:`DB::GetApproximateSizes` in the LevelDB
+      C++ API for more information.
 
       :param bytes start: start key of the range
       :param bytes stop: stop key of the range
@@ -176,6 +198,9 @@ Database
              (b'a-key', b'other-key'),
              (b'some-other-key', b'yet-another-key'))
 
+      See the description for :cpp:func:`DB::GetApproximateSizes` in the LevelDB
+      C++ API for more information.
+
       :param ranges: variable number of `(start, stop`) tuples
       :return: approximate sizes for the specified ranges
       :rtype: list
@@ -190,12 +215,18 @@ level functions:
 
    See :py:class:`DB` for a description of the arguments.
 
+   See the description for :cpp:func:`RepairDB` in the LevelDB C++ API for more
+   information.
+
 
 .. py:function:: destroy_db(name)
 
    Destroy the specified database.
 
    :param str name: name of the database (directory name)
+
+   See the description for :cpp:func:`DestroyDB` in the LevelDB C++ API for more
+   information.
 
 
 Write batch
@@ -220,6 +251,9 @@ Write batch
    discarded (this is like a ``try`` statement with an ``else`` clause).
 
    Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
+
+   See the descriptions for :cpp:class:`WriteBatch` and :cpp:func:`DB::Write` in
+   the LevelDB C++ API for more information.
 
 
    .. py:method:: put(key, value)
@@ -268,6 +302,9 @@ Snapshot
 
    Do not instantiate directly; use :py:meth:`DB.snapshot` instead.
 
+   See the descriptions for :cpp:func:`DB::GetSnapshot` and
+   :cpp:func:`DB::ReleaseSnapshot` in the LevelDB C++ API for more information.
+
 
    .. py:method:: get(key, verify_checksums=None, fill_cache=None)
 
@@ -295,6 +332,9 @@ Iterator
 
    Do not instantiate directly; use :py:meth:`DB.iterator` or
    :py:meth:`Snapshot.iterator` instead.
+
+   See the descriptions for :cpp:func:`DB::NewIterator` and
+   :cpp:class:`Iterator` in the LevelDB C++ API for more information.
 
 
    .. py:method:: prev()
@@ -325,7 +365,7 @@ Iterator
 
    .. py:method:: seek(target)
 
-      Move the iterator to teh specified `target`.
+      Move the iterator to the specified `target`.
 
       This moves the iterator to the the first key that sorts equal or before
       the specified `target` within the iterator range (`start` and `stop`).
