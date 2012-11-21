@@ -785,25 +785,53 @@ def test_destroy_db():
 
 def test_threading():
     from threading import Thread, current_thread
+    import time
+    import itertools
+    from random import randint
 
     with tmp_db('threading') as db:
 
-        N_PUTS = 1000
-        N_THREADS = 10
+        N_THREADS_PER_FUNC = 5
 
         def bulk_insert(db):
             name = current_thread().name
-            v = name.encode('ascii') * 500
-            for n in xrange(N_PUTS):
+            v = name.encode('ascii') * randint(300, 700)
+            for n in xrange(randint(1000, 8000)):
                 rev = '{:x}'.format(n)[::-1]
                 k = '{}: {}'.format(rev, name).encode('ascii')
                 db.put(k, v)
 
+        def iterate_full(db):
+            for i in xrange(randint(4, 7)):
+                for key, value in db.iterator(reverse=True):
+                    pass
+
+        def iterate_short(db):
+            for i in xrange(randint(200, 700)):
+                it = db.iterator()
+                list(itertools.islice(it, randint(50, 100)))
+
+        def close_db(db):
+            time.sleep(1)
+            db.close()
+
+        funcs = [
+            bulk_insert,
+            iterate_full,
+            iterate_short,
+
+            # XXX: This this will usually cause a segfault since
+            # unexpectedly closing a database may crash threads using
+            # iterators:
+            # close_db,
+        ]
+
         threads = []
-        for n in xrange(N_THREADS):
-            t = Thread(target=bulk_insert, kwargs=dict(db=db))
-            threads.append(t)
-            t.start()
+        for func in funcs:
+            for n in xrange(N_THREADS_PER_FUNC):
+                t = Thread(target=func, args=(db,))
+                t.start()
+                threads.append(t)
 
         for t in threads:
             t.join()
