@@ -522,10 +522,6 @@ cdef enum IteratorDirection:
     REVERSE
 
 
-cdef inline int compare(Comparator* comparator, bytes a, bytes b):
-    return comparator.Compare(Slice(a, len(a)), Slice(b, len(b)))
-
-
 @cython.final
 cdef class Iterator:
     cdef DB db
