@@ -216,10 +216,19 @@ cdef class DB:
         self.iterators = weakref.WeakValueDictionary()
 
     cpdef close(self):
+        # If the constructor raised an exception (and hence never
+        # completed), self.iterators can be None. In that case no
+        # iterators need to be cleaned, since the database has never
+        # produced any used.
         cdef Iterator iterator
         if self.iterators is not None:
             with self.lock:
-                for iterator in self.iterators.itervalues():
+                try:
+                    itervalues = self.iterators.itervalues  # Python 2
+                except AttributeError:
+                    itervalues = self.iterators.values  # Python 3
+
+                for iterator in itervalues():
                     iterator.close()
 
                 self.iterators.clear()
