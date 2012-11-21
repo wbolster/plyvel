@@ -115,6 +115,14 @@ cdef bytes to_file_system_name(name):
             "Cannot convert unicode 'name' to a file system name: %s" % exc)
 
 
+cdef bytes bytes_increment(bytes s):
+    for i in xrange(len(s) - 1, -1, -1):
+        if s[i] != '\xff':
+            return s[:i] + chr(ord(s[i:]) + 1)
+
+    return None  # byte string contained 0xff bytes only
+
+
 cdef int parse_options(Options *options, bool create_if_missing,
                        bool error_if_exists, object paranoid_checks,
                        object write_buffer_size, object max_open_files,
@@ -315,17 +323,18 @@ cdef class DB:
         return self.iterator()
 
     def iterator(self, *, reverse=False, start=None, stop=None,
-                 include_start=True, include_stop=False, include_key=True,
-                 include_value=True, verify_checksums=None, fill_cache=None):
+                 include_start=True, include_stop=False, prefix=None,
+                 include_key=True, include_value=True, verify_checksums=None,
+                 fill_cache=None):
         if self._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
         iterator = Iterator(
             db=self, reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
-            include_key=include_key, include_value=include_value,
-            verify_checksums=verify_checksums, fill_cache=fill_cache,
-            snapshot=None)
+            prefix=prefix, include_key=include_key,
+            include_value=include_value, verify_checksums=verify_checksums,
+            fill_cache=fill_cache, snapshot=None)
         with self.lock:
             self.iterators[id(iterator)] = iterator
         return iterator
@@ -544,11 +553,21 @@ cdef class Iterator:
 
     def __init__(self, *, DB db not None, bool reverse, bytes start,
                  bytes stop, bool include_start, bool include_stop,
-                 bool include_key, bool include_value, bool verify_checksums,
-                 bool fill_cache, Snapshot snapshot):
+                 bytes prefix, bool include_key, bool include_value,
+                 bool verify_checksums, bool fill_cache, Snapshot snapshot):
         self.db = db
         self.comparator = <leveldb.Comparator*>db.options.comparator
         self.direction = FORWARD if not reverse else REVERSE
+
+        if prefix is not None:
+            if start is not None or stop is not None:
+                raise TypeError(
+                    "'prefix' cannot be used together with 'start' or 'stop'")
+
+            start = prefix
+            stop = bytes_increment(prefix)
+            # TODO: this doesn't work in all tests for some reason
+            raise NotImplementedError()
 
         if start is None:
             self.has_start = False
@@ -832,17 +851,18 @@ cdef class Snapshot:
         return self.iterator()
 
     def iterator(self, *, reverse=False, start=None, stop=None,
-                 include_start=True, include_stop=False, include_key=True,
-                 include_value=True, verify_checksums=None, fill_cache=None):
+                 include_start=True, include_stop=False, prefix=None,
+                 include_key=True, include_value=True, verify_checksums=None,
+                 fill_cache=None):
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
         iterator = Iterator(
             db=self.db, reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
-            include_key=include_key, include_value=include_value,
-            verify_checksums=verify_checksums, fill_cache=fill_cache,
-            snapshot=self)
+            prefix=prefix, include_key=include_key,
+            include_value=include_value, verify_checksums=verify_checksums,
+            fill_cache=fill_cache, snapshot=self)
         with self.db.lock:
             self.db.iterators[id(iterator)] = iterator
         return iterator
