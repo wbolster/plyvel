@@ -182,8 +182,7 @@ cdef int parse_options(Options *options, bool create_if_missing,
 @cython.final
 cdef class DB:
     cdef leveldb.DB* _db
-    cdef Comparator* comparator
-    cdef Cache* cache
+    cdef Options options
     cdef object lock
     cdef object iterators
 
@@ -194,21 +193,18 @@ cdef class DB:
                  block_restart_interval=None, compression='snappy',
                  int bloom_filter_bits=0, object comparator=None,
                  bytes comparator_name=None):
-        cdef Options options
         cdef Status st
         cdef string fsname
 
         fsname = to_file_system_name(name)
         parse_options(
-            &options, create_if_missing, error_if_exists, paranoid_checks,
+            &self.options, create_if_missing, error_if_exists, paranoid_checks,
             write_buffer_size, max_open_files, lru_cache_size, block_size,
             block_restart_interval, compression, bloom_filter_bits, comparator,
             comparator_name)
         with nogil:
-            st = leveldb.DB_Open(options, fsname, &self._db)
+            st = leveldb.DB_Open(self.options, fsname, &self._db)
         raise_for_status(st)
-        self.cache = options.block_cache
-        self.comparator = <leveldb.Comparator*>options.comparator
 
         # Keep weak references to open iterators, since deleting a C++
         # DB instance results in a segfault if associated Iterator
@@ -231,13 +227,20 @@ cdef class DB:
         if self._db is not NULL:
             del self._db
             self._db = NULL
-        if self.cache is not NULL:
-            del self.cache
-            self.cache = NULL
-        if self.comparator is not NULL:
-            if self.comparator is not BytewiseComparator():
-                del self.comparator
-                self.comparator = NULL
+
+        if self.options.block_cache is not NULL:
+            del self.options.block_cache
+            self.options.block_cache = NULL
+
+        if self.options.filter_policy is not NULL:
+            del self.options.filter_policy
+            self.options.filter_policy = NULL
+
+        if self.options.comparator is not NULL:
+            # The built-in BytewiseComparator must not be deleted
+            if self.options.comparator is not BytewiseComparator():
+                del self.options.comparator
+                self.options.comparator = NULL
 
     property closed:
         def __get__(self):
@@ -539,7 +542,7 @@ cdef class Iterator:
                  bool include_key, bool include_value, bool verify_checksums,
                  bool fill_cache, Snapshot snapshot):
         self.db = db
-        self.comparator = db.comparator
+        self.comparator = <leveldb.Comparator*>db.options.comparator
         self.direction = FORWARD if not reverse else REVERSE
 
         if start is None:
