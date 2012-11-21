@@ -28,6 +28,7 @@ from nose.tools import (
     assert_is_not_none,
     assert_list_equal,
     assert_raises,
+    assert_sequence_equal,
     nottest)
 
 import plyvel
@@ -174,7 +175,6 @@ def test_open_close():
         # ... and on snapshot iterators,
         with assert_raises(RuntimeError):
             next(snapshot_it)
-
 
 
 def test_put():
@@ -666,6 +666,34 @@ def test_iterator_boundaries():
         t(b'2345', start=b'2', stop=b'5', include_stop=True)
         t(b'345', start=b'3', include_stop=False)
         t(b'45', start=b'3', include_start=False, include_stop=False)
+
+
+def test_iterator_prefix():
+    with tmp_db('iterator_prefix') as db:
+        keys = [
+            b'a1', b'a2', b'a3', b'aa4', b'aa5',
+            b'b1', b'b2', b'b3', b'b4', b'b5',
+            b'c1', b'c\xff', b'c\x00',
+            b'\xff\xff', b'\xff\xffa', b'\xff\xff\xff',
+        ]
+        for key in keys:
+            db.put(key, b'')
+
+        assert_raises(TypeError, db.iterator, prefix=b'abc', start=b'a')
+        assert_raises(TypeError, db.iterator, prefix=b'abc', stop=b'a')
+
+        def t(*args, **kwargs):
+            # Positional arguments are the expected ones, keyword
+            # arguments are passed to db.iterator()
+            kwargs.update(include_value=False)
+            actual = list(db.iterator(**kwargs))
+            assert_sequence_equal(args, actual)
+
+        t(prefix=b'd')
+        t(b'b1', prefix=b'b1')
+        t(b'a1', b'a2', b'a3', b'aa4', b'aa5', prefix=b'a')
+        t(b'aa4', b'aa5', prefix=b'aa')
+        t(b'\xff\xff', b'\xff\xffa', b'\xff\xff\xff', prefix=b'\xff\xff')
 
 
 def test_snapshot():
