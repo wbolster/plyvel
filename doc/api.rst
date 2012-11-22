@@ -83,7 +83,7 @@ Database
          Applications should make sure not to close databases that are
          concurrently used from other threads.
 
-      See the description for :cpp:func:`DB` in the LevelDB C++ API for more
+      See the description for :cpp:class:`DB` in the LevelDB C++ API for more
       information. This method deletes the underlying DB handle in the LevelDB
       C++ API also frees other related objects.
 

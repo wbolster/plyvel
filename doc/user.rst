@@ -357,7 +357,7 @@ should return either a positive number, zero, or a negative number, depending on
 whether the first byte string is greater than, equal to or less than the second
 byte string. (These are the same semantics as the built-in :py:func:`cmp()`,
 which has been removed in Python 3 in favour of the so-called ‘rich’ comparison
-method.)
+methods.)
 
 A simple comparator function for case insensitive comparisons might look like
 this::
@@ -399,9 +399,9 @@ exceptions, since there is no proper way to recover from those. If an exception
 happens nonetheless, Plyvel will print the traceback to `stderr` and immediately
 abort your program to avoid database corruption.
 
-A final thing to keep in mind is that custom comparators written in Python will
-come with a considerable performance impact. Experiments with simple Python
-comparator functions like the example below show a 4× slowdown for bulk writes
+A final thing to keep in mind is that custom comparators written in Python come
+with a considerable performance impact. Experiments with simple Python
+comparator functions like the example above show a 4× slowdown for bulk writes
 compared to the built-in LevelDB comparator.
 
 
