@@ -85,7 +85,7 @@ Database
 
       See the description for :cpp:class:`DB` in the LevelDB C++ API for more
       information. This method deletes the underlying DB handle in the LevelDB
-      C++ API also frees other related objects.
+      C++ API and also frees other related objects.
 
 
    .. py:attribute:: closed
