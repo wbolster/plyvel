@@ -146,19 +146,23 @@ Database
       :rtype: :py:class:`WriteBatch`
 
 
-   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
+   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, prefix=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
 
       Create a new :py:class:`Iterator` instance for this database.
+
+      All arguments are optional, and not all arguments can be used together.
+      For example, the `start` and `prefix` arguments are mutually exclusive.
+      Note that, due to the whay the `prefix` support is implemented, this
+      feature only works reliably when the default DB comparator is used.
 
       See the :py:class:`Iterator` API for more information.
 
       :param bool reverse: whether the iterator should iterate in reverse order
       :param bytes start: the start key (inclusive) of the iterator range
-                          (optional)
       :param bytes stop: the stop key (exclusive) of the iterator range
-                         (optional)
       :param bool include_start: whether to include the start key in the range
       :param bool include_stop: whether to include the stop key in the range
+      :param bytes prefix: prefix that all keys in the the range must have
       :param bool include_key: whether to include keys in the returned data
       :param bool include_value: whether to include values in the returned data
       :param bool verify_checksums: whether to verify checksums
@@ -340,7 +344,7 @@ Snapshot
       Same as :py:meth:`DB.get`, but operates on the snapshot instead.
 
 
-   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
+   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, prefix=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
 
       Create a new :py:class:`Iterator` instance for this snapshot.
 

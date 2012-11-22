@@ -563,11 +563,8 @@ cdef class Iterator:
             if start is not None or stop is not None:
                 raise TypeError(
                     "'prefix' cannot be used together with 'start' or 'stop'")
-
             start = prefix
             stop = bytes_increment(prefix)
-            # TODO: this doesn't work in all tests for some reason
-            raise NotImplementedError()
 
         if start is not None:
             self.start = start

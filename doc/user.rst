@@ -262,6 +262,23 @@ arguments::
     key-4
     key-5
 
+Instead of specifying `start` and `stop` keys, you can also specify a `prefix`
+for keys. In this case the iterator will only return key/value pairs whose key
+starts with the specified prefix. In our example, all keys have the same prefix,
+so this will return all key/value pairs:
+
+    >>> for key, value in db.iterator(prefix=b'ke'):
+    ...     print(key)
+    key-1
+    key-2
+    key-3
+    key-4
+    key-5
+    >>> for key, value in db.iterator(prefix=b'key-4'):
+    ...     print(key)
+    key-4
+
+
 Limiting the returned data
 --------------------------
 
