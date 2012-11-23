@@ -373,9 +373,13 @@ cdef class DB:
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=None)
+        self._register_iterator(iterator)
+        return iterator
+
+    cdef _register_iterator(self, Iterator iterator):
+        # Store a weak reference to an iterator (needed when closing DB)
         with self.lock:
             self.iterators[id(iterator)] = iterator
-        return iterator
 
     def snapshot(self):
         return Snapshot(db=self)
@@ -987,6 +991,5 @@ cdef class Snapshot:
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=self)
-        with self.db.lock:
-            self.db.iterators[id(iterator)] = iterator
+        self.db._register_iterator(iterator)
         return iterator
