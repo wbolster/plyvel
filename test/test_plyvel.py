@@ -696,6 +696,11 @@ def test_iterator_prefix():
         t(b'aa4', b'aa5', prefix=b'aa')
         t(b'\xff\xff', b'\xff\xffa', b'\xff\xff\xff', prefix=b'\xff\xff')
 
+        # The include_start and include_stop make no sense, so should
+        # not affect the behaviour
+        t(b'a1', b'a2', b'a3', b'aa4', b'aa5',
+          prefix=b'a', include_start=False, include_stop=True)
+
 
 def test_snapshot():
     with tmp_db('snapshot') as db:
