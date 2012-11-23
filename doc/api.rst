@@ -150,12 +150,17 @@ Database
 
       Create a new :py:class:`Iterator` instance for this database.
 
-      All arguments are optional, and not all arguments can be used together.
-      For example, the `start` and `prefix` arguments are mutually exclusive.
-      Note that, due to the whay the `prefix` support is implemented, this
-      feature only works reliably when the default DB comparator is used.
+      All arguments are optional, and not all arguments can be used together,
+      because some combinations make no sense. In particular:
+      
+      * `start` and `stop` cannot be used if a `prefix` is specified.
+      * `include_start` and `include_stop` are only used if `start` and `stop`
+        are specified.
+      
+      Note: due to the whay the `prefix` support is implemented, this feature
+      only works reliably when the default DB comparator is used.
 
-      See the :py:class:`Iterator` API for more information.
+      See the :py:class:`Iterator` API for more information about iterators.
 
       :param bool reverse: whether the iterator should iterate in reverse order
       :param bytes start: the start key (inclusive) of the iterator range
