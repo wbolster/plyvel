@@ -116,11 +116,24 @@ cdef bytes to_file_system_name(name):
 
 
 cdef bytes bytes_increment(bytes s):
-    for i in xrange(len(s) - 1, -1, -1):
-        if s[i] != '\xff':
-            return s[:i] + chr(ord(s[i:]) + 1)
+    # Increment the last byte that is not 0xff, and returned a new byte
+    # string truncated after the position that was incremented. We use
+    # a temporary bytearray to construct a new byte string, since that
+    # works the same in Python 2 and Python 3.
 
-    return None  # byte string contained 0xff bytes only
+    b = bytearray(s)
+    cdef int i = len(s) - 1
+    while i >= 0:
+        if b[i] == 0xff:
+            i = i - 1
+            continue
+
+        # Found byte smaller than 0xff: increment and truncate
+        b[i] += 1
+        return bytes(b[:i + 1])
+
+    # Input contained only 0xff bytes
+    return None
 
 
 cdef int parse_options(Options *options, bool create_if_missing,

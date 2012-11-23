@@ -689,6 +689,7 @@ def test_iterator_prefix():
             actual = list(db.iterator(**kwargs))
             assert_sequence_equal(args, actual)
 
+        t(*sorted(keys), prefix=b'')
         t(prefix=b'd')
         t(b'b1', prefix=b'b1')
         t(b'a1', b'a2', b'a3', b'aa4', b'aa5', prefix=b'a')
