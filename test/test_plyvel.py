@@ -961,6 +961,8 @@ def test_prefixed_db():
         assert_equal(13, len(list(it)))
         it = db_a.iterator(include_stop=True)
         assert_equal(1000, len(list(it)))
+        it = db_a.iterator(prefix=b'10')
+        assert_equal(10, len(list(it)))
 
         # Snapshots
         sn_a = db_a.snapshot()
@@ -968,9 +970,11 @@ def test_prefixed_db():
         db_a.put(b'042', b'new')
         assert_equal(b'', sn_a.get(b'042'))
         assert_equal(b'new', db_a.get(b'042'))
-        with assert_raises(NotImplementedError):
-            # TODO: snapshot iterators
-            sn_a.iterator()
+
+        # Snapshot iterators
+        sn_a.iterator()
+        it = sn_a.iterator(start=b'900')
+        assert_equal(100, len(list(it)))
 
         # Write batches
         wb = db_a.write_batch()

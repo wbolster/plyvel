@@ -196,6 +196,31 @@ cdef int parse_options(Options *options, bool create_if_missing,
             comparator_name, comparator)
 
 
+cdef transform_prefixed_db_iter_args(
+        db_prefix, start, stop, include_start, include_stop, prefix):
+    # This is an helper function to transform args passed to the
+    # .iterator() method for prefixed databases and snapshots on
+    # prefixed databases, so that the database prefix is properly take
+    # into account.
+
+    if prefix is not None:
+        prefix = db_prefix + prefix
+    else:
+        if start is None:
+            start = db_prefix
+            include_start = True
+        else:
+            start = db_prefix + start
+
+        if stop is None:
+            stop = bytes_increment(db_prefix)
+            include_stop = False
+        else:
+            stop = db_prefix + stop
+
+    return start, stop, include_start, include_stop, prefix
+
+
 #
 # Database
 #
@@ -455,34 +480,21 @@ cdef class PrefixedDB:
         # to be confused with the 'self.prefix' of a PrefixedDB
         # instance!
 
-        if prefix is not None:
-            prefix = self.prefix + prefix
-        else:
-            if start is None:
-                start = self.prefix
-                include_start = True
-            else:
-                start = self.prefix + start
+        transformed = transform_prefixed_db_iter_args(
+            self.prefix, start, stop, include_start, include_stop, prefix)
+        start, stop, include_start, include_stop, prefix = transformed
 
-            if stop is None:
-                stop = bytes_increment(self.prefix)
-                include_stop = False
-            else:
-                stop = self.prefix + stop
-
+        # We delegate to the real DB.iterator(), which is public API
+        # that we don't want to clutter with a skip_key_bytes arg that
+        # is only used internally. Instead we just set the value
+        # directly on the Iterator instance.
         cdef Iterator iterator = self.db.iterator(
             reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache)
-
-        # We delegate to the real DB.iterator(), which is public API
-        # that we don't want to clutter with a skip_key_bytes arg that
-        # is only used internally. Instead we just set the value
-        # directly on the Iterator instance.
         iterator.skip_key_bytes = len(self.prefix)
-
         return iterator
 
     def snapshot(self):
@@ -964,8 +976,10 @@ cdef class Snapshot:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
         if self.prefix is not None:
-            raise NotImplementedError(
-                "Prefixed snapshot iterators have not been implemented yet")
+            # This is a snapshot on a PrefixedDB instance
+            transformed = transform_prefixed_db_iter_args(
+                self.prefix, start, stop, include_start, include_stop, prefix)
+            start, stop, include_start, include_stop, prefix = transformed
 
         iterator = Iterator(
             db=self.db, reverse=reverse, start=start, stop=stop,
