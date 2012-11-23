@@ -165,6 +165,7 @@ def test_open_close():
             wb.put(b'key', b'value')
 
         # ... on snapshots,
+        assert_raises(RuntimeError, db.snapshot)
         with assert_raises(RuntimeError):
             sn.get(b'key')
 
@@ -921,3 +922,73 @@ def test_comparator():
         assert_list_equal(
             sorted(keys, key=lambda s: s.lower()),
             list(db.iterator(include_value=False)))
+
+
+def test_prefixed_db():
+    with tmp_db('prefixed') as db:
+        for prefix in (b'a', b'b'):
+            for i in xrange(1000):
+                key = prefix + '{:03d}'.format(i).encode('ascii')
+                db.put(key, b'')
+
+        db_a = db.prefixed_db(b'a')
+        db_b = db.prefixed_db(b'b')
+
+        # Access original db
+        assert db_a.db is db
+
+        # Basic operations
+        key = b'123'
+        assert_is_not_none(db_a.get(key))
+        db_a.put(key, b'foo')
+        assert_equal(b'foo', db_a.get(key))
+        db_a.delete(key)
+        assert_is_none(db_a.get(key))
+        db_a.put(key, b'foo')
+        assert_equal(b'foo', db.get(b'a123'))
+
+        # Iterators
+        assert_equal(1000, len(list(db_a)))
+        it = db_a.iterator(include_value=False)
+        assert_equal(b'000', next(it))
+        assert_equal(b'001', next(it))
+        assert_equal(998, len(list(it)))
+        it = db_a.iterator(start=b'900')
+        assert_equal(100, len(list(it)))
+        it = db_a.iterator(stop=b'012', include_stop=True)
+        assert_equal(13, len(list(it)))
+        it = db_a.iterator(include_stop=True)
+        assert_equal(1000, len(list(it)))
+
+        # Snapshots
+        sn_a = db_a.snapshot()
+        assert_equal(b'', sn_a.get(b'042'))
+        db_a.put(b'042', b'new')
+        assert_equal(b'', sn_a.get(b'042'))
+        assert_equal(b'new', db_a.get(b'042'))
+        with assert_raises(NotImplementedError):
+            # TODO: snapshot iterators
+            sn_a.iterator()
+
+        # Write batches
+        wb = db_a.write_batch()
+        wb.put(b'0002', b'foo')
+        wb.delete(b'0003')
+        wb.write()
+        assert_equal(b'foo', db_a.get(b'0002'))
+        assert_is_none(db_a.get(b'0003'))
+
+        # Delete all data in db_a
+        for key in db_a.iterator(include_value=False):
+            db_a.delete(key)
+        assert_equal(0, len(list(db_a)))
+
+        # The complete db and the 'b' prefix should remain untouched
+        assert_equal(1000, len(list(db)))
+        assert_equal(1000, len(list(db_b)))
+
+        # Prefixed prefixed databases (recursive)
+        db_b12 = db_b.prefixed_db(b'12')
+        it = db_b12.iterator(include_value=False)
+        assert_equal(b'0', next(it))
+        assert_equal(9, len(list(it)))
