@@ -470,7 +470,7 @@ cdef class PrefixedDB:
             else:
                 stop = self.prefix + stop
 
-        iterator = self.db.iterator(
+        cdef Iterator iterator = self.db.iterator(
             reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
@@ -481,7 +481,7 @@ cdef class PrefixedDB:
         # that we don't want to clutter with a skip_key_bytes arg that
         # is only used internally. Instead we just set the value
         # directly on the Iterator instance.
-        (<Iterator>iterator).skip_key_bytes = len(self.prefix)
+        iterator.skip_key_bytes = len(self.prefix)
 
         return iterator
 
