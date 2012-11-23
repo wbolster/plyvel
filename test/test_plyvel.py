@@ -955,6 +955,8 @@ def test_prefixed_db():
         assert_equal(998, len(list(it)))
         it = db_a.iterator(start=b'900')
         assert_equal(100, len(list(it)))
+        it = db_a.iterator(stop=b'012', include_stop=False)
+        assert_equal(12, len(list(it)))
         it = db_a.iterator(stop=b'012', include_stop=True)
         assert_equal(13, len(list(it)))
         it = db_a.iterator(include_stop=True)

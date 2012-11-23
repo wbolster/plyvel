@@ -460,13 +460,13 @@ cdef class PrefixedDB:
         else:
             if start is None:
                 start = self.prefix
-                include_start = True  # XXX: is this correct?
+                include_start = True
             else:
                 start = self.prefix + start
 
             if stop is None:
                 stop = bytes_increment(self.prefix)
-                include_stop = False  # XXX: is this correct?
+                include_stop = False
             else:
                 stop = self.prefix + stop
 
