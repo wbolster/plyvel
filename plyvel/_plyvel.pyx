@@ -353,9 +353,6 @@ cdef class DB:
         return iterator
 
     def snapshot(self):
-        if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
-
         return Snapshot(db=self)
 
     def get_property(self, bytes name not None):
@@ -418,6 +415,82 @@ cdef class DB:
             free(c_ranges)
             free(sizes)
 
+    def prefixed_db(self, bytes prefix not None):
+        return PrefixedDB(db=self, prefix=prefix)
+
+
+cdef class PrefixedDB:
+    cdef readonly DB db
+    cdef readonly bytes prefix
+
+    def __init__(self, *, db, prefix):
+        self.db = db
+        self.prefix = prefix
+
+    def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
+        return self.db.get(
+            self.prefix + key,
+            verify_checksums=verify_checksums,
+            fill_cache=fill_cache)
+
+    def put(self, bytes key, bytes value, *, sync=None):
+        return self.db.put(self.prefix + key, value, sync=sync)
+
+    def delete(self, bytes key, *, sync=None):
+        return self.db.delete(self.prefix + key, sync=sync)
+
+    def write_batch(self, *, transaction=False, sync=None):
+        return WriteBatch(
+            db=self.db, prefix=self.prefix, transaction=transaction, sync=sync)
+
+    def __iter__(self):
+        return self.iterator()
+
+    def iterator(self, *, reverse=False, start=None, stop=None,
+                 include_start=True, include_stop=False, prefix=None,
+                 include_key=True, include_value=True, verify_checksums=None,
+                 fill_cache=None):
+
+        # XXX: the 'prefix' arg is part of the iterator() API, and not
+        # to be confused with the 'self.prefix' of a PrefixedDB
+        # instance!
+
+        if prefix is not None:
+            prefix = self.prefix + prefix
+        else:
+            if start is None:
+                start = self.prefix
+                include_start = True  # XXX: is this correct?
+            else:
+                start = self.prefix + start
+
+            if stop is None:
+                stop = bytes_increment(self.prefix)
+                include_stop = False  # XXX: is this correct?
+            else:
+                stop = self.prefix + stop
+
+        iterator = self.db.iterator(
+            reverse=reverse, start=start, stop=stop,
+            include_start=include_start, include_stop=include_stop,
+            prefix=prefix, include_key=include_key,
+            include_value=include_value, verify_checksums=verify_checksums,
+            fill_cache=fill_cache)
+
+        # We delegate to the real DB.iterator(), which is public API
+        # that we don't want to clutter with a skip_key_bytes arg that
+        # is only used internally. Instead we just set the value
+        # directly on the Iterator instance.
+        (<Iterator>iterator).skip_key_bytes = len(self.prefix)
+
+        return iterator
+
+    def snapshot(self):
+        return Snapshot(db=self.db, prefix=self.prefix)
+
+    def prefixed_db(self, bytes prefix not None):
+        return PrefixedDB(db=self.db, prefix=self.prefix + prefix)
+
 
 def repair_db(name, *, paranoid_checks=None, write_buffer_size=None,
               max_open_files=None, lru_cache_size=None, block_size=None,
@@ -461,10 +534,12 @@ cdef class WriteBatch:
     cdef leveldb.WriteBatch* _write_batch
     cdef WriteOptions write_options
     cdef DB db
+    cdef bytes prefix
     cdef bool transaction
 
-    def __init__(self, *, DB db not None, bool transaction=False, sync=None):
+    def __init__(self, *, DB db not None, bytes prefix=None, bool transaction=False, sync=None):
         self.db = db
+        self.prefix = prefix
         self.transaction = transaction
 
         self.write_options = WriteOptions()
@@ -480,6 +555,9 @@ cdef class WriteBatch:
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
+        if self.prefix is not None:
+            key = self.prefix + key
+
         cdef Slice key_slice = Slice(key, len(key))
         cdef Slice value_slice = Slice(value, len(value))
         with nogil:
@@ -488,6 +566,9 @@ cdef class WriteBatch:
     def delete(self, bytes key):
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
+
+        if self.prefix is not None:
+            key = self.prefix + key
 
         cdef Slice key_slice = Slice(key, len(key))
         with nogil:
@@ -560,6 +641,11 @@ cdef class Iterator:
     cdef bool include_key
     cdef bool include_value
 
+    # This is the number of bytes that should be skipped over when
+    # returning keys from .current(). This avoids Python byte string
+    # copying/slicing overhead for PrefixedDB iterators.
+    cdef int skip_key_bytes
+
     # Iterators need to be weak referencable to ensure a proper cleanup
     # from DB.close()
     cdef object __weakref__
@@ -569,6 +655,7 @@ cdef class Iterator:
                  bytes prefix, bool include_key, bool include_value,
                  bool verify_checksums, bool fill_cache, Snapshot snapshot):
         self.db = db
+        self.skip_key_bytes = 0
         self.comparator = <leveldb.Comparator*>db.options.comparator
         self.direction = FORWARD if not reverse else REVERSE
 
@@ -643,7 +730,8 @@ cdef class Iterator:
         # Only build Python strings that will be returned
         if self.include_key:
             key_slice = self._iter.key()
-            key = key_slice.data()[:key_slice.size()]
+            key = key_slice.data()[self.skip_key_bytes:key_slice.size()]
+
         if self.include_value:
             value_slice = self._iter.value()
             value = value_slice.data()[:value_slice.size()]
@@ -830,9 +918,14 @@ cdef class Iterator:
 cdef class Snapshot:
     cdef leveldb.Snapshot* _snapshot
     cdef DB db
+    cdef bytes prefix
 
-    def __init__(self, *, DB db not None):
+    def __init__(self, *, DB db not None, bytes prefix=None):
+        if db._db is NULL:
+            raise RuntimeError("Cannot operate on closed LevelDB database")
+
         self.db = db
+        self.prefix = prefix
         with nogil:
             self._snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
 
@@ -852,6 +945,9 @@ cdef class Snapshot:
         if fill_cache is not None:
             read_options.fill_cache = fill_cache
 
+        if self.prefix is not None:
+            key = self.prefix + key
+
         return db_get(self.db, key, read_options)
 
     def __iter__(self):
@@ -866,6 +962,10 @@ cdef class Snapshot:
                  fill_cache=None):
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
+
+        if self.prefix is not None:
+            raise NotImplementedError(
+                "Prefixed snapshot iterators have not been implemented yet")
 
         iterator = Iterator(
             db=self.db, reverse=reverse, start=start, stop=stop,
