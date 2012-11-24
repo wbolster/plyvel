@@ -993,6 +993,9 @@ cdef class Snapshot:
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=self)
-        iterator.skip_key_bytes = len(self.prefix)
+
+        if self.prefix is not None:
+            iterator.skip_key_bytes = len(self.prefix)
+
         self.db._register_iterator(iterator)
         return iterator
