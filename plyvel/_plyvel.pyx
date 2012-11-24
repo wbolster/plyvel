@@ -979,17 +979,20 @@ cdef class Snapshot:
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
+        # XXX: See DB.iterator() for more information.
+
         if self.prefix is not None:
             # This is a snapshot on a PrefixedDB instance
             transformed = transform_prefixed_db_iter_args(
                 self.prefix, start, stop, include_start, include_stop, prefix)
             start, stop, include_start, include_stop, prefix = transformed
 
-        iterator = Iterator(
+        cdef Iterator iterator = Iterator(
             db=self.db, reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=self)
+        iterator.skip_key_bytes = len(self.prefix)
         self.db._register_iterator(iterator)
         return iterator

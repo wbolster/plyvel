@@ -973,8 +973,10 @@ def test_prefixed_db():
 
         # Snapshot iterators
         sn_a.iterator()
-        it = sn_a.iterator(start=b'900')
-        assert_equal(100, len(list(it)))
+        it = sn_a.iterator(
+            start=b'900', include_start=False, include_value=False)
+        assert_equal(b'901', next(it))
+        assert_equal(98, len(list(it)))
 
         # Write batches
         wb = db_a.write_batch()
