@@ -152,11 +152,11 @@ Database
 
       All arguments are optional, and not all arguments can be used together,
       because some combinations make no sense. In particular:
-      
+
       * `start` and `stop` cannot be used if a `prefix` is specified.
       * `include_start` and `include_stop` are only used if `start` and `stop`
         are specified.
-      
+
       Note: due to the whay the `prefix` support is implemented, this feature
       only works reliably when the default DB comparator is used.
 
@@ -241,9 +241,72 @@ Database
       :return: approximate sizes for the specified ranges
       :rtype: list
 
+   .. py:method:: prefixed_db(prefix)
 
-Additionally, existing databases can be repaired or destroyed using these module
-level functions:
+      Return a new :py:class:`PrefixedDB` instance for this database.
+
+      See the :py:class:`PrefixedDB` API for more information.
+
+      :param bytes prefix: prefix to use
+      :return: new :py:class:`PrefixedDB` instance
+      :rtype: :py:class:`PrefixedDB`
+
+
+Prefixed database
+-----------------
+
+.. py:class:: PrefixedDB
+
+   A :py:class:`DB`-like object that transparently prefixes all database keys.
+
+   Do not instantiate directly; use :py:meth:`DB.prefixed_db` instead.
+
+   .. py:attribute:: prefix
+
+      The prefix used by this :py:class:`PrefixedDB`.
+
+   .. py:attribute:: db
+
+      The underlying :py:class:`DB` instance.
+
+   .. py:method:: get(...)
+
+      See :py:meth:`DB.get`.
+
+   .. py:method:: put(...)
+
+      See :py:meth:`DB.put`.
+
+   .. py:method:: delete(...)
+
+      See :py:meth:`DB.delete`.
+
+   .. py:method:: write_batch(...)
+
+      See :py:meth:`DB.write_batch`.
+
+   .. py:method:: iterator(...)
+
+      See :py:meth:`DB.iterator`.
+
+   .. py:method:: snapshot(...)
+
+      See :py:meth:`DB.snapshot`.
+
+   .. py:method:: prefixed_db(...)
+
+      Create another :py:class:`PrefixedDB` instance with an additional key
+      prefix, which will be appended to the prefix used by this
+      :py:class:`PrefixedDB` instance.
+
+      See :py:meth:`DB.prefixed_db`.
+
+
+Database maintenance
+--------------------
+
+Existing databases can be repaired or destroyed using these module level
+functions:
 
 .. py:function:: repair_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
 

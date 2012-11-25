@@ -278,7 +278,6 @@ so this will return all key/value pairs:
     ...     print(key)
     key-4
 
-
 Limiting the returned data
 --------------------------
 
@@ -360,6 +359,39 @@ Additionally, Plyvel supports seeking on iterators. See the :py:class:`Iterator`
 API reference for more information about advanced iterator usage.
 
 
+Prefixed databases
+==================
+
+LevelDB databases have a single key space. A common way to split a LevelDB
+database into separate partitions is to use a prefix for each partition. Plyvel
+makes this very easy to do using the :py:meth:`DB.prefixed_db` method:
+
+    >>> my_sub_db = db.prefixed_db(b'example-')
+
+The ``my_sub_db`` variable in this example points to an instance of the
+:py:class:`PrefixedDB` class. This class behaves mostly like a normal Plyvel
+:py:class:`DB` instance, but all operations will transparently add the key
+prefix to all keys that it accepts (e.g. in :py:meth:`PrefixedDB.get`), and
+strip the key prefix from all keys that it returns (e.g. from
+:py:meth:`PrefixedDB.iterator`). Examples::
+
+    >>> my_sub_db.get(b'some-key')  # this looks up b'example-some-key'
+    >>> my_sub_db.get(b'some-key', b'value')  # this sets b'example-some-key'
+
+Almost all functionality available on :py:class:`DB` is also available from
+:py:class:`PrefixedDB`: write batches, iterators, snapshots, and also iterators
+over snapshots. A :py:class:`PrefixedDB` is simply a lightweight object that
+delegates to the the real :py:class:`DB`, which is accessible using the
+:py:attr:`~PrefixedDB.db` attribute:
+
+    >>> real_db = my_sub_db.db
+
+You can even nest key spaces by creating prefixed prefixed databases using
+:py:meth:`PrefixedDB.prefixed_db`:
+
+    >>> my_sub_sub_db = my_sub_db.prefixed_db(b'other-prefix')
+
+
 Custom comparators
 ==================
 
@@ -424,7 +456,7 @@ compared to the built-in LevelDB comparator.
 
 .. rubric:: Next steps
 
-A complete description of the Plyvel API is available from the :doc:`API
-reference <api>`. The tutorial above should be enough to get you started though.
+The user guide should be enough to get you started with Plyvel. A complete
+description of the Plyvel API is available from the :doc:`API reference <api>`.
 
 .. vim: set spell spelllang=en:
