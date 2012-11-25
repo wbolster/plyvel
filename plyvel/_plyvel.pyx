@@ -196,31 +196,6 @@ cdef int parse_options(Options *options, bool create_if_missing,
             comparator_name, comparator)
 
 
-cdef transform_prefixed_db_iter_args(
-        db_prefix, start, stop, include_start, include_stop, prefix):
-    # This is an helper function to transform args passed to the
-    # .iterator() method for prefixed databases and snapshots on
-    # prefixed databases, so that the database prefix is properly take
-    # into account.
-
-    if prefix is not None:
-        prefix = db_prefix + prefix
-    else:
-        if start is None:
-            start = db_prefix
-            include_start = True
-        else:
-            start = db_prefix + start
-
-        if stop is None:
-            stop = bytes_increment(db_prefix)
-            include_stop = False
-        else:
-            stop = db_prefix + stop
-
-    return start, stop, include_start, include_stop, prefix
-
-
 #
 # Database
 #
@@ -364,9 +339,6 @@ cdef class DB:
                  include_start=True, include_stop=False, prefix=None,
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
-        if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
-
         return Iterator(
             db=self, key_prefix=None, reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
@@ -477,15 +449,6 @@ cdef class PrefixedDB:
                  include_start=True, include_stop=False, prefix=None,
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
-
-        # XXX: the 'prefix' arg is part of the iterator() API, and not
-        # to be confused with the 'self.prefix' of a PrefixedDB
-        # instance!
-
-        transformed = transform_prefixed_db_iter_args(
-            self.prefix, start, stop, include_start, include_stop, prefix)
-        start, stop, include_start, include_stop, prefix = transformed
-
         return Iterator(
             db=self.db, key_prefix=self.prefix, reverse=reverse, start=start,
             stop=stop, include_start=include_start, include_stop=include_stop,
@@ -663,6 +626,9 @@ cdef class Iterator:
                  bool include_stop, bytes prefix, bool include_key,
                  bool include_value, bool verify_checksums, bool fill_cache,
                  Snapshot snapshot):
+        if db._db is NULL:
+            raise RuntimeError("Cannot operate on closed LevelDB database")
+
         self.db = db
         self.comparator = <leveldb.Comparator*>db.options.comparator
         self.direction = FORWARD if not reverse else REVERSE
@@ -670,7 +636,26 @@ cdef class Iterator:
         if key_prefix is None:
             self.skip_key_bytes = 0
         else:
+            # This is an iterator on a PrefixedDB. Transform args so
+            # that the database key prefix is taken into account.
             self.skip_key_bytes = len(key_prefix)
+            if prefix is not None:
+                # Both database key prefix and prefix on the iterator
+                prefix = key_prefix + prefix
+            else:
+                # Adapt start and stop keys to use the database key
+                # prefix.
+                if start is None:
+                    start = key_prefix
+                    include_start = True
+                else:
+                    start = key_prefix + start
+
+                if stop is None:
+                    stop = bytes_increment(key_prefix)
+                    include_stop = False
+                else:
+                    stop = key_prefix + stop
 
         if prefix is not None:
             if start is not None or stop is not None:
@@ -975,17 +960,6 @@ cdef class Snapshot:
                  include_start=True, include_stop=False, prefix=None,
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
-        if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
-
-        # XXX: See DB.iterator() for more information.
-
-        if self.prefix is not None:
-            # This is a snapshot on a PrefixedDB instance
-            transformed = transform_prefixed_db_iter_args(
-                self.prefix, start, stop, include_start, include_stop, prefix)
-            start, stop, include_start, include_stop, prefix = transformed
-
         return Iterator(
             db=self.db, key_prefix=self.prefix, reverse=reverse, start=start,
             stop=stop, include_start=include_start, include_stop=include_stop,
