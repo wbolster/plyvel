@@ -1,8 +1,3 @@
-.. Plyvel documentation master file, created by
-   sphinx-quickstart on Sun Nov 11 17:26:23 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 ======
 Plyvel
 ======
@@ -13,21 +8,27 @@ Plyvel's key features are:
 
 * **Rich feature set**
 
-  Plyvel wraps most of the LevelDB C++ API, so in addition to basic features
-  like getting, putting and deleting data, Plyvel allows you to use write
-  batches, database snapshots, very flexible iterators, bloom filters, custom
-  cache sizes, custom comparators, and other goodness LevelDB has to offer.
-
-* **High performance**
-
-  Plyvel executes all performance-critical code at C speed (using Cython_),
-  which means Plyvel is a good fit for high performance applications.
+  Plyvel wraps most of the LevelDB C++ API and adds some features of its own. In
+  addition to basic features like getting, putting and deleting data, Plyvel
+  allows you to use write batches, database snapshots, very flexible iterators,
+  prefixed databases, bloom filters, custom cache sizes, custom comparators, and
+  other goodness LevelDB has to offer.
 
 * **Friendly Pythonic API**
 
   Plyvel has a friendly and well-designed API that uses Python idioms like
   iterators and context managers (``with`` blocks), without sacrificing the
   power or performance of the underlying LevelDB C++ API.
+
+* **High performance**
+
+  Plyvel executes all performance-critical code at C speed (using Cython_),
+  which means Plyvel is a good fit for high performance applications.
+
+* **Extensive documentation**
+
+  Plyvel comes with extensive documentation, including a user guide and API
+  reference material.
 
 * **Python 2 and Python 3 compatibility**
 
