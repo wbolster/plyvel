@@ -342,14 +342,14 @@ Snapshot
    :cpp:func:`DB::ReleaseSnapshot` in the LevelDB C++ API for more information.
 
 
-   .. py:method:: get(key, verify_checksums=None, fill_cache=None)
+   .. py:method:: get(...)
 
       Get the value for the specified key, or `None` if no value was set.
 
       Same as :py:meth:`DB.get`, but operates on the snapshot instead.
 
 
-   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, prefix=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
+   .. py:method:: iterator(...)
 
       Create a new :py:class:`Iterator` instance for this snapshot.
 
