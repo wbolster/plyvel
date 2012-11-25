@@ -286,6 +286,10 @@ Write batch
    ``finally`` clause), but if transaction mode is enabled`, the batch will be
    discarded (this is like a ``try`` statement with an ``else`` clause).
 
+   Note methods on a :py:class:`WriteBatch` do not take a `sync` argument; this
+   flag can be specified for the complete write batch when it is created using
+   :py:meth:`DB.write_batch`.
+
    Do not instantiate directly; use :py:meth:`DB.write_batch` instead.
 
    See the descriptions for :cpp:class:`WriteBatch` and :cpp:func:`DB::Write` in
