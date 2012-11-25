@@ -367,14 +367,12 @@ cdef class DB:
         if self._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
-        iterator = Iterator(
-            db=self, reverse=reverse, start=start, stop=stop,
+        return Iterator(
+            db=self, key_prefix=None, reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=None)
-        self._register_iterator(iterator)
-        return iterator
 
     cdef _register_iterator(self, Iterator iterator):
         # Store a weak reference to an iterator (needed when closing DB)
@@ -488,18 +486,12 @@ cdef class PrefixedDB:
             self.prefix, start, stop, include_start, include_stop, prefix)
         start, stop, include_start, include_stop, prefix = transformed
 
-        # We delegate to the real DB.iterator(), which is public API
-        # that we don't want to clutter with a skip_key_bytes arg that
-        # is only used internally. Instead we just set the value
-        # directly on the Iterator instance.
-        cdef Iterator iterator = self.db.iterator(
-            reverse=reverse, start=start, stop=stop,
-            include_start=include_start, include_stop=include_stop,
+        return Iterator(
+            db=self.db, key_prefix=self.prefix, reverse=reverse, start=start,
+            stop=stop, include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
-            fill_cache=fill_cache)
-        iterator.skip_key_bytes = len(self.prefix)
-        return iterator
+            fill_cache=fill_cache, snapshot=None)
 
     def snapshot(self):
         return Snapshot(db=self.db, prefix=self.prefix)
@@ -666,14 +658,19 @@ cdef class Iterator:
     # from DB.close()
     cdef object __weakref__
 
-    def __init__(self, *, DB db not None, bool reverse, bytes start,
-                 bytes stop, bool include_start, bool include_stop,
-                 bytes prefix, bool include_key, bool include_value,
-                 bool verify_checksums, bool fill_cache, Snapshot snapshot):
+    def __init__(self, *, DB db not None, key_prefix, bool reverse,
+                 bytes start, bytes stop, bool include_start,
+                 bool include_stop, bytes prefix, bool include_key,
+                 bool include_value, bool verify_checksums, bool fill_cache,
+                 Snapshot snapshot):
         self.db = db
-        self.skip_key_bytes = 0
         self.comparator = <leveldb.Comparator*>db.options.comparator
         self.direction = FORWARD if not reverse else REVERSE
+
+        if key_prefix is None:
+            self.skip_key_bytes = 0
+        else:
+            self.skip_key_bytes = len(key_prefix)
 
         if prefix is not None:
             if start is not None or stop is not None:
@@ -713,6 +710,8 @@ cdef class Iterator:
             self.seek_to_start()
         else:
             self.seek_to_stop()
+
+        db._register_iterator(self)
         raise_for_status(self._iter.status())
 
     cdef close(self):
@@ -987,15 +986,9 @@ cdef class Snapshot:
                 self.prefix, start, stop, include_start, include_stop, prefix)
             start, stop, include_start, include_stop, prefix = transformed
 
-        cdef Iterator iterator = Iterator(
-            db=self.db, reverse=reverse, start=start, stop=stop,
-            include_start=include_start, include_stop=include_stop,
+        return Iterator(
+            db=self.db, key_prefix=self.prefix, reverse=reverse, start=start,
+            stop=stop, include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=self)
-
-        if self.prefix is not None:
-            iterator.skip_key_bytes = len(self.prefix)
-
-        self.db._register_iterator(iterator)
-        return iterator
