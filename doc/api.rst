@@ -2,19 +2,8 @@
 API reference
 =============
 
-Plyvel exposes the :py:class:`DB` class as the main interface to LevelDB.
-Application code should create a :py:class:`DB` and use the appropriate methods
-on this instance to create write batches, snapshots, and iterators for that
-LevelDB database.
-
-Plyvel's :py:class:`Iterator` is intended to be used like a normal Python
-iterator, so you can just use a standard ``for`` loop to iterate over it.
-Directly invoking methods on the :py:class:`Iterator` returned by
-:py:meth:`DB.iterator` method is only required for additional functionality.
-
-Plyvel uses standard exceptions like ``TypeError`` and ``ValueError`` as much as
-possible. For LevelDB specific errors, Plyvel may raise a few custom exceptions:
-:py:class:`Error`, :py:class:`IOError`, and :py:class:`CorruptionError`.
+This document is the API reference for Plyvel. It describes all classes,
+methods, functions, and attributes that are part of the public API.
 
 Most of the terminology in the Plyvel API comes straight from the LevelDB API.
 See the LevelDB documentation and the LevelDB header files
@@ -24,6 +13,11 @@ and options.
 
 Database
 ========
+
+Plyvel exposes the :py:class:`DB` class as the main interface to LevelDB.
+Application code should create a :py:class:`DB` and use the appropriate methods
+on this instance to create write batches, snapshots, and iterators for that
+LevelDB database.
 
 .. py:class:: DB
 
@@ -426,6 +420,11 @@ Snapshot
 Iterator
 ========
 
+Plyvel's :py:class:`Iterator` is intended to be used like a normal Python
+iterator, so you can just use a standard ``for`` loop to iterate over it.
+Directly invoking methods on the :py:class:`Iterator` returned by
+:py:meth:`DB.iterator` method is only required for additional functionality.
+
 .. py:class:: Iterator
 
    Iterator to iterate over (ranges of) a database
@@ -476,6 +475,10 @@ Iterator
 
 Errors
 ======
+
+Plyvel uses standard exceptions like ``TypeError`` and ``ValueError`` as much as
+possible. For LevelDB specific errors, Plyvel may raise a few custom exceptions:
+:py:class:`Error`, :py:class:`IOError`, and :py:class:`CorruptionError`.
 
 .. py:exception:: Error
 
