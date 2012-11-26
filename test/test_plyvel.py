@@ -47,7 +47,7 @@ def tmp_db(name_prefix, create=True, delete=True):
     if create:
         db = DB(name, create_if_missing=True, error_if_exists=True)
         yield db
-        del db
+        db.close()
     else:
         yield name
 
@@ -106,7 +106,7 @@ def test_open():
 
     with tmp_db('exists', create=False) as name:
         db = DB(name, create_if_missing=True)
-        del db
+        db.close()
         with assert_raises(plyvel.Error):
             DB(name, error_if_exists=True)
 
@@ -772,7 +772,8 @@ def test_approximate_sizes():
                 key = bytes(i) * 100
                 wb.put(key, value)
 
-        # Delete and reopen the database
+        # Close and reopen the database
+        db.close()
         del wb, db
         db = DB(name, create_if_missing=False)
 
@@ -803,7 +804,9 @@ def test_repair_db():
     with tmp_db('repair', create=False) as name:
         db = DB(name, create_if_missing=True)
         db.put(b'foo', b'bar')
+        db.close()
         del db
+
         plyvel.repair_db(name)
         db = DB(name)
         assert_equal(b'bar', db.get(b'foo'))
@@ -813,7 +816,9 @@ def test_destroy_db():
     with tmp_db('destroy', create=False, delete=False) as name:
         db = DB(name, create_if_missing=True)
         db.put(b'foo', b'bar')
+        db.close()
         del db
+
         plyvel.destroy_db(name)
         assert not os.path.lexists(name)
 
