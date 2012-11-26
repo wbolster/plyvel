@@ -39,17 +39,24 @@ Plyvel's key features are:
 
 
 Documentation overview
-======================
+=========================
 
-.. toctree::
-   :maxdepth: 1
+The documentation consists of three main parts:
 
-   installation
-   user
-   api
-   developer
-   license
+* **Installation guide**
 
+  The :doc:`installation guide <installation>` describes to install Plyvel.
+
+* **User guide**
+
+  The :doc:`user guide <user>` shows how to use Plyvel and describes most
+  features.
+
+* **API reference**
+
+  The :doc:`API reference <api>` contains all details about the Plyvel API.
+
+See the full table of contents below for additional documentation.
 
 External links
 ==============
@@ -59,8 +66,16 @@ External links
   issue tracker (Github)
 
 
-Indices and tables
-==================
+Table of contents
+=================
+
+.. toctree::
+
+   installation
+   user
+   api
+   developer
+   license
 
 * :ref:`genindex`
 * :ref:`modindex`
