@@ -933,7 +933,7 @@ cdef class Snapshot:
 
     def __dealloc__(self):
         with nogil:
-            if self.db._db is not NULL:
+            if self.db._db is not NULL and self._snapshot is not NULL:
                 self.db._db.ReleaseSnapshot(self._snapshot)
 
     def get(self, bytes key, *, verify_checksums=None, fill_cache=None):
