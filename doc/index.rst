@@ -80,5 +80,4 @@ Table of contents
    license
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
