@@ -730,8 +730,9 @@ def test_snapshot():
             list(snapshot.iterator(include_value=False)))
 
         # Snapshots are directly iterable, just like DB
-        for entry in snapshot:
-            pass
+        assert_list_equal(
+            [b'b', b'c'],
+            list(k for k, v in snapshot))
 
 
 def test_property():
