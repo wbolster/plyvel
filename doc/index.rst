@@ -47,6 +47,7 @@ Documentation overview
    installation
    user
    api
+   developer
    license
 
 
