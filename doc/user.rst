@@ -2,9 +2,15 @@
 User guide
 ==========
 
-This user guide gives an overview of Plyvel. It covers opening and closing
-databases, storing and retrieving data, working with write batches, using
-snapshots, iterating over your data, and implementing custom comparators.
+This user guide gives an overview of Plyvel. It covers:
+
+* opening and closing databases,
+* storing and retrieving data,
+* working with write batches,
+* using snapshots,
+* iterating over your data,
+* using prefixed databases, and
+* implementing custom comparators.
 
 Note: this document assumes basic familiarity with LevelDB; visit the `LevelDB
 homepage`_ for more information about its features and design.
