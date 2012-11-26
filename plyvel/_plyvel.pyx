@@ -349,8 +349,7 @@ cdef class DB:
 
     cdef _register_iterator(self, Iterator iterator):
         # Store a weak reference to an iterator (needed when closing DB)
-        with self.lock:
-            self.iterators[id(iterator)] = iterator
+        self.iterators[id(iterator)] = iterator
 
     def snapshot(self):
         return Snapshot(db=self)
