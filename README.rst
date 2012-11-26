@@ -8,7 +8,9 @@ See the documentation and project page for more information:
 
 * Documentation_
 * `Project page`_
+* `PyPI page`_
 
-.. _LevelDB: http://code.google.com/p/leveldb/
-.. _Documentation: https://plyvel.readthedocs.org/
 .. _Project page: https://github.com/wbolster/plyvel
+.. _Documentation: https://plyvel.readthedocs.org/
+.. _PyPI page: http://pypi.python.org/pypi/plyvel/
+.. _LevelDB: http://code.google.com/p/leveldb/

@@ -64,6 +64,8 @@ External links
 * `Online documentation <https://plyvel.readthedocs.org/>`_ (Read the docs)
 * `Project page <https://github.com/wbolster/plyvel>`_ with source code and
   issue tracker (Github)
+* `Python Package Index (PyPI) page <http://pypi.python.org/pypi/plyvel/>`_ with
+  released tarballs
 
 
 Table of contents
