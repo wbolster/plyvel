@@ -45,7 +45,7 @@ The documentation consists of three main parts:
 
 * **Installation guide**
 
-  The :doc:`installation guide <installation>` describes to install Plyvel.
+  The :doc:`installation guide <installation>` describes how to install Plyvel.
 
 * **User guide**
 
