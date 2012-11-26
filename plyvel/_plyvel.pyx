@@ -47,7 +47,8 @@ from leveldb cimport (
 from comparator cimport NewPlyvelCallbackComparator
 
 
-__leveldb_version__ = '%d.%d' % (leveldb.kMajorVersion, leveldb.kMinorVersion)
+__leveldb_version__ = '%d.%d' % (leveldb.kMajorVersion,
+                                 leveldb.kMinorVersion)
 
 
 #
@@ -508,7 +509,8 @@ cdef class WriteBatch:
     cdef bytes prefix
     cdef bool transaction
 
-    def __init__(self, *, DB db not None, bytes prefix=None, bool transaction=False, sync=None):
+    def __init__(self, *, DB db not None, bytes prefix=None,
+                 bool transaction=False, sync=None):
         self.db = db
         self.prefix = prefix
         self.transaction = transaction
