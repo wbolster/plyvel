@@ -316,22 +316,22 @@ def test_iterator_return():
     with tmp_db('iteration') as db:
         db.put(b'key', b'value')
 
-    for key, value in db:
-        assert_equal(key, b'key')
-        assert_equal(value, b'value')
+        for key, value in db:
+            assert_equal(key, b'key')
+            assert_equal(value, b'value')
 
-    for key, value in db.iterator():
-        assert_equal(key, b'key')
-        assert_equal(value, b'value')
+        for key, value in db.iterator():
+            assert_equal(key, b'key')
+            assert_equal(value, b'value')
 
-    for key in db.iterator(include_value=False):
-        assert_equal(key, b'key')
+        for key in db.iterator(include_value=False):
+            assert_equal(key, b'key')
 
-    for value in db.iterator(include_key=False):
-        assert_equal(value, b'value')
+        for value in db.iterator(include_key=False):
+            assert_equal(value, b'value')
 
-    for ret in db.iterator(include_key=False, include_value=False):
-        assert_is_none(ret)
+        for ret in db.iterator(include_key=False, include_value=False):
+            assert_is_none(ret)
 
 
 @nottest
