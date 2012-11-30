@@ -157,8 +157,10 @@ LevelDB database.
       See the :py:class:`Iterator` API for more information about iterators.
 
       :param bool reverse: whether the iterator should iterate in reverse order
-      :param bytes start: the start key (inclusive) of the iterator range
-      :param bytes stop: the stop key (exclusive) of the iterator range
+      :param bytes start: the start key (inclusive by default) of the iterator
+                          range
+      :param bytes stop: the stop key (exclusive by default) of the iterator
+                         range
       :param bool include_start: whether to include the start key in the range
       :param bool include_stop: whether to include the stop key in the range
       :param bytes prefix: prefix that all keys in the the range must have
@@ -343,7 +345,7 @@ Write batch
    ``finally`` clause), but if transaction mode is enabled`, the batch will be
    discarded (this is like a ``try`` statement with an ``else`` clause).
 
-   Note methods on a :py:class:`WriteBatch` do not take a `sync` argument; this
+   Note: methods on a :py:class:`WriteBatch` do not take a `sync` argument; this
    flag can be specified for the complete write batch when it is created using
    :py:meth:`DB.write_batch`.
 
