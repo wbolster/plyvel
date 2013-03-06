@@ -692,6 +692,7 @@ cdef class Iterator:
 
         with nogil:
             self._iter = db._db.NewIterator(read_options)
+
         if self.direction == FORWARD:
             self.seek_to_start()
         else:

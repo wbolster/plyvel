@@ -204,7 +204,8 @@ def test_get():
         assert_equal(value, db.get(key, verify_checksums=False))
         assert_equal(value, db.get(key, verify_checksums=None))
         assert_equal(value, db.get(key, fill_cache=True))
-        assert_equal(value, db.get(key, fill_cache=False, verify_checksums=None))
+        assert_equal(value, db.get(key, fill_cache=False,
+                                   verify_checksums=None))
 
         assert_is_none(db.get(b'key-that-does-not-exist'))
         assert_raises(TypeError, db.get, 1)
@@ -444,7 +445,8 @@ def test_range_iteration():
         # Only start (exclusive)
         test_iterator_behaviour(
             db,
-            iter_kwargs=dict(start=b'2', include_key=False, include_start=False),
+            iter_kwargs=dict(start=b'2', include_key=False,
+                             include_start=False),
             expected_values=(b'3', b'4', b'5'))
 
         # Only stop (exclusive)
@@ -487,7 +489,8 @@ def test_reverse_range_iteration():
         # Only start (exclusive)
         test_iterator_behaviour(
             db,
-            iter_kwargs=dict(start=b'2', reverse=True, include_value=False, include_start=False),
+            iter_kwargs=dict(start=b'2', reverse=True, include_value=False,
+                             include_start=False),
             expected_values=(b'5', b'4', b'3'))
 
         # Only stop (exclusive)
@@ -499,13 +502,15 @@ def test_reverse_range_iteration():
         # Only stop (inclusive)
         test_iterator_behaviour(
             db,
-            iter_kwargs=dict(stop=b'3', reverse=True, include_value=False, include_stop=True),
+            iter_kwargs=dict(stop=b'3', reverse=True, include_value=False,
+                             include_stop=True),
             expected_values=(b'3', b'2', b'1'))
 
         # Both start and stop
         test_iterator_behaviour(
             db,
-            iter_kwargs=dict(start=b'1', stop=b'4', reverse=True, include_value=False),
+            iter_kwargs=dict(start=b'1', stop=b'4', reverse=True,
+                             include_value=False),
             expected_values=(b'3', b'2', b'1'))
 
 
@@ -879,7 +884,6 @@ def test_threading():
 
 
 def test_invalid_comparator():
-
     with tmp_db('invalid_comparator', create=False) as name:
 
         with assert_raises(ValueError):
