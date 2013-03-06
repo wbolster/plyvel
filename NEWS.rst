@@ -14,4 +14,6 @@ Plyvel 0.2
 Plyvel 0.1
 ==========
 
+Release date: 2012-11-26
+
 * Initial release

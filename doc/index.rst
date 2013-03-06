@@ -56,6 +56,11 @@ The documentation consists of three main parts:
 
   The :doc:`API reference <api>` contains all details about the Plyvel API.
 
+* **Version history**
+
+  See the :doc:`version history <news>` to see in which version features were
+  added, bugs were fixed, and other changes were made.
+
 See the full table of contents below for additional documentation.
 
 External links
@@ -77,6 +82,7 @@ Table of contents
    user
    api
    developer
+   news
    license
 
 * :ref:`genindex`
