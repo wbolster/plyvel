@@ -887,7 +887,7 @@ cdef class Iterator:
 
         self.state = AFTER_STOP
 
-    def seek(self, bytes target):
+    def seek(self, bytes target not None):
         if self._iter is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
