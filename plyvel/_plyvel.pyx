@@ -786,11 +786,14 @@ cdef class Iterator:
                 # Iterator is empty
                 raise StopIteration
             if self.start is not None and not self.include_start:
-                # Start key is excluded, so skip past it
-                with nogil:
-                    self._iter.Next()
-                if not self._iter.Valid():
-                    raise StopIteration
+                # Start key is excluded, so skip past it if the db
+                # contains it.
+                if self.comparator.Compare(self._iter.key(),
+                                           self.start_slice) == 0:
+                    with nogil:
+                        self._iter.Next()
+                    if not self._iter.Valid():
+                        raise StopIteration
             self.state = IN_BETWEEN
         elif self.state == AFTER_STOP:
             raise StopIteration
@@ -828,28 +831,33 @@ cdef class Iterator:
                 # No stop key, seek to last entry
                 with nogil:
                     self._iter.SeekToLast()
-                if not self._iter.Valid():
-                    # Iterator is empty
-                    raise StopIteration
-                raise_for_status(self._iter.status())
             else:
                 # Seek to stop key
                 with nogil:
                     self._iter.Seek(self.stop_slice)
-                if not self._iter.Valid():
-                    # Iterator is empty
-                    raise StopIteration
-                # Move one step back if stop is exclusive
-                if not self.include_stop:
-                    with nogil:
-                        self._iter.Prev()
-                    if not self._iter.Valid():
-                        raise StopIteration
-                raise_for_status(self._iter.status())
 
-        # Unlike .next(), first obtain the value, then move the iterator
-        # pointer (not the other way around), so that repeatedly calling
-        # .prev() and .next() will work as designed.
+                if self._iter.Valid():
+                    # Seeking was successful. Move one step back if stop
+                    # is exclusive.
+                    if not self.include_stop:
+                        with nogil:
+                            self._iter.Prev()
+                else:
+                    # Stop key did not exist; position at the last
+                    # database entry instead.
+                    with nogil:
+                        self._iter.SeekToLast()
+
+            if not self._iter.Valid():
+                # No entries left
+                raise StopIteration
+
+            raise_for_status(self._iter.status())
+
+        # Unlike .real_next(), first obtain the value, then move the
+        # iterator pointer (not the other way around), so that
+        # repeatedly calling it.prev() and next(it) will work as
+        # designed.
         out = self.current()
         with nogil:
             self._iter.Prev()
