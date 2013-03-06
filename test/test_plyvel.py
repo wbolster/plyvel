@@ -514,6 +514,31 @@ def test_reverse_range_iteration():
             expected_values=(b'3', b'2', b'1'))
 
 
+def test_out_of_range_iterations():
+    with tmp_db('out_of_range_iterations') as db:
+        db.put(b'2', b'2')
+        db.put(b'3', b'3')
+        db.put(b'4', b'4')
+
+        # Out of range start key
+        assert_list_equal(
+            [b'2', b'3', b'4'],
+            list(db.iterator(start=b'1', include_value=False)))
+        assert_list_equal(
+            [b'2', b'3', b'4'],
+            list(db.iterator(start=b'1', include_start=False,
+                             include_value=False)))
+
+        # Out of range stop key
+        assert_list_equal(
+            [b'4', b'3', b'2'],
+            list(db.iterator(stop=b'5', reverse=True, include_value=False)))
+        assert_list_equal(
+            [b'4', b'3', b'2'],
+            list(db.iterator(stop=b'5', include_stop=True, reverse=True,
+                             include_value=False)))
+
+
 def test_range_empty_database():
     with tmp_db('range_empty_database') as db:
         it = db.iterator()
