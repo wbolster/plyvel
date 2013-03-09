@@ -520,23 +520,17 @@ def test_out_of_range_iterations():
         db.put(b'4', b'4')
         db.put(b'5', b'5')
 
+        def t(expected, **kwargs):
+            kwargs['include_value'] = False
+            assert_equal(expected, b''.join((db.iterator(**kwargs))))
+
         # Out of range start key
-        assert_list_equal(
-            [b'3', b'4', b'5'],
-            list(db.iterator(start=b'2', include_value=False)))
-        assert_list_equal(
-            [b'3', b'4', b'5'],
-            list(db.iterator(start=b'2', include_start=False,
-                             include_value=False)))
+        t(b'345', start=b'2')
+        t(b'345', start=b'2', include_start=False)
 
         # Out of range stop key
-        assert_list_equal(
-            [b'5', b'4', b'3'],
-            list(db.iterator(stop=b'6', reverse=True, include_value=False)))
-        assert_list_equal(
-            [b'5', b'4', b'3'],
-            list(db.iterator(stop=b'6', include_stop=True, reverse=True,
-                             include_value=False)))
+        t(b'543', stop=b'6', reverse=True)
+        t(b'543', stop=b'6', include_stop=True, reverse=True)
 
 
 def test_range_empty_database():
