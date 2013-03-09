@@ -516,21 +516,23 @@ def test_reverse_range_iteration():
 
 def test_out_of_range_iterations():
     with tmp_db('out_of_range_iterations') as db:
+        db.put(b'1', b'1')
         db.put(b'3', b'3')
         db.put(b'4', b'4')
         db.put(b'5', b'5')
+        db.put(b'7', b'7')
 
         def t(expected, **kwargs):
             kwargs['include_value'] = False
             assert_equal(expected, b''.join((db.iterator(**kwargs))))
 
         # Out of range start key
-        t(b'345', start=b'2')
-        t(b'345', start=b'2', include_start=False)
+        t(b'3457', start=b'2')
+        t(b'3457', start=b'2', include_start=False)
 
         # Out of range stop key
-        t(b'543', stop=b'6', reverse=True)
-        t(b'543', stop=b'6', include_stop=True, reverse=True)
+        t(b'5431', stop=b'6', reverse=True)
+        t(b'5431', stop=b'6', include_stop=True, reverse=True)
 
 
 def test_range_empty_database():
