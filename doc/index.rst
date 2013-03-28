@@ -38,6 +38,14 @@ Plyvel's key features are:
 .. _Cython: http://cython.org/
 
 
+.. note::
+
+   **Are you a happy Plyvel user?** Please consider making a small donation_ to
+   let me know you appreciate my work. Thanks!
+
+   .. _donation: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4FF4VZ5LTJ73N
+
+
 Documentation overview
 =========================
 
