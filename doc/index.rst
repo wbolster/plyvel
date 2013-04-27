@@ -4,6 +4,8 @@ Plyvel
 
 **Plyvel** is a fast and feature-rich Python interface to LevelDB_.
 
+.. _LevelDB: http://code.google.com/p/leveldb/
+
 Plyvel's key features are:
 
 * **Rich feature set**
@@ -25,6 +27,8 @@ Plyvel's key features are:
   Plyvel executes all performance-critical code at C speed (using Cython_),
   which means Plyvel is a good fit for high performance applications.
 
+  .. _Cython: http://cython.org/
+
 * **Extensive documentation**
 
   Plyvel comes with extensive documentation, including a user guide and API
@@ -34,64 +38,33 @@ Plyvel's key features are:
 
   Plyvel works with both Python 2 and Python 3, without any API differences.
 
-.. _LevelDB: http://code.google.com/p/leveldb/
-.. _Cython: http://cython.org/
+
+.. rubric:: Do you enjoy using Plyvel?
+
+You should know that Plyvel is a hobby project, written and maintained by me,
+Wouter Bolsterlee, in my spare time. Please consider making a small donation_ to
+let me know you appreciate my work. Thanks!
+
+.. _donation: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4FF4VZ5LTJ73N
 
 
-.. note::
+.. rubric:: Documentation contents
 
-   **Are you a happy Plyvel user?** Please consider making a small donation_ to
-   let me know you appreciate my work. Thanks!
+.. toctree::
+   :maxdepth: 2
 
-   .. _donation: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4FF4VZ5LTJ73N
+   installation
+   user
+   api
+   news
+   developer
+   license
 
 
-Documentation overview
-=========================
-
-The documentation consists of three main parts:
-
-* **Installation guide**
-
-  The :doc:`installation guide <installation>` describes how to install Plyvel.
-
-* **User guide**
-
-  The :doc:`user guide <user>` shows how to use Plyvel and describes most
-  features.
-
-* **API reference**
-
-  The :doc:`API reference <api>` contains all details about the Plyvel API.
-
-* **Version history**
-
-  See the :doc:`version history <news>` to see in which version features were
-  added, bugs were fixed, and other changes were made.
-
-See the full table of contents below for additional documentation.
-
-External links
-==============
+.. rubric:: External links
 
 * `Online documentation <https://plyvel.readthedocs.org/>`_ (Read the docs)
 * `Project page <https://github.com/wbolster/plyvel>`_ with source code and
   issue tracker (Github)
 * `Python Package Index (PyPI) page <http://pypi.python.org/pypi/plyvel/>`_ with
   released tarballs
-
-
-Table of contents
-=================
-
-.. toctree::
-
-   installation
-   user
-   api
-   developer
-   news
-   license
-
-* :ref:`genindex`
-* :ref:`search`
