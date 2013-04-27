@@ -11,22 +11,26 @@ Build and install Plyvel
 ========================
 
 The recommended (and easiest) way to install Plyvel is to install it into a
-virtual environment (*virtualenv*) using ``pip``, which will automatically grab
-the latest release from the `Python Package Index <http://pypi.python.org/>`_
-(PyPI)::
+virtual environment (*virtualenv*)::
 
    $ virtualenv envname
    $ source envname/bin/activate
+
+Now you can automatically install the latest Plyvel release from the `Python
+Package Index <http://pypi.python.org/>`_ (PyPI) using ``pip``::
+
    (envname) $ pip install plyvel
 
-For the more traditionally minded: downloading a source tarball, unpacking it
-and installing it manually with ``python setup.py install`` should also work.
+(In case you're feeling old-fashioned:: downloading a source tarball, unpacking
+it and installing it manually with ``python setup.py install`` should also
+work.)
 
-Note that Plyvel requires an installed shared library for LevelDB at build time,
-so make sure you have a shared LevelDB library and the development headers
-installed where the compiler and linker can find them. For Debian or Ubuntu
-something like ``apt-get install libleveldb1 libleveldb-dev`` should suffice,
-but any other installation method should do as well.
+Note that Plyvel does not include a copy of LevelDB itself. Plyvel requires an
+installed shared library for LevelDB at build time, so make sure you have a
+shared LevelDB library and the development headers installed where the compiler
+and linker can find them. For Debian or Ubuntu something like ``apt-get install
+libleveldb1 libleveldb-dev`` should suffice, but any other installation method
+should do as well.
 
 
 Verify that it works
