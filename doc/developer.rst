@@ -18,10 +18,12 @@ The Plyvel source code can be found on Github. See the `Plyvel project page`_ on
 Github.
 
 
-Compiling the code
-==================
+Compiling from source
+=====================
 
-A simple ``make`` suffices to build the Plyvel extension.
+A simple ``make`` suffices to build the Plyvel extension. Note that the
+``setup.py`` script does *not* invoke Cython, so that installations using ``pip
+install`` do not need to depend on Cython.
 
 A few remarks about the code:
 
