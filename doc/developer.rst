@@ -46,5 +46,5 @@ running those tests. Type ``make test`` to run the unit tests.
 Generating the documentation
 ============================
 
-The documentation is written in ReStructuredText (ResT) format and processed
+The documentation is written in ReStructuredText (reST) format and processed
 using *Sphinx*. Type ``make doc`` to build the HTML documentation.
