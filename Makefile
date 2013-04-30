@@ -1,7 +1,7 @@
 
 .PHONY: all ext doc clean test
 
-all: ext doc test
+all: ext
 
 ext:
 	cython --cplus --fast-fail plyvel/_plyvel.pyx
