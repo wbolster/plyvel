@@ -32,6 +32,15 @@ and linker can find them. For Debian or Ubuntu something like ``apt-get install
 libleveldb1 libleveldb-dev`` should suffice, but any other installation method
 should do as well.
 
+.. warning::
+
+   The above installation method applies only to released tarballs available
+   from PyPI. If you are building and installing from a source tree acquired
+   through other means, e.g. checked out from source control, you will need to
+   run Cython first. If you don't, you will see errors about missing source
+   files. See the :doc:`developer documentation <developer>` for more
+   information.
+
 
 Verify that it works
 ====================
