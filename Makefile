@@ -24,6 +24,3 @@ clean:
 
 test: ext
 	python $$(which nosetests) -v $(TESTS)
-
-dist: clean ext doc test
-	python setup.py sdist
