@@ -838,7 +838,7 @@ cdef class Iterator:
 
                 if self._iter.Valid():
                     # Move one step back if stop is exclusive.
-                    if self._iter.Valid() and not self.include_stop:
+                    if not self.include_stop:
                         self._iter.Prev()
                 else:
                     # Stop key did not exist; position at the last
