@@ -839,7 +839,8 @@ cdef class Iterator:
                 if self._iter.Valid():
                     # Move one step back if stop is exclusive.
                     if not self.include_stop:
-                        self._iter.Prev()
+                        with nogil:
+                            self._iter.Prev()
                 else:
                     # Stop key did not exist; position at the last
                     # database entry instead.
@@ -848,7 +849,8 @@ cdef class Iterator:
 
                 # Make sure the iterator is not past the stop key
                 if self._iter.Valid() and self.comparator.Compare(self._iter.key(), self.stop_slice) > 0:
-                    self._iter.Prev()
+                    with nogil:
+                        self._iter.Prev()
 
             if not self._iter.Valid():
                 # No entries left
