@@ -534,6 +534,12 @@ def test_out_of_range_iterations():
         t(b'5431', stop=b'6', reverse=True)
         t(b'5431', stop=b'6', include_stop=True, reverse=True)
 
+        # Out of range prefix
+        t(b'', prefix=b'0', include_start=True)
+        t(b'', prefix=b'0', include_start=False)
+        t(b'', prefix=b'8', include_stop=True, reverse=True)
+        t(b'', prefix=b'8', include_stop=False, reverse=True)
+
 
 def test_range_empty_database():
     with tmp_db('range_empty_database') as db:

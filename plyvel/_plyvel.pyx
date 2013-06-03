@@ -854,6 +854,12 @@ cdef class Iterator:
                 # No entries left
                 raise StopIteration
 
+            # After all the stepping back, we might even have ended up
+            # *before* the start key. In this case the iterator does not
+            # yield any items.
+            if self.start is not None and self.comparator.Compare(self.start_slice, self._iter.key()) >= 0:
+                raise StopIteration
+
             raise_for_status(self._iter.status())
 
         # Unlike .real_next(), first obtain the value, then move the
