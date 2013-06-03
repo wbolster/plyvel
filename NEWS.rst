@@ -2,6 +2,15 @@
 Version history
 ===============
 
+Plyvel 0.3
+==========
+
+* Fix iterator behaviour for reverse iterators using a prefix
+  (`issue #9 <https://github.com/wbolster/plyvel/issues/9>`_)
+
+* Documentation improvements
+
+
 Plyvel 0.2
 ==========
 
