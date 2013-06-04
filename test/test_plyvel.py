@@ -6,6 +6,7 @@ from contextlib import contextmanager
 import os
 import shutil
 import stat
+import sys
 import tempfile
 
 try:
@@ -20,6 +21,7 @@ except NameError:
     # Python 3
     xrange = range
 
+from nose.plugins.skip import SkipTest
 from nose.tools import (
     assert_equal,
     assert_greater_equal,
@@ -97,9 +99,6 @@ def test_open():
         with assert_raises(plyvel.IOError):
             DB(name)
 
-    with tmp_db('úñîçøđê_name') as db:
-        pass
-
     with tmp_db('no_create', create=False) as name:
         with assert_raises(plyvel.Error):
             DB(name, create_if_missing=False)
@@ -132,6 +131,15 @@ def test_open():
            max_open_files=512, lru_cache_size=64 * 1024 * 1024,
            block_size=2 * 1024, block_restart_interval=32,
            compression='snappy', bloom_filter_bits=10)
+
+
+def test_open_unicode_name():
+    if sys.getfilesystemencoding().lower() != 'utf-8':
+        # XXX: letter casing differs between Python 2 and 3
+        raise SkipTest("Not running with UTF-8 file system encoding")
+
+    with tmp_db('úñîçøđê_name'):
+        pass
 
 
 def test_open_close():
