@@ -5,7 +5,7 @@ Version history
 Plyvel 0.4 (not yet released)
 =============================
 
-* Add optional 'default' argument for .get() methods
+* Add optional 'default' argument for all ``.get()`` methods
   (`issue #11 <https://github.com/wbolster/plyvel/issues/11>`_)
 
 
