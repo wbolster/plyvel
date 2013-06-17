@@ -195,8 +195,9 @@ Long-lived snapshots may consume significant resources in your LevelDB database,
 since the snapshot prevents LevelDB from cleaning up old data that is still
 accessible by the snapshot. This means that you should never keep a snapshot
 around longer than necessary. The snapshot and its associated resources will be
-released automatically when the variable goes out of scope and the garbage
-collector comes by to clean it up. Alternatively, you can delete it yourself::
+released automatically when the snapshot reference count drops to zero, which
+(for local variables) happens when the variable goes out of scope. In long
+running functions, you can also clean it up yourself::
 
     >>> del sn
 
