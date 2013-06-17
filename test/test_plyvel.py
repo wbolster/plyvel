@@ -36,7 +36,7 @@ from nose.tools import (
 import plyvel
 from plyvel import DB
 
-TEST_DB_DIR = 'testdb/'
+TEST_DBS_DIR = 'testdb/'
 
 
 #
@@ -45,7 +45,7 @@ TEST_DB_DIR = 'testdb/'
 
 @contextmanager
 def tmp_db(name_prefix, create=True, delete=True):
-    name = tempfile.mkdtemp(prefix=name_prefix + '-', dir=TEST_DB_DIR)
+    name = tempfile.mkdtemp(prefix=name_prefix + '-', dir=TEST_DBS_DIR)
     if create:
         db = DB(name, create_if_missing=True, error_if_exists=True)
         yield db
@@ -63,7 +63,7 @@ def tmp_db(name_prefix, create=True, delete=True):
 
 def setup():
     try:
-        os.mkdir(TEST_DB_DIR)
+        os.mkdir(TEST_DBS_DIR)
     except OSError as exc:
         if exc.errno == 17:
             # Directory already exists; ignore
@@ -74,7 +74,7 @@ def setup():
 
 def teardown():
     try:
-        os.rmdir(TEST_DB_DIR)
+        os.rmdir(TEST_DBS_DIR)
     except OSError as exc:
         if exc.errno == 39:
             # Directory not empty; some tests failed
