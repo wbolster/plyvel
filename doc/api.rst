@@ -94,6 +94,9 @@ LevelDB database.
       See the description for :cpp:func:`DB::Get` in the LevelDB C++ API for
       more information.
 
+      .. versionadded:: 0.4
+         `default` argument
+
       :param bytes key: key to retrieve
       :param default: default value if key is not found
       :param bool verify_checksums: whether to verify checksums
