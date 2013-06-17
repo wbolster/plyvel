@@ -382,7 +382,7 @@ strip the key prefix from all keys that it returns (e.g. from
 :py:meth:`PrefixedDB.iterator`). Examples::
 
     >>> my_sub_db.get(b'some-key')  # this looks up b'example-some-key'
-    >>> my_sub_db.get(b'some-key', b'value')  # this sets b'example-some-key'
+    >>> my_sub_db.put(b'some-key', b'value')  # this sets b'example-some-key'
 
 Almost all functionality available on :py:class:`DB` is also available from
 :py:class:`PrefixedDB`: write batches, iterators, snapshots, and also iterators
