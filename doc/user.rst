@@ -81,6 +81,11 @@ If you try to retrieve a key that does not exist, a ``None`` value is returned::
     >>> print(db.get(b'yet-another-key'))
     None
 
+Optionally, you can specify a default value, just like :py:meth:`dict.get`::
+
+    >>> print(db.get(b'yet-another-key', b'default-value'))
+    'default-value'
+
 Finally, to delete data from the database, use :py:meth:`DB.delete`::
 
     >>> db.delete(b'key')

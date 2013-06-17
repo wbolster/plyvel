@@ -87,14 +87,15 @@ LevelDB database.
       Boolean attribute indicating whether the database is closed.
 
 
-   .. py:method:: get(key, verify_checksums=None, fill_cache=None)
+   .. py:method:: get(key, default=None, verify_checksums=None, fill_cache=None)
 
-      Get the value for the specified key, or `None` if no value was set.
+      Get the value for the specified key, or `default` if no value was set.
 
       See the description for :cpp:func:`DB::Get` in the LevelDB C++ API for
       more information.
 
       :param bytes key: key to retrieve
+      :param default: default value if key is not found
       :param bool verify_checksums: whether to verify checksums
       :param bool fill_cache: whether to fill the cache
       :return: value for the specified key, or `None` if not found

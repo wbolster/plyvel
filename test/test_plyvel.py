@@ -215,11 +215,16 @@ def test_get():
         assert_equal(value, db.get(key, fill_cache=False,
                                    verify_checksums=None))
 
-        assert_is_none(db.get(b'key-that-does-not-exist'))
+        key2 = b'key-that-does-not-exist'
+        value2 = b'default-value'
+        assert_is_none(db.get(key2))
+        assert_equal(value2, db.get(key2, value2))
+        assert_equal(value2, db.get(key2, default=value2))
+
         assert_raises(TypeError, db.get, 1)
-        assert_raises(TypeError, db.get, 'foo')
+        assert_raises(TypeError, db.get, 'key')
         assert_raises(TypeError, db.get, None)
-        assert_raises(TypeError, db.get, b'foo', True)
+        assert_raises(TypeError, db.get, b'foo', b'default', True)
 
 
 def test_delete():
@@ -758,6 +763,8 @@ def test_snapshot():
         db.delete(b'a')
         db.put(b'c', b'c')
         assert_is_none(snapshot.get(b'c'))
+        assert_equal(b'd', snapshot.get(b'c', b'd'))
+        assert_equal(b'd', snapshot.get(b'c', default=b'd'))
         assert_list_equal(
             [b'a', b'b'],
             list(snapshot.iterator(include_value=False)))
@@ -989,6 +996,8 @@ def test_prefixed_db():
         assert_equal(b'foo', db_a.get(key))
         db_a.delete(key)
         assert_is_none(db_a.get(key))
+        assert_equal(b'v', db_a.get(key, b'v'))
+        assert_equal(b'v', db_a.get(key, default=b'v'))
         db_a.put(key, b'foo')
         assert_equal(b'foo', db.get(b'a123'))
 
@@ -1015,6 +1024,8 @@ def test_prefixed_db():
         db_a.put(b'042', b'new')
         assert_equal(b'', sn_a.get(b'042'))
         assert_equal(b'new', db_a.get(b'042'))
+        assert_equal(b'x', db_a.get(b'foo', b'x'))
+        assert_equal(b'x', db_a.get(b'foo', default=b'x'))
 
         # Snapshot iterators
         sn_a.iterator()
