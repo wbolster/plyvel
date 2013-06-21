@@ -41,6 +41,17 @@ should do as well.
    files. See the :doc:`developer documentation <developer>` for more
    information.
 
+.. note::
+
+   The LevelDB version packaged in Ubuntu Precise (12.04) is too old for Plyvel,
+   and the package does not include a shared library either. Manually installing
+   the
+   `libleveldb1 <http://packages.ubuntu.com/search?keywords=libleveldb1>`_,
+   `libleveldb-dev <http://packages.ubuntu.com/search?keywords=libleveldb-dev>`_,
+   `libsnappy1 <http://packages.ubuntu.com/search?keywords=libsnappy1>`_, and
+   `libsnappy-dev <http://packages.ubuntu.com/search?keywords=libsnappy-dev>`_
+   packages from Ubuntu Raring is known to work without problems.
+
 
 Verify that it works
 ====================
