@@ -27,9 +27,9 @@ LevelDB database.
 
       Open the underlying database handle.
 
-      Most of the arguments have the same name as the the corresponding LevelDB
-      parameters; see the LevelDB documentation for details about the exact
-      meaning. Arguments defaulting to `None` are only propagated to LevelDB if
+      Most arguments have the same name as the the corresponding LevelDB
+      parameters; see the LevelDB documentation for a detailed description.
+      Arguments defaulting to `None` are only propagated to LevelDB if
       specified, e.g. not specifying a `write_buffer_size` means the LevelDB
       defaults are used.
 
