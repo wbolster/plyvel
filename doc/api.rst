@@ -29,7 +29,7 @@ LevelDB database.
 
       Most of the arguments have the same name as the the corresponding LevelDB
       parameters; see the LevelDB documentation for details about the exact
-      meaning. Argument that can be `None` are only propagated to LevelDB if
+      meaning. Arguments defaulting to `None` are only propagated to LevelDB if
       specified, e.g. not specifying a `write_buffer_size` means the LevelDB
       defaults are used.
 
