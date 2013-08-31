@@ -729,7 +729,6 @@ cdef class Iterator:
         cdef bytes key
         cdef Slice value_slice
         cdef bytes value
-        cdef object out
 
         # Only build Python strings that will be returned
         if self.include_key:
