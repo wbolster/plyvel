@@ -240,8 +240,7 @@ cdef class DB:
     cpdef close(self):
         # If the constructor raised an exception (and hence never
         # completed), self.iterators can be None. In that case no
-        # iterators need to be cleaned, since the database has never
-        # produced any used.
+        # iterators need to be cleaned anyway.
         cdef Iterator iterator
         if self.iterators is not None:
             with self.lock:
