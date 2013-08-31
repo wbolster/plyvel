@@ -27,8 +27,8 @@ from libc.stdlib cimport malloc, free
 from libcpp.string cimport string
 from libcpp cimport bool
 
-cimport leveldb
-from leveldb cimport (
+cimport plyvel.leveldb as leveldb
+from plyvel.leveldb cimport (
     BytewiseComparator,
     Cache,
     Comparator,
@@ -44,7 +44,7 @@ from leveldb cimport (
     WriteOptions,
 )
 
-from comparator cimport NewPlyvelCallbackComparator
+from plyvel.comparator cimport NewPlyvelCallbackComparator
 
 
 __leveldb_version__ = '%d.%d' % (leveldb.kMajorVersion,
