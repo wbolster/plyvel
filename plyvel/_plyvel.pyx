@@ -280,7 +280,7 @@ cdef class DB:
     def __dealloc__(self):
         self.close()
 
-    def get(self, bytes key, default=None, *, verify_checksums=None,
+    def get(self, bytes key not None, default=None, *, verify_checksums=None,
             fill_cache=None):
         if self._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
@@ -294,7 +294,7 @@ cdef class DB:
 
         return db_get(self, key, default, read_options)
 
-    def put(self, bytes key, bytes value, *, sync=None):
+    def put(self, bytes key not None, bytes value not None, *, sync=None):
         if self._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
@@ -310,7 +310,7 @@ cdef class DB:
             st = self._db.Put(write_options, key_slice, value_slice)
         raise_for_status(st)
 
-    def delete(self, bytes key, *, sync=None):
+    def delete(self, bytes key not None, *, sync=None):
         if self._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
@@ -427,7 +427,7 @@ cdef class PrefixedDB:
         self.db = db
         self.prefix = prefix
 
-    def get(self, bytes key, default=None, *, verify_checksums=None,
+    def get(self, bytes key not None, default=None, *, verify_checksums=None,
             fill_cache=None):
         return self.db.get(
             self.prefix + key,
@@ -435,10 +435,10 @@ cdef class PrefixedDB:
             verify_checksums=verify_checksums,
             fill_cache=fill_cache)
 
-    def put(self, bytes key, bytes value, *, sync=None):
+    def put(self, bytes key not None, bytes value not None, *, sync=None):
         return self.db.put(self.prefix + key, value, sync=sync)
 
-    def delete(self, bytes key, *, sync=None):
+    def delete(self, bytes key not None, *, sync=None):
         return self.db.delete(self.prefix + key, sync=sync)
 
     def write_batch(self, *, transaction=False, sync=None):
@@ -526,7 +526,7 @@ cdef class WriteBatch:
     def __dealloc__(self):
         del self._write_batch
 
-    def put(self, bytes key, bytes value):
+    def put(self, bytes key not None, bytes value not None):
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
@@ -538,7 +538,7 @@ cdef class WriteBatch:
         with nogil:
             self._write_batch.Put(key_slice, value_slice)
 
-    def delete(self, bytes key):
+    def delete(self, bytes key not None):
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
@@ -957,7 +957,7 @@ cdef class Snapshot:
             if self.db._db is not NULL and self._snapshot is not NULL:
                 self.db._db.ReleaseSnapshot(self._snapshot)
 
-    def get(self, bytes key, default=None, *, verify_checksums=None,
+    def get(self, bytes key not None, default=None, *, verify_checksums=None,
             fill_cache=None):
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
