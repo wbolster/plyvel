@@ -347,10 +347,6 @@ cdef class DB:
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=None)
 
-    cdef _register_iterator(self, Iterator iterator):
-        # Store a weak reference to an iterator (needed when closing DB)
-        self.iterators[id(iterator)] = iterator
-
     def snapshot(self):
         return Snapshot(db=self)
 
@@ -700,8 +696,10 @@ cdef class Iterator:
         else:
             self.seek_to_stop()
 
-        db._register_iterator(self)
         raise_for_status(self._iter.status())
+
+        # Store a weak reference on the db (needed when closing db)
+        db.iterators[id(self)] = self
 
     cdef close(self):
         # Note: this method is only for internal cleanups and hence not
