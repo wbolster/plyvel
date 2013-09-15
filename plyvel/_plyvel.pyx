@@ -422,7 +422,7 @@ cdef class PrefixedDB:
     cdef readonly DB db
     cdef readonly bytes prefix
 
-    def __init__(self, *, db, prefix):
+    def __init__(self, *, DB db not None, bytes prefix not None):
         self.db = db
         self.prefix = prefix
 
@@ -624,7 +624,7 @@ cdef class Iterator:
     # from DB.close()
     cdef object __weakref__
 
-    def __init__(self, *, DB db not None, key_prefix, bool reverse,
+    def __init__(self, *, DB db not None, bytes key_prefix, bool reverse,
                  bytes start, bytes stop, bool include_start,
                  bool include_stop, bytes prefix, bool include_key,
                  bool include_value, bool verify_checksums, bool fill_cache,
