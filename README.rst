@@ -23,4 +23,3 @@ control. See the installation docs for more information.
 .. image:: https://d2weczhvl823v0.cloudfront.net/wbolster/plyvel/trend.png
    :alt: Bitdeli badge
    :target: https://bitdeli.com/free
-
