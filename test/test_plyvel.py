@@ -186,6 +186,12 @@ def test_open_close():
             next(snapshot_it)
 
 
+def test_large_lru_cache():
+    # Use a 2 GB size (does not fit in a 32-bit signed int)
+    with tmp_db('large_lru_cache', lru_cache_size=2 * 1024**3):
+        pass
+
+
 def test_put():
     with tmp_db('put') as db:
         db.put(b'foo', b'bar')

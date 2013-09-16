@@ -144,7 +144,7 @@ cdef int parse_options(Options *options, bool create_if_missing,
                        object block_restart_interval, object compression,
                        int bloom_filter_bits, object comparator,
                        bytes comparator_name) except -1:
-    cdef int c_lru_cache_size
+    cdef size_t c_lru_cache_size
 
     options.create_if_missing = create_if_missing
     options.error_if_exists = error_if_exists
