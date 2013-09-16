@@ -44,10 +44,10 @@ TEST_DBS_DIR = 'testdb/'
 #
 
 @contextmanager
-def tmp_db(name_prefix, create=True, delete=True):
+def tmp_db(name_prefix, create=True, delete=True, **kwargs):
     name = tempfile.mkdtemp(prefix=name_prefix + '-', dir=TEST_DBS_DIR)
     if create:
-        db = DB(name, create_if_missing=True, error_if_exists=True)
+        db = DB(name, create_if_missing=True, error_if_exists=True, **kwargs)
         yield db
         db.close()
     else:
