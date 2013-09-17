@@ -2,6 +2,7 @@ build/
 .coverage
 dist/
 plyvel/_plyvel.cpp
+plyvel/_plyvel.html
 plyvel/_plyvel*.so
 plyvel.egg-info/
 testdb/
