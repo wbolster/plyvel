@@ -724,9 +724,9 @@ cdef class Iterator:
         external Python API.
         """
         cdef Slice key_slice
-        cdef bytes key
+        cdef bytes key = None
         cdef Slice value_slice
-        cdef bytes value
+        cdef bytes value = None
 
         # Only build Python strings that will be returned. Also chop off
         # the db prefix (for PrefixedDB iterators).
