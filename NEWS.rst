@@ -6,6 +6,9 @@ Version history
 Plyvel 0.5 (not yet released)
 =============================
 
+* Fix :py:meth:`Iterator.seek()` for :py:class:`PrefixedDB` iterators
+  (`issue #15 <https://github.com/wbolster/plyvel/issues/15>`_)
+
 * Made some argument type checking a bit stricter (mostly ``None`` checks)
 
 * Support LRU caches larger than 2GB by using the right integer type for the

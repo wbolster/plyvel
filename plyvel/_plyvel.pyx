@@ -341,7 +341,7 @@ cdef class DB:
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
         return Iterator(
-            db=self, key_prefix=None, reverse=reverse, start=start, stop=stop,
+            db=self, db_prefix=None, reverse=reverse, start=start, stop=stop,
             include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
@@ -448,7 +448,7 @@ cdef class PrefixedDB:
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
         return Iterator(
-            db=self.db, key_prefix=self.prefix, reverse=reverse, start=start,
+            db=self.db, db_prefix=self.prefix, reverse=reverse, start=start,
             stop=stop, include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
@@ -610,17 +610,14 @@ cdef class Iterator:
     cdef bool include_stop
     cdef bool include_key
     cdef bool include_value
-
-    # This is the number of bytes that should be skipped over when
-    # returning keys from .current(). This avoids Python byte string
-    # copying/slicing overhead for PrefixedDB iterators.
-    cdef int skip_key_bytes
+    cdef bytes db_prefix
+    cdef size_t db_prefix_len
 
     # Iterators need to be weak referencable to ensure a proper cleanup
     # from DB.close()
     cdef object __weakref__
 
-    def __init__(self, *, DB db not None, bytes key_prefix, bool reverse,
+    def __init__(self, *, DB db not None, bytes db_prefix, bool reverse,
                  bytes start, bytes stop, bool include_start,
                  bool include_stop, bytes prefix, bool include_key,
                  bool include_value, bool verify_checksums, bool fill_cache,
@@ -632,29 +629,32 @@ cdef class Iterator:
         self.comparator = <leveldb.Comparator*>db.options.comparator
         self.direction = FORWARD if not reverse else REVERSE
 
-        if key_prefix is None:
-            self.skip_key_bytes = 0
+        if db_prefix is None:
+            self.db_prefix_len = 0
         else:
-            # This is an iterator on a PrefixedDB. Transform args so
-            # that the database key prefix is taken into account.
-            self.skip_key_bytes = len(key_prefix)
+            # This is an iterator on a PrefixedDB.
+            self.db_prefix = db_prefix
+            self.db_prefix_len = len(db_prefix)
+
+            # Transform args so that the database key prefix is taken
+            # into account.
             if prefix is not None:
                 # Both database key prefix and prefix on the iterator
-                prefix = key_prefix + prefix
+                prefix = db_prefix + prefix
             else:
                 # Adapt start and stop keys to use the database key
                 # prefix.
                 if start is None:
-                    start = key_prefix
+                    start = db_prefix
                     include_start = True
                 else:
-                    start = key_prefix + start
+                    start = db_prefix + start
 
                 if stop is None:
-                    stop = bytes_increment(key_prefix)
+                    stop = bytes_increment(db_prefix)
                     include_stop = False
                 else:
-                    stop = key_prefix + stop
+                    stop = db_prefix + stop
 
         if prefix is not None:
             if start is not None or stop is not None:
@@ -728,10 +728,11 @@ cdef class Iterator:
         cdef Slice value_slice
         cdef bytes value
 
-        # Only build Python strings that will be returned
+        # Only build Python strings that will be returned. Also chop off
+        # the db prefix (for PrefixedDB iterators).
         if self.include_key:
             key_slice = self._iter.key()
-            key = key_slice.data()[self.skip_key_bytes:key_slice.size()]
+            key = key_slice.data()[self.db_prefix_len:key_slice.size()]
 
         if self.include_value:
             value_slice = self._iter.value()
@@ -908,6 +909,9 @@ cdef class Iterator:
         if self._iter is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
+        if self.db_prefix is not None:
+            target = self.db_prefix + target
+
         cdef Slice target_slice = Slice(target, len(target))
 
         # Seek only within the start/stop boundaries
@@ -981,7 +985,7 @@ cdef class Snapshot:
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
         return Iterator(
-            db=self.db, key_prefix=self.prefix, reverse=reverse, start=start,
+            db=self.db, db_prefix=self.prefix, reverse=reverse, start=start,
             stop=stop, include_start=include_start, include_stop=include_stop,
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,

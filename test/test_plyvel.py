@@ -1023,6 +1023,9 @@ def test_prefixed_db():
         assert_equal(1000, len(list(it)))
         it = db_a.iterator(prefix=b'10')
         assert_equal(10, len(list(it)))
+        it = db_a.iterator()
+        it.seek(b'500')
+        assert_equal(500, len(list(it)))
 
         # Snapshots
         sn_a = db_a.snapshot()
