@@ -1023,9 +1023,19 @@ def test_prefixed_db():
         assert_equal(1000, len(list(it)))
         it = db_a.iterator(prefix=b'10')
         assert_equal(10, len(list(it)))
-        it = db_a.iterator()
+        it = db_a.iterator(include_value=False)
         it.seek(b'500')
         assert_equal(500, len(list(it)))
+        it.seek_to_start()
+        assert_equal(1000, len(list(it)))
+        it.seek_to_stop()
+        assert_equal(b'999', it.prev())
+        it = db_b.iterator()
+        it.seek_to_start()
+        assert_raises(StopIteration, it.prev)
+        it.seek_to_stop()
+        with assert_raises(StopIteration):
+            next(it)
 
         # Snapshots
         sn_a = db_a.snapshot()
