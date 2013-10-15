@@ -1,0 +1,23 @@
+Source: plyvel
+Maintainer: tom metge <tom@accident-prone.com>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-all-dev, debhelper (>= 9), dpkg-dev (>= 1.16.1~), cython (>= 0.17), libleveldb-dev
+Standards-Version: 3.9.4
+
+Package: python-plyvel
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}, libleveldb1
+Provides: ${python:Provides}
+Description: Fast and feature-rich Python interface to LevelDB
+ Plyvel is a fast and feature-rich Python interface to LevelDB.
+ .
+ Plyvel wraps most of the LevelDB C++ API and adds some features of its own.
+ In addition to basic features like getting, putting and deleting data, Plyvel
+ allows you to use write batches, database snapshots, very flexible iterators,
+ prefixed databases, bloom filters, custom cache sizes, custom comparators,
+ and other goodness LevelDB has to offer.
+ .
+ The API is designed to be Pythonic, with idioms like iterators and context
+ managers ("with" blocks), without sacrificing the power or performance of the
+ underlying LevelDB C++ API.
