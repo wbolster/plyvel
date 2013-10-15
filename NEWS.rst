@@ -3,6 +3,13 @@ Version history
 ===============
 
 
+Plyvel 0.6 (not yet released)
+=============================
+
+* Add useful ``__repr__()`` for :py:class:`DB` and :py:class:`PrefixedDB`
+  instances (`issue #16 <https://github.com/wbolster/plyvel/issues/16>`_)
+
+
 Plyvel 0.5
 ==========
 

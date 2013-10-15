@@ -205,6 +205,7 @@ cdef int parse_options(Options *options, bool create_if_missing,
 cdef class DB:
     cdef leveldb.DB* _db
     cdef Options options
+    cdef object name
     cdef object lock
     cdef object iterators
 
@@ -217,6 +218,7 @@ cdef class DB:
                  bytes comparator_name=None):
         cdef Status st
         cdef string fsname
+        self.name = name
 
         fsname = to_file_system_name(name)
         parse_options(
@@ -278,6 +280,13 @@ cdef class DB:
 
     def __dealloc__(self):
         self.close()
+
+    def __repr__(self):
+        return '<plyvel.DB with name %r%s at 0x%s>' % (
+            self.name,
+            ' (closed)' if self.closed else '',
+            hex(id(self)),
+        )
 
     def get(self, bytes key not None, default=None, *, verify_checksums=None,
             fill_cache=None):
@@ -421,6 +430,12 @@ cdef class PrefixedDB:
     def __init__(self, *, DB db not None, bytes prefix not None):
         self.db = db
         self.prefix = prefix
+
+    def __repr__(self):
+        return '<plyvel.PrefixedDB with prefix %r at 0x%s>' % (
+            self.prefix,
+            hex(id(self)),
+        )
 
     def get(self, bytes key not None, default=None, *, verify_checksums=None,
             fill_cache=None):
