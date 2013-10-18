@@ -2,9 +2,10 @@
 Version history
 ===============
 
+Plyvel 0.6
+==========
 
-Plyvel 0.6 (not yet released)
-=============================
+Release date: 2013-10-18
 
 * Allow iterators to be closed explicitly using either
   :py:meth:`Iterator.close()` or a ``with`` block (`issue #19
