@@ -496,6 +496,8 @@ Directly invoking methods on the :py:class:`Iterator` returned by
 
           it.seek_to_start()  # raises RuntimeError
 
+      .. versionadded:: 0.6
+
 
 Errors
 ======
