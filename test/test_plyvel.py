@@ -332,6 +332,21 @@ def test_iteration():
             assert_equal(entry, expected)
 
 
+def test_iterator_closing():
+    with tmp_db('iteration_closing') as db:
+        db.put(b'k', b'v')
+        it = db.iterator()
+        next(it)
+        it.close()
+        assert_raises(RuntimeError, next, it)
+        assert_raises(RuntimeError, it.seek_to_stop)
+
+        with db.iterator() as it:
+            next(it)
+
+        assert_raises(RuntimeError, next, it)
+
+
 def test_iterator_return():
     with tmp_db('iteration') as db:
         db.put(b'key', b'value')

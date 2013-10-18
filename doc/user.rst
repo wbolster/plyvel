@@ -325,8 +325,28 @@ iterating over snapshots using the :py:meth:`Snapshot.iterator` method. This
 method works exactly the same as :py:meth:`DB.iterator`, except that it operates
 on the snapshot instead of the complete database.
 
-Advanced iterator usage
------------------------
+Closing iterators
+-----------------
+
+It is generally not required to close an iterator explicitly, since it will be
+closed when it goes out of scope (or is garbage collected). However, due to the
+way LevelDB is designed, each iterator operates on an implicit database
+snapshot, which can be an expensive resource depending on how the database is
+used during the iterator's lifetime. The :py:meth:`Iterator.close` method gives
+explicit control over when those resources are released::
+
+    >>> it = db.iterator()
+    >>> it.close()
+
+Alternatively, to ensure that an iterator is immediately closed after used, you
+can also use an iterator as a context manager using the ``with`` statement::
+
+    >>> with db.iterator() as it:
+    ...    for k, v in it:
+    ...        pass
+
+Non-linear iteration
+--------------------
 
 In the examples above, we've only used Python's standard iteration methods using
 a ``for`` loop and the :py:func:`list` constructor. This suffices for most

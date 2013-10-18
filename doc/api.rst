@@ -65,8 +65,10 @@ LevelDB database.
       Close the database.
 
       This closes the database and releases associated resources such as open
-      file pointers and caches. Any further operations on the closed database
-      will raise a :py:exc:`RuntimeError`.
+      file pointers and caches.
+
+      Any further operations on the closed database will raise
+      :py:exc:`RuntimeError`.
 
       .. warning::
 
@@ -477,6 +479,22 @@ Directly invoking methods on the :py:class:`Iterator` returned by
 
       This moves the iterator to the the first key that sorts equal or before
       the specified `target` within the iterator range (`start` and `stop`).
+
+   .. py:method:: close()
+
+      Close the iterator.
+
+      This closes the iterator and releases the associated resources. Any
+      further operations on the closed iterator will raise
+      :py:exc:`RuntimeError`.
+
+      To automatically close an iterator, a context manager can be used::
+
+          with db.iterator() as it:
+              for k, v in it:
+                  pass  # do something
+
+          it.seek_to_start()  # raises RuntimeError
 
 
 Errors

@@ -716,18 +716,20 @@ cdef class Iterator:
         # Store a weak reference on the db (needed when closing db)
         db.iterators[id(self)] = self
 
-    cdef close(self):
-        # Note: this method is only for internal cleanups and hence not
-        # accessible from Python.
-        if self._iter is NULL:
-            # Already closed
-            return
-
-        del self._iter
-        self._iter = NULL
+    cpdef close(self):
+        if self._iter is not NULL:
+            del self._iter
+            self._iter = NULL
 
     def __dealloc__(self):
         self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False  # propagate exceptions
 
     def __iter__(self):
         return self

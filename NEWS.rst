@@ -6,6 +6,10 @@ Version history
 Plyvel 0.6 (not yet released)
 =============================
 
+* Allow iterators to be closed explicitly using either
+  :py:meth:`Iterator.close()` or a ``with`` block (`issue #19
+  <https://github.com/wbolster/plyvel/issues/19>`_)
+
 * Add useful ``__repr__()`` for :py:class:`DB` and :py:class:`PrefixedDB`
   instances (`issue #16 <https://github.com/wbolster/plyvel/issues/16>`_)
 
