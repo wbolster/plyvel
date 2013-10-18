@@ -338,7 +338,7 @@ explicit control over when those resources are released::
     >>> it = db.iterator()
     >>> it.close()
 
-Alternatively, to ensure that an iterator is immediately closed after used, you
+Alternatively, to ensure that an iterator is immediately closed after use, you
 can also use an iterator as a context manager using the ``with`` statement::
 
     >>> with db.iterator() as it:
