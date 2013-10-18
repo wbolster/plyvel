@@ -500,9 +500,10 @@ Directly invoking methods on the :py:class:`Iterator` returned by
 Errors
 ======
 
-Plyvel uses standard exceptions like ``TypeError`` and ``ValueError`` as much as
-possible. For LevelDB specific errors, Plyvel may raise a few custom exceptions:
-:py:class:`Error`, :py:class:`IOError`, and :py:class:`CorruptionError`.
+Plyvel uses standard exceptions like ``TypeError``, ``ValueError``, and
+``RuntimeError`` as much as possible. For LevelDB specific errors, Plyvel may
+raise a few custom exceptions: :py:class:`Error`, :py:class:`IOError`, and
+:py:class:`CorruptionError`.
 
 .. py:exception:: Error
 
