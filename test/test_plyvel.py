@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from contextlib import contextmanager
+import contextlib
 import os
 import shutil
 import stat
@@ -43,7 +43,7 @@ TEST_DBS_DIR = 'testdb/'
 # Utilities
 #
 
-@contextmanager
+@contextlib.contextmanager
 def tmp_db(name_prefix, create=True, delete=True, **kwargs):
     name = tempfile.mkdtemp(prefix=name_prefix + '-', dir=TEST_DBS_DIR)
     if create:
