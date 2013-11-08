@@ -30,8 +30,7 @@ from nose.tools import (
     assert_is_not_none,
     assert_list_equal,
     assert_raises,
-    assert_sequence_equal,
-    nottest)
+    assert_sequence_equal)
 
 import plyvel
 from plyvel import DB
@@ -369,8 +368,7 @@ def test_iterator_return():
             assert_is_none(ret)
 
 
-@nottest
-def test_iterator_behaviour(db, iter_kwargs, expected_values):
+def assert_iterator_behaviour(db, iter_kwargs, expected_values):
     first, second, third = expected_values
     is_forward = not iter_kwargs.get('reverse', False)
 
@@ -428,7 +426,7 @@ def test_forward_iteration():
         db.put(b'2', b'2')
         db.put(b'3', b'3')
 
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(include_key=False),
             expected_values=(b'1', b'2', b'3'))
@@ -440,7 +438,7 @@ def test_reverse_iteration():
         db.put(b'2', b'2')
         db.put(b'3', b'3')
 
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(reverse=True, include_key=False),
             expected_values=(b'3', b'2', b'1'))
@@ -471,32 +469,32 @@ def test_range_iteration():
             list(db.iterator(start=b'3', stop=b'0')))
 
         # Only start (inclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(start=b'3', include_key=False),
             expected_values=(b'3', b'4', b'5'))
 
         # Only start (exclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(start=b'2', include_key=False,
                              include_start=False),
             expected_values=(b'3', b'4', b'5'))
 
         # Only stop (exclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(stop=b'4', include_key=False),
             expected_values=(b'1', b'2', b'3'))
 
         # Only stop (inclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(stop=b'3', include_key=False, include_stop=True),
             expected_values=(b'1', b'2', b'3'))
 
         # Both start and stop
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(start=b'2', stop=b'5', include_key=False),
             expected_values=(b'2', b'3', b'4'))
@@ -515,33 +513,33 @@ def test_reverse_range_iteration():
             list(db.iterator(start=b'3', stop=b'0', reverse=True)))
 
         # Only start (inclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(start=b'3', reverse=True, include_value=False),
             expected_values=(b'5', b'4', b'3'))
 
         # Only start (exclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(start=b'2', reverse=True, include_value=False,
                              include_start=False),
             expected_values=(b'5', b'4', b'3'))
 
         # Only stop (exclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(stop=b'4', reverse=True, include_value=False),
             expected_values=(b'3', b'2', b'1'))
 
         # Only stop (inclusive)
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(stop=b'3', reverse=True, include_value=False,
                              include_stop=True),
             expected_values=(b'3', b'2', b'1'))
 
         # Both start and stop
-        test_iterator_behaviour(
+        assert_iterator_behaviour(
             db,
             iter_kwargs=dict(start=b'1', stop=b'4', reverse=True,
                              include_value=False),
