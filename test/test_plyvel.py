@@ -9,21 +9,14 @@ import stat
 import sys
 import tempfile
 
-try:
-    from itertools import izip
-except ImportError:
-    # Python 3
-    izip = zip
-
-try:
-    xrange
-except NameError:
-    # Python 3
-    xrange = range
+if sys.version_info < (3, 0):
+    from future_builtins import zip
+    range = xrange
 
 import pytest
 
 import plyvel
+
 
 TEST_DBS_DIR = 'testdb/'
 
@@ -207,7 +200,7 @@ def test_put(db):
     db.put(b'foo', b'bar', sync=False)
     db.put(b'foo', b'bar', sync=True)
 
-    for i in xrange(1000):
+    for i in range(1000):
         key = ('key-%d' % i).encode('ascii')
         value = ('value-%d' % i).encode('ascii')
         db.put(key, value)
@@ -265,7 +258,7 @@ def test_null_bytes(db):
 def test_write_batch(db):
     # Prepare a batch with some data
     batch = db.write_batch()
-    for i in xrange(1000):
+    for i in range(1000):
         batch.put(('batch-key-%d' % i).encode('ascii'), b'value')
 
     # Delete a key that was also set in the same (pending) batch
@@ -320,7 +313,7 @@ def test_write_batch_transaction(db):
 
 def test_iteration(db):
     entries = []
-    for i in xrange(100):
+    for i in range(100):
         entry = (
             ('%03d' % i).encode('ascii'),
             ('%03d' % i).encode('ascii'))
@@ -329,7 +322,7 @@ def test_iteration(db):
     for k, v in entries:
         db.put(k, v)
 
-    for entry, expected in izip(entries, db):
+    for entry, expected in zip(entries, db):
         assert entry == expected
 
 
@@ -810,7 +803,7 @@ def test_approximate_sizes():
         db = plyvel.DB(name, create_if_missing=True, error_if_exists=True)
         value = b'a' * 100
         with db.write_batch() as wb:
-            for i in xrange(1000):
+            for i in range(1000):
                 key = bytes(i) * 100
                 wb.put(key, value)
 
@@ -878,18 +871,18 @@ def test_threading():
         def bulk_insert(db):
             name = current_thread().name
             v = name.encode('ascii') * randint(300, 700)
-            for n in xrange(randint(1000, 8000)):
+            for n in range(randint(1000, 8000)):
                 rev = '{:x}'.format(n)[::-1]
                 k = '{}: {}'.format(rev, name).encode('ascii')
                 db.put(k, v)
 
         def iterate_full(db):
-            for i in xrange(randint(4, 7)):
+            for i in range(randint(4, 7)):
                 for key, value in db.iterator(reverse=True):
                     pass
 
         def iterate_short(db):
-            for i in xrange(randint(200, 700)):
+            for i in range(randint(200, 700)):
                 it = db.iterator()
                 list(itertools.islice(it, randint(50, 100)))
 
@@ -910,7 +903,7 @@ def test_threading():
 
         threads = []
         for func in funcs:
-            for n in xrange(N_THREADS_PER_FUNC):
+            for n in range(N_THREADS_PER_FUNC):
                 t = Thread(target=func, args=(db,))
                 t.start()
                 threads.append(t)
@@ -970,7 +963,7 @@ def test_comparator():
 
 def test_prefixed_db(db):
     for prefix in (b'a', b'b'):
-        for i in xrange(1000):
+        for i in range(1000):
             key = prefix + '{:03d}'.format(i).encode('ascii')
             db.put(key, b'')
 
