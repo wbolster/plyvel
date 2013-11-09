@@ -23,7 +23,6 @@ except NameError:
 
 from nose.plugins.skip import SkipTest
 from nose.tools import (
-    assert_equal,
     assert_greater_equal,
     assert_is_instance,
     assert_is_none,
@@ -228,19 +227,18 @@ def test_get(db):
     value = b'the-value'
     assert_is_none(db.get(key))
     db.put(key, value)
-    assert_equal(value, db.get(key))
-    assert_equal(value, db.get(key, verify_checksums=True))
-    assert_equal(value, db.get(key, verify_checksums=False))
-    assert_equal(value, db.get(key, verify_checksums=None))
-    assert_equal(value, db.get(key, fill_cache=True))
-    assert_equal(value, db.get(key, fill_cache=False,
-                               verify_checksums=None))
+    assert value == db.get(key)
+    assert value == db.get(key, verify_checksums=True)
+    assert value == db.get(key, verify_checksums=False)
+    assert value == db.get(key, verify_checksums=None)
+    assert value == db.get(key, fill_cache=True)
+    assert value == db.get(key, fill_cache=False, verify_checksums=None)
 
     key2 = b'key-that-does-not-exist'
     value2 = b'default-value'
     assert_is_none(db.get(key2))
-    assert_equal(value2, db.get(key2, value2))
-    assert_equal(value2, db.get(key2, default=value2))
+    assert value2 == db.get(key2, value2)
+    assert value2 == db.get(key2, default=value2)
 
     assert_raises(TypeError, db.get, 1)
     assert_raises(TypeError, db.get, 'key')
@@ -265,7 +263,7 @@ def test_null_bytes(db):
     key = b'key\x00\x01'
     value = b'\x00\x00\x01'
     db.put(key, value)
-    assert_equal(value, db.get(key))
+    assert value == db.get(key)
     db.delete(key)
     assert_is_none(db.get(key))
 
@@ -338,7 +336,7 @@ def test_iteration(db):
         db.put(k, v)
 
     for entry, expected in izip(entries, db):
-        assert_equal(entry, expected)
+        assert entry == expected
 
 
 def test_iterator_closing(db):
@@ -359,18 +357,18 @@ def test_iterator_return(db):
     db.put(b'key', b'value')
 
     for key, value in db:
-        assert_equal(key, b'key')
-        assert_equal(value, b'value')
+        assert key == b'key'
+        assert value == b'value'
 
     for key, value in db.iterator():
-        assert_equal(key, b'key')
-        assert_equal(value, b'value')
+        assert key == b'key'
+        assert value == b'value'
 
     for key in db.iterator(include_value=False):
-        assert_equal(key, b'key')
+        assert key == b'key'
 
     for value in db.iterator(include_key=False):
-        assert_equal(value, b'value')
+        assert value == b'value'
 
     for ret in db.iterator(include_key=False, include_value=False):
         assert_is_none(ret)
@@ -382,9 +380,9 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
 
     # Simple iteration
     it = db.iterator(**iter_kwargs)
-    assert_equal(first, next(it))
-    assert_equal(second, next(it))
-    assert_equal(third, next(it))
+    assert first == next(it)
+    assert second == next(it)
+    assert third == next(it)
     with assert_raises(StopIteration):
         next(it)
     with assert_raises(StopIteration):
@@ -393,19 +391,19 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
 
     # Single steps, both next() and .prev()
     it = db.iterator(**iter_kwargs)
-    assert_equal(first, next(it))
-    assert_equal(first, it.prev())
-    assert_equal(first, next(it))
-    assert_equal(first, it.prev())
+    assert first == next(it)
+    assert first == it.prev()
+    assert first == next(it)
+    assert first == it.prev()
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal(first, next(it))
-    assert_equal(second, next(it))
-    assert_equal(third, next(it))
+    assert first == next(it)
+    assert second == next(it)
+    assert third == next(it)
     with assert_raises(StopIteration):
         next(it)
-    assert_equal(third, it.prev())
-    assert_equal(second, it.prev())
+    assert third == it.prev()
+    assert second == it.prev()
 
     # End of iterator
     it = db.iterator(**iter_kwargs)
@@ -415,7 +413,7 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
         it.seek_to_start()
     with assert_raises(StopIteration):
         next(it)
-    assert_equal(third, it.prev())
+    assert third == it.prev()
 
     # Begin of iterator
     it = db.iterator(**iter_kwargs)
@@ -425,7 +423,7 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
         it.seek_to_stop()
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal(first, next(it))
+    assert first == next(it)
 
 
 def test_forward_iteration(db):
@@ -559,7 +557,7 @@ def test_out_of_range_iterations(db):
 
     def t(expected, **kwargs):
         kwargs['include_value'] = False
-        assert_equal(expected, b''.join((db.iterator(**kwargs))))
+        assert expected == b''.join((db.iterator(**kwargs)))
 
     # Out of range start key
     t(b'3457', start=b'2')
@@ -598,13 +596,13 @@ def test_iterator_single_entry(db):
     db.put(key, value)
 
     it = db.iterator(include_value=False)
-    assert_equal(key, next(it))
-    assert_equal(key, it.prev())
-    assert_equal(key, next(it))
-    assert_equal(key, it.prev())
+    assert key == next(it)
+    assert key == it.prev()
+    assert key == next(it)
+    assert key == it.prev()
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal(key, next(it))
+    assert key == next(it)
     with assert_raises(StopIteration):
         next(it)
 
@@ -620,94 +618,94 @@ def test_iterator_seeking(db):
     it.seek_to_start()
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal(b'1', next(it))
+    assert b'1' == next(it)
     it.seek_to_start()
-    assert_equal(b'1', next(it))
+    assert b'1' == next(it)
     it.seek_to_stop()
     with assert_raises(StopIteration):
         next(it)
-    assert_equal(b'5', it.prev())
+    assert b'5' == it.prev()
 
     # Seek to a specific key
     it.seek(b'2')
-    assert_equal(b'2', next(it))
-    assert_equal(b'3', next(it))
+    assert b'2' == next(it)
+    assert b'3' == next(it)
     assert_list_equal([b'4', b'5'], list(it))
     it.seek(b'2')
-    assert_equal(b'1', it.prev())
+    assert b'1' == it.prev()
 
     # Seek to keys that sort between/before/after existing keys
     it.seek(b'123')
-    assert_equal(b'2', next(it))
+    assert b'2' == next(it)
     it.seek(b'6')
     with assert_raises(StopIteration):
         next(it)
     it.seek(b'0')
     with assert_raises(StopIteration):
         it.prev()
-    assert_equal(b'1', next(it))
+    assert b'1' == next(it)
     it.seek(b'4')
     it.seek(b'3')
-    assert_equal(b'3', next(it))
+    assert b'3' == next(it)
 
     # Seek in a reverse iterator
     it = db.iterator(include_value=False, reverse=True)
     it.seek(b'6')
-    assert_equal(b'5', next(it))
-    assert_equal(b'4', next(it))
+    assert b'5' == next(it)
+    assert (b'4', next(it))
     it.seek(b'1')
     with assert_raises(StopIteration):
         next(it)
-    assert_equal(b'1', it.prev())
+    assert b'1' == it.prev()
 
     # Seek in iterator with start key
     it = db.iterator(start=b'2', include_value=False)
-    assert_equal(b'2', next(it))
+    assert b'2' == next(it)
     it.seek(b'2')
-    assert_equal(b'2', next(it))
+    assert b'2' == next(it)
     it.seek(b'0')
-    assert_equal(b'2', next(it))
+    assert b'2' == next(it)
     it.seek_to_start()
-    assert_equal(b'2', next(it))
+    assert b'2' == next(it)
 
     # Seek in iterator with stop key
     it = db.iterator(stop=b'3', include_value=False)
-    assert_equal(b'1', next(it))
+    assert b'1' == next(it)
     it.seek(b'2')
-    assert_equal(b'2', next(it))
+    assert b'2' == next(it)
     it.seek(b'5')
     with assert_raises(StopIteration):
         next(it)
     it.seek(b'5')
-    assert_equal(b'2', it.prev())
+    assert b'2' == it.prev()
     it.seek_to_stop()
     with assert_raises(StopIteration):
         next(it)
     it.seek_to_stop()
-    assert_equal(b'2', it.prev())
+    assert b'2' == it.prev()
 
     # Seek in iterator with both start and stop keys
     it = db.iterator(start=b'2', stop=b'5', include_value=False)
     it.seek(b'0')
-    assert_equal(b'2', next(it))
+    assert b'2' == next(it)
     it.seek(b'5')
     with assert_raises(StopIteration):
         next(it)
     it.seek(b'5')
-    assert_equal(b'4', it.prev())
+    assert b'4' == it.prev()
 
     # Seek in reverse iterator with start and stop key
     it = db.iterator(
         reverse=True, start=b'2', stop=b'4', include_value=False)
     it.seek(b'5')
-    assert_equal(b'3', next(it))
+    assert b'3' == next(it)
     it.seek(b'1')
-    assert_equal(b'2', it.prev())
+    assert b'2' == it.prev()
     it.seek_to_start()
     with assert_raises(StopIteration):
         next(it)
     it.seek_to_stop()
-    assert_equal(b'3', next(it))
+    assert b'3' == next(it)
 
 
 def test_iterator_boundaries(db):
@@ -720,7 +718,7 @@ def test_iterator_boundaries(db):
     def t(expected, **kwargs):
         kwargs.update(include_value=False)
         actual = b''.join(db.iterator(**kwargs))
-        assert_equal(expected, actual)
+        assert expected == actual
 
     t(b'12345')
     t(b'345', start=b'2', include_start=False)
@@ -771,7 +769,7 @@ def test_snapshot(db):
 
     # Snapshot should have existing values, but not changed values
     snapshot = db.snapshot()
-    assert_equal(b'a', snapshot.get(b'a'))
+    assert b'a' == snapshot.get(b'a')
     assert_list_equal(
         [b'a', b'b'],
         list(snapshot.iterator(include_value=False)))
@@ -779,15 +777,15 @@ def test_snapshot(db):
     db.delete(b'a')
     db.put(b'c', b'c')
     assert_is_none(snapshot.get(b'c'))
-    assert_equal(b'd', snapshot.get(b'c', b'd'))
-    assert_equal(b'd', snapshot.get(b'c', default=b'd'))
+    assert b'd' == snapshot.get(b'c', b'd')
+    assert b'd' == snapshot.get(b'c', default=b'd')
     assert_list_equal(
         [b'a', b'b'],
         list(snapshot.iterator(include_value=False)))
 
     # New snapshot should reflect latest state
     snapshot = db.snapshot()
-    assert_equal(b'c', snapshot.get(b'c'))
+    assert b'c' == snapshot.get(b'c')
     assert_list_equal(
         [b'b', b'c'],
         list(snapshot.iterator(include_value=False)))
@@ -859,7 +857,7 @@ def test_approximate_sizes():
             (b'1', b'3'),
             (b'', b'\xff'),
         ]
-        assert_equal(len(ranges), len(db.approximate_sizes(*ranges)))
+        assert len(ranges) == len(db.approximate_sizes(*ranges))
 
 
 def test_repair_db():
@@ -871,7 +869,7 @@ def test_repair_db():
 
         plyvel.repair_db(name)
         db = DB(name)
-        assert_equal(b'bar', db.get(b'foo'))
+        assert b'bar' == db.get(b'foo')
 
 
 def test_destroy_db():
@@ -1006,37 +1004,37 @@ def test_prefixed_db(db):
     key = b'123'
     assert_is_not_none(db_a.get(key))
     db_a.put(key, b'foo')
-    assert_equal(b'foo', db_a.get(key))
+    assert b'foo' == db_a.get(key)
     db_a.delete(key)
     assert_is_none(db_a.get(key))
-    assert_equal(b'v', db_a.get(key, b'v'))
-    assert_equal(b'v', db_a.get(key, default=b'v'))
+    assert b'v' == db_a.get(key, b'v')
+    assert b'v' == db_a.get(key, default=b'v')
     db_a.put(key, b'foo')
-    assert_equal(b'foo', db.get(b'a123'))
+    assert b'foo' == db.get(b'a123')
 
     # Iterators
-    assert_equal(1000, len(list(db_a)))
+    assert 1000 == len(list(db_a))
     it = db_a.iterator(include_value=False)
-    assert_equal(b'000', next(it))
-    assert_equal(b'001', next(it))
-    assert_equal(998, len(list(it)))
+    assert b'000' == next(it)
+    assert b'001' == next(it)
+    assert 998 == len(list(it))
     it = db_a.iterator(start=b'900')
-    assert_equal(100, len(list(it)))
+    assert 100 == len(list(it))
     it = db_a.iterator(stop=b'012', include_stop=False)
-    assert_equal(12, len(list(it)))
+    assert 12 == len(list(it))
     it = db_a.iterator(stop=b'012', include_stop=True)
-    assert_equal(13, len(list(it)))
+    assert 13 == len(list(it))
     it = db_a.iterator(include_stop=True)
-    assert_equal(1000, len(list(it)))
+    assert 1000 == len(list(it))
     it = db_a.iterator(prefix=b'10')
-    assert_equal(10, len(list(it)))
+    assert 10 == len(list(it))
     it = db_a.iterator(include_value=False)
     it.seek(b'500')
-    assert_equal(500, len(list(it)))
+    assert 500 == len(list(it))
     it.seek_to_start()
-    assert_equal(1000, len(list(it)))
+    assert 1000 == len(list(it))
     it.seek_to_stop()
-    assert_equal(b'999', it.prev())
+    assert b'999' == it.prev()
     it = db_b.iterator()
     it.seek_to_start()
     assert_raises(StopIteration, it.prev)
@@ -1046,39 +1044,39 @@ def test_prefixed_db(db):
 
     # Snapshots
     sn_a = db_a.snapshot()
-    assert_equal(b'', sn_a.get(b'042'))
+    assert b'' == sn_a.get(b'042')
     db_a.put(b'042', b'new')
-    assert_equal(b'', sn_a.get(b'042'))
-    assert_equal(b'new', db_a.get(b'042'))
-    assert_equal(b'x', db_a.get(b'foo', b'x'))
-    assert_equal(b'x', db_a.get(b'foo', default=b'x'))
+    assert b'' == sn_a.get(b'042')
+    assert b'new' == db_a.get(b'042')
+    assert b'x' == db_a.get(b'foo', b'x')
+    assert b'x' == db_a.get(b'foo', default=b'x')
 
     # Snapshot iterators
     sn_a.iterator()
     it = sn_a.iterator(
         start=b'900', include_start=False, include_value=False)
-    assert_equal(b'901', next(it))
-    assert_equal(98, len(list(it)))
+    assert b'901' == next(it)
+    assert 98 == len(list(it))
 
     # Write batches
     wb = db_a.write_batch()
     wb.put(b'0002', b'foo')
     wb.delete(b'0003')
     wb.write()
-    assert_equal(b'foo', db_a.get(b'0002'))
+    assert b'foo' == db_a.get(b'0002')
     assert_is_none(db_a.get(b'0003'))
 
     # Delete all data in db_a
     for key in db_a.iterator(include_value=False):
         db_a.delete(key)
-    assert_equal(0, len(list(db_a)))
+    assert 0 == len(list(db_a))
 
     # The complete db and the 'b' prefix should remain untouched
-    assert_equal(1000, len(list(db)))
-    assert_equal(1000, len(list(db_b)))
+    assert 1000 == len(list(db))
+    assert 1000 == len(list(db_b))
 
     # Prefixed prefixed databases (recursive)
     db_b12 = db_b.prefixed_db(b'12')
     it = db_b12.iterator(include_value=False)
-    assert_equal(b'0', next(it))
-    assert_equal(9, len(list(it)))
+    assert b'0' == next(it)
+    assert 9 == len(list(it))
