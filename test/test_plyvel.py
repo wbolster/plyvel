@@ -18,13 +18,13 @@ import pytest
 import plyvel
 
 
-
 #
 # Utilities
 #
 
 @contextlib.contextmanager
 def tmp_db(name_prefix, create=True, delete=True, **kwargs):
+    # FIXME: remove this helper, use fixtures instead
     name = tempfile.mkdtemp(prefix=name_prefix + '-')
     if create:
         db = plyvel.DB(
@@ -42,8 +42,19 @@ def tmp_db(name_prefix, create=True, delete=True, **kwargs):
 
 
 #
-# Fixture
+# Fixtures
 #
+
+@pytest.fixture
+def db_dir(request):
+    name = tempfile.mkdtemp()
+
+    def finalize():
+        shutil.rmtree(name)
+
+    request.addfinalizer(finalize)
+    return name
+
 
 @pytest.fixture
 def db(request):
@@ -112,60 +123,59 @@ def test_open():
 # XXX: letter casing of encoding names differs between Python 2 and 3
 @pytest.mark.skipif(sys.getfilesystemencoding().lower() != 'utf-8',
                     reason="requires UTF-8 file system encoding")
-def test_open_unicode_name():
-    with tmp_db('úñîçøđê_name'):
-        pass
+def test_open_unicode_name(db_dir):
+    db_dir = os.path.join(db_dir, 'úñîçøđê_name')
+    os.makedirs(db_dir)
+    plyvel.DB(db_dir, create_if_missing=True)
 
 
-def test_open_close():
-    with tmp_db('open_close', create=False) as name:
-        # Create a database with options that result in additional
-        # object allocation (e.g. LRU cache).
-        db = plyvel.DB(
-            name,
-            create_if_missing=True,
-            lru_cache_size=1024 * 1024,
-            bloom_filter_bits=10)
+def test_open_close(db_dir):
+    # Create a database with options that result in additional object
+    # allocation (e.g. LRU cache).
+    db = plyvel.DB(
+        db_dir,
+        create_if_missing=True,
+        lru_cache_size=1024 * 1024,
+        bloom_filter_bits=10)
+    db.put(b'key', b'value')
+    wb = db.write_batch()
+    sn = db.snapshot()
+    it = db.iterator()
+    snapshot_it = sn.iterator()
+
+    # Close the database
+    db.close()
+    assert db.closed
+
+    # Expect runtime errors for operations on the database,
+    with pytest.raises(RuntimeError):
+        db.get(b'key')
+    with pytest.raises(RuntimeError):
         db.put(b'key', b'value')
-        wb = db.write_batch()
-        sn = db.snapshot()
-        it = db.iterator()
-        snapshot_it = sn.iterator()
+    with pytest.raises(RuntimeError):
+        db.delete(b'key')
 
-        # Close the database
-        db.close()
-        assert db.closed
+    # ... on write batches,
+    with pytest.raises(RuntimeError):
+        wb.put(b'key', b'value')
 
-        # Expect runtime errors for operations on the database,
-        with pytest.raises(RuntimeError):
-            db.get(b'key')
-        with pytest.raises(RuntimeError):
-            db.put(b'key', b'value')
-        with pytest.raises(RuntimeError):
-            db.delete(b'key')
+    # ... on snapshots,
+    pytest.raises(RuntimeError, db.snapshot)
+    with pytest.raises(RuntimeError):
+        sn.get(b'key')
 
-        # ... on write batches,
-        with pytest.raises(RuntimeError):
-            wb.put(b'key', b'value')
+    # ... on iterators,
+    with pytest.raises(RuntimeError):
+        next(it)
 
-        # ... on snapshots,
-        pytest.raises(RuntimeError, db.snapshot)
-        with pytest.raises(RuntimeError):
-            sn.get(b'key')
-
-        # ... on iterators,
-        with pytest.raises(RuntimeError):
-            next(it)
-
-        # ... and on snapshot iterators,
-        with pytest.raises(RuntimeError):
-            next(snapshot_it)
+    # ... and on snapshot iterators,
+    with pytest.raises(RuntimeError):
+        next(snapshot_it)
 
 
-def test_large_lru_cache():
+def test_large_lru_cache(db_dir):
     # Use a 2 GB size (does not fit in a 32-bit signed int)
-    with tmp_db('large_lru_cache', lru_cache_size=2 * 1024**3):
-        pass
+    plyvel.DB(db_dir, create_if_missing=True, lru_cache_size=2 * 1024**3)
 
 
 def test_put(db):
@@ -769,137 +779,130 @@ def test_compaction(db):
     db.compact_range(stop=b'b')
 
 
-def test_approximate_sizes():
-    with tmp_db('approximate_sizes', create=False) as name:
+def test_approximate_sizes(db_dir):
+    # Write some data to a fresh database
+    db = plyvel.DB(db_dir, create_if_missing=True, error_if_exists=True)
+    value = b'a' * 100
+    with db.write_batch() as wb:
+        for i in range(1000):
+            key = bytes(i) * 100
+            wb.put(key, value)
 
-        # Write some data to a fresh database
-        db = plyvel.DB(name, create_if_missing=True, error_if_exists=True)
-        value = b'a' * 100
-        with db.write_batch() as wb:
-            for i in range(1000):
-                key = bytes(i) * 100
-                wb.put(key, value)
+    # Close and reopen the database
+    db.close()
+    del wb, db
+    db = plyvel.DB(db_dir, create_if_missing=False)
 
-        # Close and reopen the database
-        db.close()
-        del wb, db
-        db = plyvel.DB(name, create_if_missing=False)
+    with pytest.raises(TypeError):
+        db.approximate_size(1, 2)
 
-        with pytest.raises(TypeError):
-            db.approximate_size(1, 2)
+    with pytest.raises(TypeError):
+        db.approximate_sizes(None)
 
-        with pytest.raises(TypeError):
-            db.approximate_sizes(None)
+    with pytest.raises(TypeError):
+        db.approximate_sizes((1, 2))
 
-        with pytest.raises(TypeError):
-            db.approximate_sizes((1, 2))
+    # Test single range
+    assert db.approximate_size(b'1', b'2') >= 0
 
-        # Test single range
-        assert db.approximate_size(b'1', b'2') >= 0
+    # Test multiple ranges
+    assert db.approximate_sizes() == []
+    assert db.approximate_sizes((b'1', b'2'))[0] >= 0
 
-        # Test multiple ranges
-        assert db.approximate_sizes() == []
-        assert db.approximate_sizes((b'1', b'2'))[0] >= 0
-
-        ranges = [
-            (b'1', b'3'),
-            (b'', b'\xff'),
-        ]
-        assert len(db.approximate_sizes(*ranges)) == len(ranges)
+    ranges = [
+        (b'1', b'3'),
+        (b'', b'\xff'),
+    ]
+    assert len(db.approximate_sizes(*ranges)) == len(ranges)
 
 
-def test_repair_db():
-    with tmp_db('repair', create=False) as name:
-        db = plyvel.DB(name, create_if_missing=True)
-        db.put(b'foo', b'bar')
-        db.close()
-        del db
+def test_repair_db(db_dir):
+    db = plyvel.DB(db_dir, create_if_missing=True)
+    db.put(b'foo', b'bar')
+    db.close()
+    del db
 
-        plyvel.repair_db(name)
-        db = plyvel.DB(name)
-        assert db.get(b'foo') == b'bar'
-
-
-def test_destroy_db():
-    with tmp_db('destroy', create=False, delete=False) as name:
-        db = plyvel.DB(name, create_if_missing=True)
-        db.put(b'foo', b'bar')
-        db.close()
-        del db
-
-        plyvel.destroy_db(name)
-        assert not os.path.lexists(name)
+    plyvel.repair_db(db_dir)
+    db = plyvel.DB(db_dir)
+    assert db.get(b'foo') == b'bar'
 
 
-def test_threading():
+def test_destroy_db(db_dir):
+    db_dir = os.path.join(db_dir, 'subdir')
+    db = plyvel.DB(db_dir, create_if_missing=True)
+    db.put(b'foo', b'bar')
+    db.close()
+    del db
+
+    plyvel.destroy_db(db_dir)
+    assert not os.path.lexists(db_dir)
+
+
+def test_threading(db):
     from threading import Thread, current_thread
     import time
     import itertools
     from random import randint
 
-    with tmp_db('threading') as db:
+    N_THREADS_PER_FUNC = 5
 
-        N_THREADS_PER_FUNC = 5
+    def bulk_insert(db):
+        name = current_thread().name
+        v = name.encode('ascii') * randint(300, 700)
+        for n in range(randint(1000, 8000)):
+            rev = '{:x}'.format(n)[::-1]
+            k = '{}: {}'.format(rev, name).encode('ascii')
+            db.put(k, v)
 
-        def bulk_insert(db):
-            name = current_thread().name
-            v = name.encode('ascii') * randint(300, 700)
-            for n in range(randint(1000, 8000)):
-                rev = '{:x}'.format(n)[::-1]
-                k = '{}: {}'.format(rev, name).encode('ascii')
-                db.put(k, v)
+    def iterate_full(db):
+        for i in range(randint(4, 7)):
+            for key, value in db.iterator(reverse=True):
+                pass
 
-        def iterate_full(db):
-            for i in range(randint(4, 7)):
-                for key, value in db.iterator(reverse=True):
-                    pass
+    def iterate_short(db):
+        for i in range(randint(200, 700)):
+            it = db.iterator()
+            list(itertools.islice(it, randint(50, 100)))
 
-        def iterate_short(db):
-            for i in range(randint(200, 700)):
-                it = db.iterator()
-                list(itertools.islice(it, randint(50, 100)))
+    def close_db(db):
+        time.sleep(1)
+        db.close()
 
-        def close_db(db):
-            time.sleep(1)
-            db.close()
+    funcs = [
+        bulk_insert,
+        iterate_full,
+        iterate_short,
 
-        funcs = [
-            bulk_insert,
-            iterate_full,
-            iterate_short,
+        # XXX: This this will usually cause a segfault since
+        # unexpectedly closing a database may crash threads using
+        # iterators:
+        # close_db,
+    ]
 
-            # XXX: This this will usually cause a segfault since
-            # unexpectedly closing a database may crash threads using
-            # iterators:
-            # close_db,
-        ]
+    threads = []
+    for func in funcs:
+        for n in range(N_THREADS_PER_FUNC):
+            t = Thread(target=func, args=(db,))
+            t.start()
+            threads.append(t)
 
-        threads = []
-        for func in funcs:
-            for n in range(N_THREADS_PER_FUNC):
-                t = Thread(target=func, args=(db,))
-                t.start()
-                threads.append(t)
-
-        for t in threads:
-            t.join()
+    for t in threads:
+        t.join()
 
 
-def test_invalid_comparator():
-    with tmp_db('invalid_comparator', create=False) as name:
+def test_invalid_comparator(db_dir):
+    with pytest.raises(ValueError):
+        plyvel.DB(db_dir, comparator=None, comparator_name=b'invalid')
 
-        with pytest.raises(ValueError):
-            plyvel.DB(name, comparator=None, comparator_name=b'invalid')
+    with pytest.raises(TypeError):
+        plyvel.DB(db_dir, comparator=lambda x, y: 1, comparator_name=12)
 
-        with pytest.raises(TypeError):
-            plyvel.DB(name, comparator=lambda x, y: 1, comparator_name=12)
-
-        with pytest.raises(TypeError):
-            plyvel.DB(name, comparator=b'not-a-callable',
-                      comparator_name=b'invalid')
+    with pytest.raises(TypeError):
+        plyvel.DB(db_dir, comparator=b'not-a-callable',
+                  comparator_name=b'invalid')
 
 
-def test_comparator():
+def test_comparator(db_dir):
     def comparator(a, b):
         a = a.lower()
         b = b.lower()
@@ -912,26 +915,25 @@ def test_comparator():
 
     comparator_name = b"CaseInsensitiveComparator"
 
-    with tmp_db('comparator', create=False) as name:
-        db = plyvel.DB(
-            name,
-            create_if_missing=True,
-            comparator=comparator,
-            comparator_name=comparator_name)
+    db = plyvel.DB(
+        db_dir,
+        create_if_missing=True,
+        comparator=comparator,
+        comparator_name=comparator_name)
 
-        keys = [
-            b'aaa',
-            b'BBB',
-            b'ccc',
-        ]
+    keys = [
+        b'aaa',
+        b'BBB',
+        b'ccc',
+    ]
 
-        with db.write_batch() as wb:
-            for key in keys:
-                wb.put(key, b'')
+    with db.write_batch() as wb:
+        for key in keys:
+            wb.put(key, b'')
 
-        expected = sorted(keys, key=lambda s: s.lower())
-        actual = list(db.iterator(include_value=False))
-        assert actual == expected
+    expected = sorted(keys, key=lambda s: s.lower())
+    actual = list(db.iterator(include_value=False))
+    assert actual == expected
 
 
 def test_prefixed_db(db):
