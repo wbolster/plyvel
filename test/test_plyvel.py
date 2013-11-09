@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-import contextlib
 import os
 import shutil
 import stat
@@ -16,29 +15,6 @@ if sys.version_info < (3, 0):
 import pytest
 
 import plyvel
-
-
-#
-# Utilities
-#
-
-@contextlib.contextmanager
-def tmp_db(name_prefix, create=True, delete=True, **kwargs):
-    # FIXME: remove this helper, use fixtures instead
-    name = tempfile.mkdtemp(prefix=name_prefix + '-')
-    if create:
-        db = plyvel.DB(
-            name,
-            create_if_missing=True,
-            error_if_exists=True,
-            **kwargs)
-        yield db
-        db.close()
-    else:
-        yield name
-
-    if delete:
-        shutil.rmtree(name)
 
 
 #
@@ -78,46 +54,50 @@ def test_version():
     assert v.startswith('1.')
 
 
-def test_open():
-    with tmp_db('read_only_dir', create=False) as name:
-        # Opening a DB in a read-only dir should not work
-        os.chmod(name, stat.S_IRUSR | stat.S_IXUSR)
-        with pytest.raises(plyvel.IOError):
-            plyvel.DB(name)
+def test_open_read_only_dir(db_dir):
+    # Opening a DB in a read-only dir should not work
+    os.chmod(db_dir, stat.S_IRUSR | stat.S_IXUSR)
+    with pytest.raises(plyvel.IOError):
+        plyvel.DB(db_dir)
 
-    with tmp_db('no_create', create=False) as name:
-        with pytest.raises(plyvel.Error):
-            plyvel.DB(name, create_if_missing=False)
 
-    with tmp_db('exists', create=False) as name:
-        db = plyvel.DB(name, create_if_missing=True)
-        db.close()
-        with pytest.raises(plyvel.Error):
-            plyvel.DB(name, error_if_exists=True)
+def test_open_no_create(db_dir):
+    with pytest.raises(plyvel.Error):
+        plyvel.DB(db_dir, create_if_missing=False)
 
+
+def test_open_fresh(db_dir):
+    db = plyvel.DB(db_dir, create_if_missing=True)
+    db.close()
+    with pytest.raises(plyvel.Error):
+        plyvel.DB(db_dir, error_if_exists=True)
+
+
+def tesT_open_no_compression(db_dir):
+    plyvel.DB(db_dir, compression=None, create_if_missing=True)
+
+
+def test_open_many_options(db_dir):
+    plyvel.DB(
+        db_dir, create_if_missing=True, error_if_exists=False,
+        paranoid_checks=True, write_buffer_size=16 * 1024 * 1024,
+        max_open_files=512, lru_cache_size=64 * 1024 * 1024,
+        block_size=2 * 1024, block_restart_interval=32,
+        compression='snappy', bloom_filter_bits=10)
+
+
+def test_invalid_open(db_dir):
     with pytest.raises(TypeError):
         plyvel.DB(123)
 
     with pytest.raises(TypeError):
-        plyvel.DB('invalid_option_types', write_buffer_size='invalid')
+        plyvel.DB(db_dir, write_buffer_size='invalid')
 
     with pytest.raises(TypeError):
-        plyvel.DB('invalid_option_types', lru_cache_size='invalid')
+        plyvel.DB(db_dir, lru_cache_size='invalid')
 
     with pytest.raises(ValueError):
-        plyvel.DB('invalid_compression', compression='invalid',
-                  create_if_missing=True)
-
-    with tmp_db('no_compression', create=False) as name:
-        plyvel.DB(name, compression=None, create_if_missing=True)
-
-    with tmp_db('many_options', create=False) as name:
-        plyvel.DB(
-            name, create_if_missing=True, error_if_exists=False,
-            paranoid_checks=True, write_buffer_size=16 * 1024 * 1024,
-            max_open_files=512, lru_cache_size=64 * 1024 * 1024,
-            block_size=2 * 1024, block_restart_interval=32,
-            compression='snappy', bloom_filter_bits=10)
+        plyvel.DB(db_dir, compression='invalid', create_if_missing=True)
 
 
 # XXX: letter casing of encoding names differs between Python 2 and 3
