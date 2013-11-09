@@ -149,10 +149,11 @@ def test_open_close():
     with tmp_db('open_close', create=False) as name:
         # Create a database with options that result in additional
         # object allocation (e.g. LRU cache).
-        db = plyvel.DB(name,
-                create_if_missing=True,
-                lru_cache_size=1024 * 1024,
-                bloom_filter_bits=10)
+        db = plyvel.DB(
+            name,
+            create_if_missing=True,
+            lru_cache_size=1024 * 1024,
+            bloom_filter_bits=10)
         db.put(b'key', b'value')
         wb = db.write_batch()
         sn = db.snapshot()
