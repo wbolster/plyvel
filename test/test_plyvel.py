@@ -22,14 +22,6 @@ except NameError:
     xrange = range
 
 from nose.plugins.skip import SkipTest
-from nose.tools import (
-    assert_greater_equal,
-    assert_is_instance,
-    assert_is_none,
-    assert_is_not_none,
-    assert_list_equal,
-    assert_raises,
-    assert_sequence_equal)
 import pytest
 
 import plyvel
@@ -112,29 +104,29 @@ def test_open():
     with tmp_db('read_only_dir', create=False) as name:
         # Opening a DB in a read-only dir should not work
         os.chmod(name, stat.S_IRUSR | stat.S_IXUSR)
-        with assert_raises(plyvel.IOError):
+        with pytest.raises(plyvel.IOError):
             DB(name)
 
     with tmp_db('no_create', create=False) as name:
-        with assert_raises(plyvel.Error):
+        with pytest.raises(plyvel.Error):
             DB(name, create_if_missing=False)
 
     with tmp_db('exists', create=False) as name:
         db = DB(name, create_if_missing=True)
         db.close()
-        with assert_raises(plyvel.Error):
+        with pytest.raises(plyvel.Error):
             DB(name, error_if_exists=True)
 
-    with assert_raises(TypeError):
+    with pytest.raises(TypeError):
         DB(123)
 
-    with assert_raises(TypeError):
+    with pytest.raises(TypeError):
         DB('invalid_option_types', write_buffer_size='invalid')
 
-    with assert_raises(TypeError):
+    with pytest.raises(TypeError):
         DB('invalid_option_types', lru_cache_size='invalid')
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         DB('invalid_compression', compression='invalid',
            create_if_missing=True)
 
@@ -177,28 +169,28 @@ def test_open_close():
         assert db.closed
 
         # Expect runtime errors for operations on the database,
-        with assert_raises(RuntimeError):
+        with pytest.raises(RuntimeError):
             db.get(b'key')
-        with assert_raises(RuntimeError):
+        with pytest.raises(RuntimeError):
             db.put(b'key', b'value')
-        with assert_raises(RuntimeError):
+        with pytest.raises(RuntimeError):
             db.delete(b'key')
 
         # ... on write batches,
-        with assert_raises(RuntimeError):
+        with pytest.raises(RuntimeError):
             wb.put(b'key', b'value')
 
         # ... on snapshots,
-        assert_raises(RuntimeError, db.snapshot)
-        with assert_raises(RuntimeError):
+        pytest.raises(RuntimeError, db.snapshot)
+        with pytest.raises(RuntimeError):
             sn.get(b'key')
 
         # ... on iterators,
-        with assert_raises(RuntimeError):
+        with pytest.raises(RuntimeError):
             next(it)
 
         # ... and on snapshot iterators,
-        with assert_raises(RuntimeError):
+        with pytest.raises(RuntimeError):
             next(snapshot_it)
 
 
@@ -218,14 +210,14 @@ def test_put(db):
         value = ('value-%d' % i).encode('ascii')
         db.put(key, value)
 
-    assert_raises(TypeError, db.put, b'foo', 12)
-    assert_raises(TypeError, db.put, 12, 'foo')
+    pytest.raises(TypeError, db.put, b'foo', 12)
+    pytest.raises(TypeError, db.put, 12, 'foo')
 
 
 def test_get(db):
     key = b'the-key'
     value = b'the-value'
-    assert_is_none(db.get(key))
+    assert db.get(key) is None
     db.put(key, value)
     assert db.get(key) == value
     assert db.get(key, verify_checksums=True) == value
@@ -236,23 +228,23 @@ def test_get(db):
 
     key2 = b'key-that-does-not-exist'
     value2 = b'default-value'
-    assert_is_none(db.get(key2))
+    assert db.get(key2) is None
     assert db.get(key2, value2) == value2
     assert db.get(key2, default=value2) == value2
 
-    assert_raises(TypeError, db.get, 1)
-    assert_raises(TypeError, db.get, 'key')
-    assert_raises(TypeError, db.get, None)
-    assert_raises(TypeError, db.get, b'foo', b'default', True)
+    pytest.raises(TypeError, db.get, 1)
+    pytest.raises(TypeError, db.get, 'key')
+    pytest.raises(TypeError, db.get, None)
+    pytest.raises(TypeError, db.get, b'foo', b'default', True)
 
 
 def test_delete(db):
     # Put and delete a key
     key = b'key-that-will-be-deleted'
     db.put(key, b'')
-    assert_is_not_none(db.get(key))
+    assert db.get(key) is not None
     db.delete(key)
-    assert_is_none(db.get(key))
+    assert db.get(key) is None
 
     # The .delete() method also takes write options
     db.put(key, b'')
@@ -265,7 +257,7 @@ def test_null_bytes(db):
     db.put(key, value)
     assert db.get(key) == value
     db.delete(key)
-    assert_is_none(db.get(key))
+    assert db.get(key) is None
 
 
 def test_write_batch(db):
@@ -278,19 +270,19 @@ def test_write_batch(db):
     batch.delete(b'batch-key-2')
 
     # The DB should not have any data before the batch is written
-    assert_is_none(db.get(b'batch-key-1'))
+    assert db.get(b'batch-key-1') is None
 
     # ...but it should have data afterwards
     batch.write()
-    assert_is_not_none(db.get(b'batch-key-1'))
-    assert_is_none(db.get(b'batch-key-2'))
+    assert db.get(b'batch-key-1') is not None
+    assert db.get(b'batch-key-2') is None
 
     # Batches can be cleared
     batch = db.write_batch()
     batch.put(b'this-is-never-saved', b'')
     batch.clear()
     batch.write()
-    assert_is_none(db.get(b'this-is-never-saved'))
+    assert db.get(b'this-is-never-saved') is None
 
     # Batches take write options
     batch = db.write_batch(sync=True)
@@ -300,28 +292,28 @@ def test_write_batch(db):
 
 def test_write_batch_context_manager(db):
     key = b'batch-key'
-    assert_is_none(db.get(key))
+    assert db.get(key) is None
     with db.write_batch() as wb:
         wb.put(key, b'')
-    assert_is_not_none(db.get(key))
+    assert db.get(key) is not None
 
     # Data should also be written when an exception is raised
     key = b'batch-key-exception'
-    assert_is_none(db.get(key))
-    with assert_raises(ValueError):
+    assert db.get(key) is None
+    with pytest.raises(ValueError):
         with db.write_batch() as wb:
             wb.put(key, b'')
             raise ValueError()
-    assert_is_not_none(db.get(key))
+    assert db.get(key) is not None
 
 
 def test_write_batch_transaction(db):
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         with db.write_batch(transaction=True) as wb:
             wb.put(b'key', b'value')
             raise ValueError()
 
-    assert_list_equal([], list(db.iterator()))
+    assert list(db.iterator()) == []
 
 
 def test_iteration(db):
@@ -344,13 +336,13 @@ def test_iterator_closing(db):
     it = db.iterator()
     next(it)
     it.close()
-    assert_raises(RuntimeError, next, it)
-    assert_raises(RuntimeError, it.seek_to_stop)
+    pytest.raises(RuntimeError, next, it)
+    pytest.raises(RuntimeError, it.seek_to_stop)
 
     with db.iterator() as it:
         next(it)
 
-    assert_raises(RuntimeError, next, it)
+    pytest.raises(RuntimeError, next, it)
 
 
 def test_iterator_return(db):
@@ -371,7 +363,7 @@ def test_iterator_return(db):
         assert b'value' == value
 
     for ret in db.iterator(include_key=False, include_value=False):
-        assert_is_none(ret)
+        assert ret is None
 
 
 def assert_iterator_behaviour(db, iter_kwargs, expected_values):
@@ -383,9 +375,9 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
     assert next(it) == first
     assert next(it) == second
     assert next(it) == third
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         # second time may not cause a segfault
         next(it)
 
@@ -395,12 +387,12 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
     assert it.prev() == first
     assert next(it) == first
     assert it.prev() == first
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         it.prev()
     assert next(it) == first
     assert next(it) == second
     assert next(it) == third
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     assert it.prev() == third
     assert it.prev() == second
@@ -411,7 +403,7 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
         it.seek_to_stop()
     else:
         it.seek_to_start()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     assert it.prev() == third
 
@@ -421,7 +413,7 @@ def assert_iterator_behaviour(db, iter_kwargs, expected_values):
         it.seek_to_start()
     else:
         it.seek_to_stop()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         it.prev()
     assert next(it) == first
 
@@ -455,21 +447,19 @@ def test_range_iteration(db):
     db.put(b'4', b'4')
     db.put(b'5', b'5')
 
-    assert_list_equal(
-        [b'2', b'3', b'4', b'5'],
-        list(db.iterator(start=b'2', include_value=False)))
+    actual = list(db.iterator(start=b'2', include_value=False))
+    expected = [b'2', b'3', b'4', b'5']
+    assert actual == expected
 
-    assert_list_equal(
-        [b'1', b'2'],
-        list(db.iterator(stop=b'3', include_value=False)))
+    actual = list(db.iterator(stop=b'3', include_value=False))
+    expected = [b'1', b'2']
+    assert actual == expected
 
-    assert_list_equal(
-        [b'1', b'2'],
-        list(db.iterator(start=b'0', stop=b'3', include_value=False)))
+    actual = list(db.iterator(start=b'0', stop=b'3', include_value=False))
+    expected = [b'1', b'2']
+    assert actual == expected
 
-    assert_list_equal(
-        [],
-        list(db.iterator(start=b'3', stop=b'0')))
+    assert list(db.iterator(start=b'3', stop=b'0')) == []
 
     # Only start (inclusive)
     assert_iterator_behaviour(
@@ -510,9 +500,7 @@ def test_reverse_range_iteration(db):
     db.put(b'4', b'4')
     db.put(b'5', b'5')
 
-    assert_list_equal(
-        [],
-        list(db.iterator(start=b'3', stop=b'0', reverse=True)))
+    assert list(db.iterator(start=b'3', stop=b'0', reverse=True)) == []
 
     # Only start (inclusive)
     assert_iterator_behaviour(
@@ -557,7 +545,7 @@ def test_out_of_range_iterations(db):
 
     def t(expected, **kwargs):
         kwargs['include_value'] = False
-        assert expected == b''.join((db.iterator(**kwargs)))
+        assert b''.join((db.iterator(**kwargs))) == expected
 
     # Out of range start key
     t(b'3457', start=b'2')
@@ -580,13 +568,13 @@ def test_range_empty_database(db):
     it.seek_to_stop()  # no-op (don't crash)
 
     it = db.iterator()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
 
     it = db.iterator()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         it.prev()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
 
 
@@ -600,10 +588,10 @@ def test_iterator_single_entry(db):
     assert it.prev() == key
     assert next(it) == key
     assert it.prev() == key
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         it.prev()
     assert next(it) == key
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
 
 
@@ -616,13 +604,13 @@ def test_iterator_seeking(db):
 
     it = db.iterator(include_value=False)
     it.seek_to_start()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         it.prev()
     assert next(it) == b'1'
     it.seek_to_start()
     assert next(it) == b'1'
     it.seek_to_stop()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     assert it.prev() == b'5'
 
@@ -630,7 +618,7 @@ def test_iterator_seeking(db):
     it.seek(b'2')
     assert next(it) == b'2'
     assert next(it) == b'3'
-    assert_list_equal([b'4', b'5'], list(it))
+    assert list(it) == [b'4', b'5']
     it.seek(b'2')
     assert it.prev() == b'1'
 
@@ -638,10 +626,10 @@ def test_iterator_seeking(db):
     it.seek(b'123')
     assert next(it) == b'2'
     it.seek(b'6')
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     it.seek(b'0')
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         it.prev()
     assert next(it) == b'1'
     it.seek(b'4')
@@ -654,7 +642,7 @@ def test_iterator_seeking(db):
     assert next(it) == b'5'
     assert next(it) == b'4'
     it.seek(b'1')
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     assert it.prev() == b'1'
 
@@ -674,12 +662,12 @@ def test_iterator_seeking(db):
     it.seek(b'2')
     assert next(it) == b'2'
     it.seek(b'5')
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     it.seek(b'5')
     assert it.prev() == b'2'
     it.seek_to_stop()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     it.seek_to_stop()
     assert it.prev() == b'2'
@@ -689,7 +677,7 @@ def test_iterator_seeking(db):
     it.seek(b'0')
     assert next(it) == b'2'
     it.seek(b'5')
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     it.seek(b'5')
     assert it.prev() == b'4'
@@ -702,7 +690,7 @@ def test_iterator_seeking(db):
     it.seek(b'1')
     assert it.prev() == b'2'
     it.seek_to_start()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
     it.seek_to_stop()
     assert next(it) == b'3'
@@ -740,15 +728,15 @@ def test_iterator_prefix(db):
     for key in keys:
         db.put(key, b'')
 
-    assert_raises(TypeError, db.iterator, prefix=b'abc', start=b'a')
-    assert_raises(TypeError, db.iterator, prefix=b'abc', stop=b'a')
+    pytest.raises(TypeError, db.iterator, prefix=b'abc', start=b'a')
+    pytest.raises(TypeError, db.iterator, prefix=b'abc', stop=b'a')
 
     def t(*args, **kwargs):
         # Positional arguments are the expected ones, keyword
         # arguments are passed to db.iterator()
         kwargs.update(include_value=False)
-        actual = list(db.iterator(**kwargs))
-        assert_sequence_equal(args, actual)
+        it = db.iterator(**kwargs)
+        assert list(it) == list(args)
 
     t(*sorted(keys), prefix=b'')
     t(prefix=b'd')
@@ -770,40 +758,32 @@ def test_snapshot(db):
     # Snapshot should have existing values, but not changed values
     snapshot = db.snapshot()
     assert snapshot.get(b'a') == b'a'
-    assert_list_equal(
-        [b'a', b'b'],
-        list(snapshot.iterator(include_value=False)))
-    assert_is_none(snapshot.get(b'c'))
+    assert list(snapshot.iterator(include_value=False)) == [b'a', b'b']
+    assert snapshot.get(b'c') is None
     db.delete(b'a')
     db.put(b'c', b'c')
-    assert_is_none(snapshot.get(b'c'))
+    assert snapshot.get(b'c') is None
     assert snapshot.get(b'c', b'd') == b'd'
     assert snapshot.get(b'c', default=b'd') == b'd'
-    assert_list_equal(
-        [b'a', b'b'],
-        list(snapshot.iterator(include_value=False)))
+    assert list(snapshot.iterator(include_value=False)) == [b'a', b'b']
 
     # New snapshot should reflect latest state
     snapshot = db.snapshot()
     assert snapshot.get(b'c') == b'c'
-    assert_list_equal(
-        [b'b', b'c'],
-        list(snapshot.iterator(include_value=False)))
+    assert list(snapshot.iterator(include_value=False)) == [b'b', b'c']
 
     # Snapshots are directly iterable, just like DB
-    assert_list_equal(
-        [b'b', b'c'],
-        list(k for k, v in snapshot))
+    assert list(k for k, v in snapshot) == [b'b', b'c']
 
 
 def test_property(db):
-    with assert_raises(TypeError):
+    with pytest.raises(TypeError):
         db.get_property()
 
-    with assert_raises(TypeError):
+    with pytest.raises(TypeError):
         db.get_property(42)
 
-    assert_is_none(db.get_property(b'does-not-exist'))
+    assert db.get_property(b'does-not-exist') is None
 
     properties = [
         b'leveldb.stats',
@@ -811,7 +791,7 @@ def test_property(db):
         b'leveldb.num-files-at-level0',
     ]
     for prop in properties:
-        assert_is_instance(db.get_property(prop), bytes)
+        assert isinstance(db.get_property(prop), bytes)
 
 
 def test_compaction(db):
@@ -837,21 +817,21 @@ def test_approximate_sizes():
         del wb, db
         db = DB(name, create_if_missing=False)
 
-        with assert_raises(TypeError):
+        with pytest.raises(TypeError):
             db.approximate_size(1, 2)
 
-        with assert_raises(TypeError):
+        with pytest.raises(TypeError):
             db.approximate_sizes(None)
 
-        with assert_raises(TypeError):
+        with pytest.raises(TypeError):
             db.approximate_sizes((1, 2))
 
         # Test single range
-        assert_greater_equal(db.approximate_size(b'1', b'2'), 0)
+        assert db.approximate_size(b'1', b'2') >= 0
 
         # Test multiple ranges
-        assert_list_equal([], db.approximate_sizes())
-        assert_greater_equal(db.approximate_sizes((b'1', b'2'))[0], 0)
+        assert db.approximate_sizes() == []
+        assert db.approximate_sizes((b'1', b'2'))[0] >= 0
 
         ranges = [
             (b'1', b'3'),
@@ -940,15 +920,15 @@ def test_threading():
 def test_invalid_comparator():
     with tmp_db('invalid_comparator', create=False) as name:
 
-        with assert_raises(ValueError):
+        with pytest.raises(ValueError):
             DB(name, comparator=None, comparator_name=b'invalid')
 
-        with assert_raises(TypeError):
+        with pytest.raises(TypeError):
             DB(name,
                comparator=lambda x, y: 1,
                comparator_name=12)
 
-        with assert_raises(TypeError):
+        with pytest.raises(TypeError):
             DB(name,
                comparator=b'not-a-callable',
                comparator_name=b'invalid')
@@ -983,9 +963,9 @@ def test_comparator():
             for key in keys:
                 wb.put(key, b'')
 
-        assert_list_equal(
-            sorted(keys, key=lambda s: s.lower()),
-            list(db.iterator(include_value=False)))
+        expected = sorted(keys, key=lambda s: s.lower())
+        actual = list(db.iterator(include_value=False))
+        assert actual == expected
 
 
 def test_prefixed_db(db):
@@ -1002,11 +982,11 @@ def test_prefixed_db(db):
 
     # Basic operations
     key = b'123'
-    assert_is_not_none(db_a.get(key))
+    assert db_a.get(key) is not None
     db_a.put(key, b'foo')
     assert db_a.get(key) == b'foo'
     db_a.delete(key)
-    assert_is_none(db_a.get(key))
+    assert db_a.get(key) is None
     assert db_a.get(key, b'v') == b'v'
     assert db_a.get(key, default=b'v') == b'v'
     db_a.put(key, b'foo')
@@ -1037,9 +1017,10 @@ def test_prefixed_db(db):
     assert it.prev() == b'999'
     it = db_b.iterator()
     it.seek_to_start()
-    assert_raises(StopIteration, it.prev)
+    with pytest.raises(StopIteration):
+        it.prev()
     it.seek_to_stop()
-    with assert_raises(StopIteration):
+    with pytest.raises(StopIteration):
         next(it)
 
     # Snapshots
@@ -1064,7 +1045,7 @@ def test_prefixed_db(db):
     wb.delete(b'0003')
     wb.write()
     assert db_a.get(b'0002') == b'foo'
-    assert_is_none(db_a.get(b'0003'))
+    assert db_a.get(b'0003') is None
 
     # Delete all data in db_a
     for key in db_a.iterator(include_value=False):
