@@ -21,7 +21,6 @@ except NameError:
     # Python 3
     xrange = range
 
-from nose.plugins.skip import SkipTest
 import pytest
 
 import plyvel
@@ -141,11 +140,10 @@ def test_open():
            compression='snappy', bloom_filter_bits=10)
 
 
+# XXX: letter casing of encoding names differs between Python 2 and 3
+@pytest.mark.skipif(sys.getfilesystemencoding().lower() != 'utf-8',
+                    reason="requires UTF-8 file system encoding")
 def test_open_unicode_name():
-    if sys.getfilesystemencoding().lower() != 'utf-8':
-        # XXX: letter casing differs between Python 2 and 3
-        raise SkipTest("Not running with UTF-8 file system encoding")
-
     with tmp_db('úñîçøđê_name'):
         pass
 
