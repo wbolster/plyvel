@@ -39,4 +39,4 @@ test: ext
 	@echo "Running tests"
 	@echo "============="
 	@echo
-	python $$(which nosetests) -v $(TESTS)
+	py.test
