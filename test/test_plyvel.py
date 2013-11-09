@@ -965,7 +965,7 @@ def test_comparator():
 def test_prefixed_db(db):
     for prefix in (b'a', b'b'):
         for i in range(1000):
-            key = prefix + '{:03d}'.format(i).encode('ascii')
+            key = prefix + '{0:03d}'.format(i).encode('ascii')
             db.put(key, b'')
 
     db_a = db.prefixed_db(b'a')
