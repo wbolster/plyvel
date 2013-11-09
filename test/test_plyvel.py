@@ -18,8 +18,6 @@ import pytest
 import plyvel
 
 
-TEST_DBS_DIR = 'testdb/'
-
 
 #
 # Utilities
@@ -27,7 +25,7 @@ TEST_DBS_DIR = 'testdb/'
 
 @contextlib.contextmanager
 def tmp_db(name_prefix, create=True, delete=True, **kwargs):
-    name = tempfile.mkdtemp(prefix=name_prefix + '-', dir=TEST_DBS_DIR)
+    name = tempfile.mkdtemp(prefix=name_prefix + '-')
     if create:
         db = plyvel.DB(
             name,
@@ -58,32 +56,6 @@ def db(request):
 
     request.addfinalizer(finalize)
     return db
-
-
-#
-# Test setup and teardown
-#
-
-def setup():
-    try:
-        os.mkdir(TEST_DBS_DIR)
-    except OSError as exc:
-        if exc.errno == 17:
-            # Directory already exists; ignore
-            pass
-        else:
-            raise
-
-
-def teardown():
-    try:
-        os.rmdir(TEST_DBS_DIR)
-    except OSError as exc:
-        if exc.errno == 39:
-            # Directory not empty; some tests failed
-            pass
-        else:
-            raise
 
 
 #
