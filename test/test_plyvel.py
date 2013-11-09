@@ -24,7 +24,6 @@ except NameError:
 import pytest
 
 import plyvel
-from plyvel import DB
 
 TEST_DBS_DIR = 'testdb/'
 
@@ -37,7 +36,11 @@ TEST_DBS_DIR = 'testdb/'
 def tmp_db(name_prefix, create=True, delete=True, **kwargs):
     name = tempfile.mkdtemp(prefix=name_prefix + '-', dir=TEST_DBS_DIR)
     if create:
-        db = DB(name, create_if_missing=True, error_if_exists=True, **kwargs)
+        db = plyvel.DB(
+            name,
+            create_if_missing=True,
+            error_if_exists=True,
+            **kwargs)
         yield db
         db.close()
     else:
@@ -54,7 +57,7 @@ def tmp_db(name_prefix, create=True, delete=True, **kwargs):
 @pytest.fixture
 def db(request):
     name = tempfile.mkdtemp()
-    db = DB(name, create_if_missing=True, error_if_exists=True)
+    db = plyvel.DB(name, create_if_missing=True, error_if_exists=True)
 
     def finalize():
         db.close()
@@ -104,40 +107,41 @@ def test_open():
         # Opening a DB in a read-only dir should not work
         os.chmod(name, stat.S_IRUSR | stat.S_IXUSR)
         with pytest.raises(plyvel.IOError):
-            DB(name)
+            plyvel.DB(name)
 
     with tmp_db('no_create', create=False) as name:
         with pytest.raises(plyvel.Error):
-            DB(name, create_if_missing=False)
+            plyvel.DB(name, create_if_missing=False)
 
     with tmp_db('exists', create=False) as name:
-        db = DB(name, create_if_missing=True)
+        db = plyvel.DB(name, create_if_missing=True)
         db.close()
         with pytest.raises(plyvel.Error):
-            DB(name, error_if_exists=True)
+            plyvel.DB(name, error_if_exists=True)
 
     with pytest.raises(TypeError):
-        DB(123)
+        plyvel.DB(123)
 
     with pytest.raises(TypeError):
-        DB('invalid_option_types', write_buffer_size='invalid')
+        plyvel.DB('invalid_option_types', write_buffer_size='invalid')
 
     with pytest.raises(TypeError):
-        DB('invalid_option_types', lru_cache_size='invalid')
+        plyvel.DB('invalid_option_types', lru_cache_size='invalid')
 
     with pytest.raises(ValueError):
-        DB('invalid_compression', compression='invalid',
-           create_if_missing=True)
+        plyvel.DB('invalid_compression', compression='invalid',
+                  create_if_missing=True)
 
     with tmp_db('no_compression', create=False) as name:
-        DB(name, compression=None, create_if_missing=True)
+        plyvel.DB(name, compression=None, create_if_missing=True)
 
     with tmp_db('many_options', create=False) as name:
-        DB(name, create_if_missing=True, error_if_exists=False,
-           paranoid_checks=True, write_buffer_size=16 * 1024 * 1024,
-           max_open_files=512, lru_cache_size=64 * 1024 * 1024,
-           block_size=2 * 1024, block_restart_interval=32,
-           compression='snappy', bloom_filter_bits=10)
+        plyvel.DB(
+            name, create_if_missing=True, error_if_exists=False,
+            paranoid_checks=True, write_buffer_size=16 * 1024 * 1024,
+            max_open_files=512, lru_cache_size=64 * 1024 * 1024,
+            block_size=2 * 1024, block_restart_interval=32,
+            compression='snappy', bloom_filter_bits=10)
 
 
 # XXX: letter casing of encoding names differs between Python 2 and 3
@@ -152,7 +156,7 @@ def test_open_close():
     with tmp_db('open_close', create=False) as name:
         # Create a database with options that result in additional
         # object allocation (e.g. LRU cache).
-        db = DB(name,
+        db = plyvel.DB(name,
                 create_if_missing=True,
                 lru_cache_size=1024 * 1024,
                 bloom_filter_bits=10)
@@ -803,7 +807,7 @@ def test_approximate_sizes():
     with tmp_db('approximate_sizes', create=False) as name:
 
         # Write some data to a fresh database
-        db = DB(name, create_if_missing=True, error_if_exists=True)
+        db = plyvel.DB(name, create_if_missing=True, error_if_exists=True)
         value = b'a' * 100
         with db.write_batch() as wb:
             for i in xrange(1000):
@@ -813,7 +817,7 @@ def test_approximate_sizes():
         # Close and reopen the database
         db.close()
         del wb, db
-        db = DB(name, create_if_missing=False)
+        db = plyvel.DB(name, create_if_missing=False)
 
         with pytest.raises(TypeError):
             db.approximate_size(1, 2)
@@ -840,19 +844,19 @@ def test_approximate_sizes():
 
 def test_repair_db():
     with tmp_db('repair', create=False) as name:
-        db = DB(name, create_if_missing=True)
+        db = plyvel.DB(name, create_if_missing=True)
         db.put(b'foo', b'bar')
         db.close()
         del db
 
         plyvel.repair_db(name)
-        db = DB(name)
+        db = plyvel.DB(name)
         assert db.get(b'foo') == b'bar'
 
 
 def test_destroy_db():
     with tmp_db('destroy', create=False, delete=False) as name:
-        db = DB(name, create_if_missing=True)
+        db = plyvel.DB(name, create_if_missing=True)
         db.put(b'foo', b'bar')
         db.close()
         del db
@@ -919,17 +923,14 @@ def test_invalid_comparator():
     with tmp_db('invalid_comparator', create=False) as name:
 
         with pytest.raises(ValueError):
-            DB(name, comparator=None, comparator_name=b'invalid')
+            plyvel.DB(name, comparator=None, comparator_name=b'invalid')
 
         with pytest.raises(TypeError):
-            DB(name,
-               comparator=lambda x, y: 1,
-               comparator_name=12)
+            plyvel.DB(name, comparator=lambda x, y: 1, comparator_name=12)
 
         with pytest.raises(TypeError):
-            DB(name,
-               comparator=b'not-a-callable',
-               comparator_name=b'invalid')
+            plyvel.DB(name, comparator=b'not-a-callable',
+                      comparator_name=b'invalid')
 
 
 def test_comparator():
@@ -946,10 +947,11 @@ def test_comparator():
     comparator_name = b"CaseInsensitiveComparator"
 
     with tmp_db('comparator', create=False) as name:
-        db = DB(name,
-                create_if_missing=True,
-                comparator=comparator,
-                comparator_name=comparator_name)
+        db = plyvel.DB(
+            name,
+            create_if_missing=True,
+            comparator=comparator,
+            comparator_name=comparator_name)
 
         keys = [
             b'aaa',
