@@ -39,8 +39,9 @@ A few remarks about the code:
 Running the tests
 =================
 
-Almost all Plyvel code is covered by the unit tests. Plyvel uses *Nose* for
-running those tests. Type ``make test`` to run the unit tests.
+Almost all Plyvel code is covered by the unit tests. Plyvel uses *pytest* and
+*tox* for running those tests. Type ``make test`` to run the unit tests, or run
+``tox`` to run the tests against multiple Python versions.
 
 
 Generating the documentation
