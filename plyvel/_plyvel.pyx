@@ -243,7 +243,7 @@ cdef class DB:
         # If the constructor raised an exception (and hence never
         # completed), self.iterators can be None. In that case no
         # iterators need to be cleaned anyway.
-        cdef Iterator iterator
+        cdef BaseIterator iterator
         if self.iterators is not None:
             with self.lock:
                 try:
@@ -610,10 +610,54 @@ cdef enum IteratorDirection:
     REVERSE
 
 
-@cython.final
-cdef class Iterator:
+cdef class BaseIterator:
     cdef DB db
     cdef leveldb.Iterator* _iter
+
+    # Iterators need to be weak referencable to ensure a proper cleanup
+    # from DB.close()
+    cdef object __weakref__
+
+    def __init__(self, *, DB db not None, bool verify_checksums,
+                 bool fill_cache, Snapshot snapshot):
+        if db._db is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        self.db = db
+
+        cdef ReadOptions read_options
+        if verify_checksums is not None:
+            read_options.verify_checksums = verify_checksums
+        if fill_cache is not None:
+            read_options.fill_cache = fill_cache
+        if snapshot is not None:
+            read_options.snapshot = snapshot._snapshot
+
+        with nogil:
+            self._iter = db._db.NewIterator(read_options)
+
+        # Store a weak reference on the db (needed when closing db)
+        db.iterators[id(self)] = self
+
+    cpdef close(self):
+        if self._iter is not NULL:
+            del self._iter
+            self._iter = NULL
+
+    def __dealloc__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False  # propagate exceptions
+
+
+
+@cython.final
+cdef class Iterator(BaseIterator):
     cdef IteratorDirection direction
     cdef IteratorState state
     cdef Comparator* comparator
@@ -628,19 +672,18 @@ cdef class Iterator:
     cdef bytes db_prefix
     cdef size_t db_prefix_len
 
-    # Iterators need to be weak referencable to ensure a proper cleanup
-    # from DB.close()
-    cdef object __weakref__
-
     def __init__(self, *, DB db not None, bytes db_prefix, bool reverse,
                  bytes start, bytes stop, bool include_start,
                  bool include_stop, bytes prefix, bool include_key,
                  bool include_value, bool verify_checksums, bool fill_cache,
                  Snapshot snapshot):
-        if db._db is NULL:
-            raise RuntimeError("Database or iterator is closed")
 
-        self.db = db
+        super(Iterator, self).__init__(
+            db=db,
+            verify_checksums=verify_checksums,
+            fill_cache=fill_cache,
+            snapshot=snapshot)
+
         self.comparator = <leveldb.Comparator*>db.options.comparator
         self.direction = FORWARD if not reverse else REVERSE
 
@@ -695,41 +738,12 @@ cdef class Iterator:
         self.include_key = include_key
         self.include_value = include_value
 
-        cdef ReadOptions read_options
-        if verify_checksums is not None:
-            read_options.verify_checksums = verify_checksums
-        if fill_cache is not None:
-            read_options.fill_cache = fill_cache
-        if snapshot is not None:
-            read_options.snapshot = snapshot._snapshot
-
-        with nogil:
-            self._iter = db._db.NewIterator(read_options)
-
         if self.direction == FORWARD:
             self.seek_to_start()
         else:
             self.seek_to_stop()
 
         raise_for_status(self._iter.status())
-
-        # Store a weak reference on the db (needed when closing db)
-        db.iterators[id(self)] = self
-
-    cpdef close(self):
-        if self._iter is not NULL:
-            del self._iter
-            self._iter = NULL
-
-    def __dealloc__(self):
-        self.close()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-        return False  # propagate exceptions
 
     def __iter__(self):
         return self
