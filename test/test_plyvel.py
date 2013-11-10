@@ -831,8 +831,8 @@ def test_threading(db):
         name = threading.current_thread().name
         v = name.encode('ascii') * randint(300, 700)
         for n in range(randint(1000, 8000)):
-            rev = '{:x}'.format(n)[::-1]
-            k = '{}: {}'.format(rev, name).encode('ascii')
+            rev = '{0:x}'.format(n)[::-1]
+            k = '{0}: {1}'.format(rev, name).encode('ascii')
             db.put(k, v)
 
     def iterate_full(db):
