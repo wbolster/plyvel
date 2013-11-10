@@ -1010,3 +1010,79 @@ def test_prefixed_db(db):
     it = db_b12.iterator(include_value=False)
     assert next(it) == b'0'
     assert len(list(it)) == 9
+
+
+def test_raw_iterator(db):
+    for i in range(1000):
+        key = value = '{0:03d}'.format(i).encode('ascii')
+        db.put(key, value)
+
+    it = db.raw_iterator()
+    it.seek_to_first()
+    assert it.key() == b'000'
+    assert it.value() == b'000'
+    it.next()
+    assert it.key() == b'001'
+    assert it.value() == b'001'
+    it.next()
+    assert it.key() == b'002'
+    it.next()
+    it.next()
+    assert it.key() == b'004'
+    it.prev()
+    assert it.key() == b'003'
+
+    it.seek_to_first()
+    it.prev()
+    with pytest.raises(plyvel.IteratorInvalidError):
+        it.value()
+    assert not it.valid()
+
+    it.seek(b'005')
+    assert it.key() == b'005'
+
+    it.seek(b'006abc')
+    assert it.key() == b'007'
+
+    it.seek_to_last()
+    assert it.key() == b'999'
+
+    it.next()
+    with pytest.raises(plyvel.IteratorInvalidError):
+        it.key()
+
+
+def test_raw_iterator_empty_db(db):
+    it = db.raw_iterator()
+    assert not it.valid()
+
+    it.seek_to_first()
+    assert not it.valid()
+
+    it.seek_to_last()
+    assert not it.valid()
+
+    with pytest.raises(plyvel.IteratorInvalidError):
+        it.key()
+
+
+def test_raw_iterator_snapshot(db):
+    sn = db.snapshot()
+    db.put(b'001', b'')
+    it = sn.raw_iterator()
+    it.seek_to_first()
+    assert not it.valid()
+    with pytest.raises(plyvel.IteratorInvalidError):
+        it.key()
+
+
+def test_raw_iterator_closing(db):
+    it = db.raw_iterator()
+    it.close()
+    with pytest.raises(RuntimeError):
+        it.next()
+
+    with pytest.raises(RuntimeError):
+        with db.raw_iterator() as it:
+            pass
+        it.valid()

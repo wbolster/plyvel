@@ -11,6 +11,7 @@ from ._plyvel import (  # noqa
     Error,
     IOError,
     CorruptionError,
+    IteratorInvalidError,
 )
 
 from ._version import __version__  # noqa

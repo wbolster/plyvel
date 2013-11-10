@@ -67,6 +67,10 @@ class CorruptionError(Error):
     pass
 
 
+class IteratorInvalidError(Error):
+    pass
+
+
 cdef int raise_for_status(Status st) except -1:
     if st.ok():
         return 0
@@ -355,6 +359,13 @@ cdef class DB:
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=None)
+
+    def raw_iterator(self, *, verify_checksums=None, fill_cache=None):
+        return RawIterator(
+            db=self,
+            verify_checksums=verify_checksums,
+            fill_cache=fill_cache,
+            snapshot=None)
 
     def snapshot(self):
         return Snapshot(db=self)
@@ -964,6 +975,92 @@ cdef class Iterator(BaseIterator):
         raise_for_status(self._iter.status())
 
 
+@cython.final
+cdef class RawIterator(BaseIterator):
+    def valid(self):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        return self._iter.Valid()
+
+    def seek_to_first(self):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        with nogil:
+            self._iter.SeekToFirst()
+
+        raise_for_status(self._iter.status())
+
+    def seek_to_last(self):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        with nogil:
+            self._iter.SeekToLast()
+
+        raise_for_status(self._iter.status())
+
+    def seek(self, bytes target not None):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        cdef Slice target_slice = Slice(target, len(target))
+        with nogil:
+            self._iter.Seek(target_slice)
+
+        raise_for_status(self._iter.status())
+
+    def next(self):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        if not self._iter.Valid():
+            raise IteratorInvalidError()
+
+        with nogil:
+            self._iter.Next()
+
+        raise_for_status(self._iter.status())
+
+    def prev(self):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        if not self._iter.Valid():
+            raise IteratorInvalidError()
+
+        with nogil:
+            self._iter.Prev()
+
+        raise_for_status(self._iter.status())
+
+    cpdef key(self):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        if not self._iter.Valid():
+            raise IteratorInvalidError()
+
+        cdef Slice key_slice
+        key_slice = self._iter.key()
+        return key_slice.data()[:key_slice.size()]
+
+    cpdef value(self):
+        if self._iter is NULL:
+            raise RuntimeError("Database or iterator is closed")
+
+        if not self._iter.Valid():
+            raise IteratorInvalidError()
+
+        cdef Slice value_slice
+        value_slice = self._iter.value()
+        return value_slice.data()[:value_slice.size()]
+
+    def item(self):
+        return self.key(), self.value()
+
+
 #
 # Snapshot
 #
@@ -1021,3 +1118,10 @@ cdef class Snapshot:
             prefix=prefix, include_key=include_key,
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=self)
+
+    def raw_iterator(self, *, verify_checksums=None, fill_cache=None):
+        return RawIterator(
+            db=self.db,
+            verify_checksums=verify_checksums,
+            fill_cache=fill_cache,
+            snapshot=self)
