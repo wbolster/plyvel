@@ -2,11 +2,15 @@
 
 from __future__ import unicode_literals
 
+import itertools
 import os
+import random
 import shutil
 import stat
 import sys
 import tempfile
+import threading
+import time
 
 if sys.version_info < (3, 0):
     from future_builtins import zip
@@ -819,15 +823,12 @@ def test_destroy_db(db_dir):
 
 
 def test_threading(db):
-    from threading import Thread, current_thread
-    import time
-    import itertools
-    from random import randint
+    randint = random.randint
 
     N_THREADS_PER_FUNC = 5
 
     def bulk_insert(db):
-        name = current_thread().name
+        name = threading.current_thread().name
         v = name.encode('ascii') * randint(300, 700)
         for n in range(randint(1000, 8000)):
             rev = '{:x}'.format(n)[::-1]
@@ -862,7 +863,7 @@ def test_threading(db):
     threads = []
     for func in funcs:
         for n in range(N_THREADS_PER_FUNC):
-            t = Thread(target=func, args=(db,))
+            t = threading.Thread(target=func, args=(db,))
             t.start()
             threads.append(t)
 
