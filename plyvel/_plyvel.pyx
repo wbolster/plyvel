@@ -291,7 +291,7 @@ cdef class DB:
     def get(self, bytes key not None, default=None, *, verify_checksums=None,
             fill_cache=None):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         cdef ReadOptions read_options
 
@@ -304,7 +304,7 @@ cdef class DB:
 
     def put(self, bytes key not None, bytes value not None, *, sync=None):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         cdef WriteOptions write_options = WriteOptions()
         cdef Slice key_slice = Slice(key, len(key))
@@ -320,7 +320,7 @@ cdef class DB:
 
     def delete(self, bytes key not None, *, sync=None):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         cdef Status st
         cdef WriteOptions write_options = WriteOptions()
@@ -335,13 +335,13 @@ cdef class DB:
 
     def write_batch(self, *, transaction=False, sync=None):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         return WriteBatch(db=self, transaction=transaction, sync=sync)
 
     def __iter__(self):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         return self.iterator()
 
@@ -361,7 +361,7 @@ cdef class DB:
 
     def get_property(self, bytes name not None):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         cdef Slice sl = Slice(name, len(name))
         cdef string value
@@ -374,7 +374,7 @@ cdef class DB:
 
     def compact_range(self, *, bytes start=None, bytes stop=None):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         cdef Slice start_slice
         cdef Slice stop_slice
@@ -390,13 +390,13 @@ cdef class DB:
 
     def approximate_size(self, bytes start not None, bytes stop not None):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         return self.approximate_sizes((start, stop))[0]
 
     def approximate_sizes(self, *ranges):
         if self._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         cdef int n_ranges = len(ranges)
         cdef Range *c_ranges = <Range *>malloc(n_ranges * sizeof(Range))
@@ -538,7 +538,7 @@ cdef class WriteBatch:
 
     def put(self, bytes key not None, bytes value not None):
         if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         if self.prefix is not None:
             key = self.prefix + key
@@ -550,7 +550,7 @@ cdef class WriteBatch:
 
     def delete(self, bytes key not None):
         if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         if self.prefix is not None:
             key = self.prefix + key
@@ -561,14 +561,14 @@ cdef class WriteBatch:
 
     def clear(self):
         if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         with nogil:
             self._write_batch.Clear()
 
     def write(self):
         if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         cdef Status st
         with nogil:
@@ -577,13 +577,13 @@ cdef class WriteBatch:
 
     def __enter__(self):
         if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database is closed")
 
         if self.transaction and exc_type is not None:
             # Exception occurred in transaction; do not write the batch
@@ -638,7 +638,7 @@ cdef class Iterator:
                  bool include_value, bool verify_checksums, bool fill_cache,
                  Snapshot snapshot):
         if db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database or iterator is closed")
 
         self.db = db
         self.comparator = <leveldb.Comparator*>db.options.comparator
@@ -782,7 +782,7 @@ cdef class Iterator:
 
     cdef real_next(self):
         if self._iter is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database or iterator is closed")
 
         if self.state == IN_BETWEEN:
             with nogil:
@@ -828,7 +828,7 @@ cdef class Iterator:
 
     cdef real_prev(self):
         if self._iter is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database or iterator is closed")
 
         if self.state == IN_BETWEEN:
             pass
@@ -912,19 +912,19 @@ cdef class Iterator:
 
     def seek_to_start(self):
         if self._iter is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database or iterator is closed")
 
         self.state = BEFORE_START
 
     def seek_to_stop(self):
         if self._iter is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database or iterator is closed")
 
         self.state = AFTER_STOP
 
     def seek(self, bytes target not None):
         if self._iter is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+            raise RuntimeError("Database or iterator is closed")
 
         if self.db_prefix is not None:
             target = self.db_prefix + target
