@@ -341,7 +341,7 @@ cdef class DB:
         if self._db is NULL:
             raise RuntimeError("Database is closed")
 
-        return WriteBatch(db=self, transaction=transaction, sync=sync)
+        return WriteBatch(self, None, transaction, sync)
 
     def __iter__(self):
         if self._db is NULL:
@@ -354,18 +354,28 @@ cdef class DB:
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
         return Iterator(
-            db=self, db_prefix=None, reverse=reverse, start=start, stop=stop,
-            include_start=include_start, include_stop=include_stop,
-            prefix=prefix, include_key=include_key,
-            include_value=include_value, verify_checksums=verify_checksums,
-            fill_cache=fill_cache, snapshot=None)
+            self,  # db
+            None,  # db_prefix
+            reverse,
+            start,
+            stop,
+            include_start,
+            include_stop,
+            prefix,
+            include_key,
+            include_value,
+            verify_checksums,
+            fill_cache,
+            None,  # snapshot
+        )
 
     def raw_iterator(self, *, verify_checksums=None, fill_cache=None):
         return RawIterator(
-            db=self,
-            verify_checksums=verify_checksums,
-            fill_cache=fill_cache,
-            snapshot=None)
+            self,  #db
+            verify_checksums,
+            fill_cache,
+            None,  # snapshot
+        )
 
     def snapshot(self):
         return Snapshot(db=self)
@@ -463,8 +473,7 @@ cdef class PrefixedDB:
         return self.db.delete(self.prefix + key, sync=sync)
 
     def write_batch(self, *, transaction=False, sync=None):
-        return WriteBatch(
-            db=self.db, prefix=self.prefix, transaction=transaction, sync=sync)
+        return WriteBatch(self.db, self.prefix, transaction, sync)
 
     def __iter__(self):
         return self.iterator()
@@ -474,11 +483,20 @@ cdef class PrefixedDB:
                  include_key=True, include_value=True, verify_checksums=None,
                  fill_cache=None):
         return Iterator(
-            db=self.db, db_prefix=self.prefix, reverse=reverse, start=start,
-            stop=stop, include_start=include_start, include_stop=include_stop,
-            prefix=prefix, include_key=include_key,
-            include_value=include_value, verify_checksums=verify_checksums,
-            fill_cache=fill_cache, snapshot=None)
+            self.db,
+            self.prefix,
+            reverse,
+            start,
+            stop,
+            include_start,
+            include_stop,
+            prefix,
+            include_key,
+            include_value,
+            verify_checksums,
+            fill_cache,
+            None,  # snapshot
+        )
 
     def snapshot(self):
         return Snapshot(db=self.db, prefix=self.prefix)
@@ -532,8 +550,7 @@ cdef class WriteBatch:
     cdef bytes prefix
     cdef bool transaction
 
-    def __init__(self, *, DB db not None, bytes prefix=None,
-                 bool transaction=False, sync=None):
+    def __init__(self, DB db not None, bytes prefix, bool transaction, sync):
         self.db = db
         self.prefix = prefix
         self.transaction = transaction
@@ -629,8 +646,8 @@ cdef class BaseIterator:
     # from DB.close()
     cdef object __weakref__
 
-    def __init__(self, *, DB db not None, bool verify_checksums,
-                 bool fill_cache, Snapshot snapshot):
+    def __init__(self, DB db, bool verify_checksums, bool fill_cache,
+                 Snapshot snapshot):
         if db._db is NULL:
             raise RuntimeError("Database or iterator is closed")
 
@@ -683,11 +700,10 @@ cdef class Iterator(BaseIterator):
     cdef bytes db_prefix
     cdef size_t db_prefix_len
 
-    def __init__(self, *, DB db not None, bytes db_prefix, bool reverse,
-                 bytes start, bytes stop, bool include_start,
-                 bool include_stop, bytes prefix, bool include_key,
-                 bool include_value, bool verify_checksums, bool fill_cache,
-                 Snapshot snapshot):
+    def __init__(self, DB db, bytes db_prefix, bool reverse, bytes start,
+                 bytes stop, bool include_start, bool include_stop,
+                 bytes prefix, bool include_key, bool include_value,
+                 bool verify_checksums, bool fill_cache, Snapshot snapshot):
 
         super(Iterator, self).__init__(
             db=db,
