@@ -22,10 +22,11 @@ import weakref
 
 cimport cython
 
+from cpython cimport bool
 from libc.stdint cimport uint64_t
 from libc.stdlib cimport malloc, free
 from libcpp.string cimport string
-from libcpp cimport bool
+from libcpp cimport bool as c_bool
 
 cimport plyvel.leveldb as leveldb
 from plyvel.leveldb cimport (
@@ -141,8 +142,8 @@ cdef bytes bytes_increment(bytes s):
     return None
 
 
-cdef int parse_options(Options *options, bool create_if_missing,
-                       bool error_if_exists, object paranoid_checks,
+cdef int parse_options(Options *options, c_bool create_if_missing,
+                       c_bool error_if_exists, object paranoid_checks,
                        object write_buffer_size, object max_open_files,
                        object lru_cache_size, object block_size,
                        object block_restart_interval, object compression,
@@ -292,52 +293,47 @@ cdef class DB:
             hex(id(self)),
         )
 
-    def get(self, bytes key not None, default=None, *, verify_checksums=None,
-            fill_cache=None):
+    def get(self, bytes key not None, default=None, *,
+            bool verify_checksums=False, bool fill_cache=True):
         if self._db is NULL:
             raise RuntimeError("Database is closed")
 
         cdef ReadOptions read_options
-
-        if verify_checksums is not None:
-            read_options.verify_checksums = verify_checksums
-        if fill_cache is not None:
-            read_options.fill_cache = fill_cache
+        read_options.verify_checksums = verify_checksums
+        read_options.fill_cache = fill_cache
 
         return db_get(self, key, default, read_options)
 
-    def put(self, bytes key not None, bytes value not None, *, sync=None):
+    def put(self, bytes key not None, bytes value not None, *,
+            bool sync=False):
         if self._db is NULL:
             raise RuntimeError("Database is closed")
 
         cdef WriteOptions write_options = WriteOptions()
+        write_options.sync = sync
+
         cdef Slice key_slice = Slice(key, len(key))
         cdef Slice value_slice = Slice(value, len(value))
         cdef Status st
-
-        if sync is not None:
-            write_options.sync = sync
 
         with nogil:
             st = self._db.Put(write_options, key_slice, value_slice)
         raise_for_status(st)
 
-    def delete(self, bytes key not None, *, sync=None):
+    def delete(self, bytes key not None, *, bool sync=False):
         if self._db is NULL:
             raise RuntimeError("Database is closed")
 
         cdef Status st
-        cdef WriteOptions write_options = WriteOptions()
-
-        if sync is not None:
-            write_options.sync = sync
+        cdef WriteOptions write_options
+        write_options.sync = sync
 
         cdef Slice key_slice = Slice(key, len(key))
         with nogil:
             st = self._db.Delete(write_options, key_slice)
         raise_for_status(st)
 
-    def write_batch(self, *, transaction=False, sync=None):
+    def write_batch(self, *, bool transaction=False, bool sync=False):
         if self._db is NULL:
             raise RuntimeError("Database is closed")
 
@@ -351,8 +347,8 @@ cdef class DB:
 
     def iterator(self, *, reverse=False, start=None, stop=None,
                  include_start=True, include_stop=False, prefix=None,
-                 include_key=True, include_value=True, verify_checksums=None,
-                 fill_cache=None):
+                 include_key=True, include_value=True,
+                 bool verify_checksums=False, bool fill_cache=True):
         return Iterator(
             self,  # db
             None,  # db_prefix
@@ -369,9 +365,9 @@ cdef class DB:
             None,  # snapshot
         )
 
-    def raw_iterator(self, *, verify_checksums=None, fill_cache=None):
+    def raw_iterator(self, *, bool verify_checksums=False, bool fill_cache=True):
         return RawIterator(
-            self,  #db
+            self,  # db
             verify_checksums,
             fill_cache,
             None,  # snapshot
@@ -386,7 +382,7 @@ cdef class DB:
 
         cdef Slice sl = Slice(name, len(name))
         cdef string value
-        cdef bool result
+        cdef c_bool result
 
         with nogil:
             result = self._db.GetProperty(sl, &value)
@@ -458,21 +454,22 @@ cdef class PrefixedDB:
             hex(id(self)),
         )
 
-    def get(self, bytes key not None, default=None, *, verify_checksums=None,
-            fill_cache=None):
+    def get(self, bytes key not None, default=None, *,
+            bool verify_checksums=False, bool fill_cache=True):
         return self.db.get(
             self.prefix + key,
             default=default,
             verify_checksums=verify_checksums,
             fill_cache=fill_cache)
 
-    def put(self, bytes key not None, bytes value not None, *, sync=None):
+    def put(self, bytes key not None, bytes value not None, *,
+            bool sync=False):
         return self.db.put(self.prefix + key, value, sync=sync)
 
-    def delete(self, bytes key not None, *, sync=None):
+    def delete(self, bytes key not None, *, bool sync=False):
         return self.db.delete(self.prefix + key, sync=sync)
 
-    def write_batch(self, *, transaction=False, sync=None):
+    def write_batch(self, *, transaction=False, bool sync=False):
         return WriteBatch(self.db, self.prefix, transaction, sync)
 
     def __iter__(self):
@@ -480,8 +477,8 @@ cdef class PrefixedDB:
 
     def iterator(self, *, reverse=False, start=None, stop=None,
                  include_start=True, include_stop=False, prefix=None,
-                 include_key=True, include_value=True, verify_checksums=None,
-                 fill_cache=None):
+                 include_key=True, include_value=True,
+                 bool verify_checksums=False, bool fill_cache=True):
         return Iterator(
             self.db,
             self.prefix,
@@ -548,7 +545,7 @@ cdef class WriteBatch:
     cdef WriteOptions write_options
     cdef DB db
     cdef bytes prefix
-    cdef bool transaction
+    cdef c_bool transaction
 
     def __init__(self, DB db not None, bytes prefix, bool transaction, sync):
         self.db = db
@@ -654,10 +651,8 @@ cdef class BaseIterator:
         self.db = db
 
         cdef ReadOptions read_options
-        if verify_checksums is not None:
-            read_options.verify_checksums = verify_checksums
-        if fill_cache is not None:
-            read_options.fill_cache = fill_cache
+        read_options.verify_checksums = verify_checksums
+        read_options.fill_cache = fill_cache
         if snapshot is not None:
             read_options.snapshot = snapshot._snapshot
 
@@ -693,10 +688,10 @@ cdef class Iterator(BaseIterator):
     cdef bytes stop
     cdef Slice start_slice
     cdef Slice stop_slice
-    cdef bool include_start
-    cdef bool include_stop
-    cdef bool include_key
-    cdef bool include_value
+    cdef c_bool include_start
+    cdef c_bool include_stop
+    cdef c_bool include_key
+    cdef c_bool include_value
     cdef bytes db_prefix
     cdef size_t db_prefix_len
 
@@ -1101,17 +1096,15 @@ cdef class Snapshot:
             if self.db._db is not NULL and self._snapshot is not NULL:
                 self.db._db.ReleaseSnapshot(self._snapshot)
 
-    def get(self, bytes key not None, default=None, *, verify_checksums=None,
-            fill_cache=None):
+    def get(self, bytes key not None, default=None, *,
+            bool verify_checksums=False, bool fill_cache=True):
         if self.db._db is NULL:
             raise RuntimeError("Cannot operate on closed LevelDB database")
 
         cdef ReadOptions read_options
+        read_options.verify_checksums = verify_checksums
+        read_options.fill_cache = fill_cache
         read_options.snapshot = self._snapshot
-        if verify_checksums is not None:
-            read_options.verify_checksums = verify_checksums
-        if fill_cache is not None:
-            read_options.fill_cache = fill_cache
 
         if self.prefix is not None:
             key = self.prefix + key
@@ -1126,8 +1119,8 @@ cdef class Snapshot:
 
     def iterator(self, *, reverse=False, start=None, stop=None,
                  include_start=True, include_stop=False, prefix=None,
-                 include_key=True, include_value=True, verify_checksums=None,
-                 fill_cache=None):
+                 include_key=True, include_value=True,
+                 bool verify_checksums=False, bool fill_cache=True):
         return Iterator(
             db=self.db, db_prefix=self.prefix, reverse=reverse, start=start,
             stop=stop, include_start=include_start, include_stop=include_stop,
@@ -1135,7 +1128,8 @@ cdef class Snapshot:
             include_value=include_value, verify_checksums=verify_checksums,
             fill_cache=fill_cache, snapshot=self)
 
-    def raw_iterator(self, *, verify_checksums=None, fill_cache=None):
+    def raw_iterator(self, *, bool verify_checksums=False,
+                     bool fill_cache=True):
         return RawIterator(
             db=self.db,
             verify_checksums=verify_checksums,

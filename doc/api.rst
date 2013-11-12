@@ -89,7 +89,7 @@ LevelDB database.
       Boolean attribute indicating whether the database is closed.
 
 
-   .. py:method:: get(key, default=None, verify_checksums=None, fill_cache=None)
+   .. py:method:: get(key, default=None, verify_checksums=False, fill_cache=True)
 
       Get the value for the specified key, or `default` if no value was set.
 
@@ -107,7 +107,7 @@ LevelDB database.
       :rtype: bytes
 
 
-   .. py:method:: put(key, value, sync=None)
+   .. py:method:: put(key, value, sync=False)
 
       Set a value for the specified key.
 
@@ -119,7 +119,7 @@ LevelDB database.
       :param bool sync: whether to use synchronous writes
 
 
-   .. method:: delete(key, sync=None)
+   .. method:: delete(key, sync=False)
 
       Delete the key/value pair for the specified key.
 
@@ -130,7 +130,7 @@ LevelDB database.
       :param bool sync: whether to use synchronous writes
 
 
-   .. py:method:: write_batch(transaction=False, sync=None)
+   .. py:method:: write_batch(transaction=False, sync=False)
 
       Create a new :py:class:`WriteBatch` instance for this database.
 
@@ -146,7 +146,7 @@ LevelDB database.
       :rtype: :py:class:`WriteBatch`
 
 
-   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, prefix=None, include_key=True, include_value=True, verify_checksums=None, fill_cache=None)
+   .. py:method:: iterator(reverse=False, start=None, stop=None, include_start=True, include_stop=False, prefix=None, include_key=True, include_value=True, verify_checksums=False, fill_cache=True)
 
       Create a new :py:class:`Iterator` instance for this database.
 
