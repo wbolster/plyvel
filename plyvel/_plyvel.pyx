@@ -18,7 +18,7 @@ Use plyvel.DB() to create or open a database.
 
 import sys
 import threading
-import weakref
+from weakref import ref as weakref_ref
 
 cimport cython
 
@@ -212,7 +212,7 @@ cdef class DB:
     cdef Options options
     cdef object name
     cdef object lock
-    cdef object iterators
+    cdef dict iterators
 
     def __init__(self, name, *, bool create_if_missing=False,
                  bool error_if_exists=False, paranoid_checks=None,
@@ -238,11 +238,10 @@ cdef class DB:
         # Keep weak references to open iterators, since deleting a C++
         # DB instance results in a segfault if associated Iterator
         # instances are not deleted beforehand (as mentioned in
-        # leveldb/db.h). We don't use weakref.WeakSet here because it's
-        # only available since Python 2.7. Instead we'll just use the
-        # object's id() as the key.
+        # leveldb/db.h). We don't use weakref.WeakValueDictionary here
+        # for performance reasons.
         self.lock = threading.Lock()
-        self.iterators = weakref.WeakValueDictionary()
+        self.iterators = dict()
 
     cpdef close(self):
         # If the constructor raised an exception (and hence never
@@ -251,15 +250,10 @@ cdef class DB:
         cdef BaseIterator iterator
         if self.iterators is not None:
             with self.lock:
-                try:
-                    itervalues = self.iterators.itervalues  # Python 2
-                except AttributeError:
-                    itervalues = self.iterators.values  # Python 3
-
-                for iterator in itervalues():
-                    iterator.close()
-
-                self.iterators.clear()
+                while self.iterators:
+                    iterator = self.iterators.popitem()[1]()
+                    if iterator is not None:
+                        iterator.close()
 
         if self._db is not NULL:
             del self._db
@@ -660,7 +654,7 @@ cdef class BaseIterator:
             self._iter = db._db.NewIterator(read_options)
 
         # Store a weak reference on the db (needed when closing db)
-        db.iterators[id(self)] = self
+        db.iterators[id(self)] = weakref_ref(self)
 
     cpdef close(self):
         if self._iter is not NULL:
