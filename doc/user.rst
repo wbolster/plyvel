@@ -387,8 +387,18 @@ Note that for reverse iterators, the definition of 'forward' and 'backward' is
 inverted, i.e. calling ``next(it)`` on a reverse iterator will return the key
 that sorts *before* the key that was most recently returned.
 
-Additionally, Plyvel supports seeking on iterators. See the :py:class:`Iterator`
-API reference for more information about advanced iterator usage.
+Additionally, Plyvel supports seeking on iterators::
+
+    >>> it = db.iterator(include_value=False)
+    >>> it.seek(b'key-3')
+    >>> next(it)
+    'key-3'
+    >>> it.seek_to_start()
+    >>> next(it)
+    'key-1'
+
+See the :py:class:`Iterator` API reference for more information about advanced
+iterator usage.
 
 
 Prefixed databases
