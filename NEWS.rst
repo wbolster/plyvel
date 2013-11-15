@@ -2,6 +2,26 @@
 Version history
 ===============
 
+Plyvel 0.7
+==========
+
+Release date: *not yet released*
+
+* New raw_iterator API (TODO: no docs yet)
+
+* Migrate to `pytest` and `tox` for testing (`issue #24
+  <https://github.com/wbolster/plyvel/issues/24>`_)
+
+* Performance improvements in iterator and write batch construction. The
+  internal calls within Plyvel are now a bit faster, and the `weakref` handling
+  required for iterators is now a lot faster due to replacing
+  :py:class:`weakref.WeakValueDictionary` with manual `weakref` handling.
+
+* The `fill_cache`, `verify_checksums`, and `sync` arguments to various methods
+  are now correctly taken into account everywhere, and their default values are
+  now booleans reflecting the the LevelDB defaults.
+
+
 Plyvel 0.6
 ==========
 
