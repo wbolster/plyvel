@@ -5,7 +5,7 @@ Version history
 Plyvel 0.7
 ==========
 
-Release date: *not yet released*
+Release date: 2013-11-15
 
 * New raw iterator API that mimics the LevelDB C++ interface. See
   :py:meth:`DB.raw_iterator()` and :py:class:`RawIterator`. (`issue #17
