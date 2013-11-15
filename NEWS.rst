@@ -7,7 +7,9 @@ Plyvel 0.7
 
 Release date: *not yet released*
 
-* New raw_iterator API (TODO: no docs yet)
+* New raw iterator API that mimics the LevelDB C++ interface. See
+  :py:meth:`DB.raw_iterator()` and :py:class:`RawIterator`. (`issue #17
+  <https://github.com/wbolster/plyvel/issues/17>`_)
 
 * Migrate to `pytest` and `tox` for testing (`issue #24
   <https://github.com/wbolster/plyvel/issues/24>`_)

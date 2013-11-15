@@ -400,6 +400,15 @@ Additionally, Plyvel supports seeking on iterators::
 See the :py:class:`Iterator` API reference for more information about advanced
 iterator usage.
 
+Raw iterators
+-------------
+
+In addition to the iterators describe above, which adhere to the Python iterator
+protocol, there is also a *raw iterator* API that mimics the C++ iterator API
+provided by LevelDB. Since this interface is only intended for advanced use
+cases, it is not covered in this user guide. See the API reference for
+:py:meth:`DB.raw_iterator` and :py:class:`RawIterator` for more information.
+
 
 Prefixed databases
 ==================

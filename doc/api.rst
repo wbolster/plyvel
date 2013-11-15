@@ -178,6 +178,13 @@ LevelDB database.
       :rtype: :py:class:`Iterator`
 
 
+   .. py:method:: raw_iterator(verify_checksums=False, fill_cache=True)
+
+      Create a new :py:class:`RawIterator` instance for this database.
+
+      See the :py:class:`RawIterator` API for more information.
+
+
    .. py:method:: snapshot()
 
       Create a new :py:class:`Snapshot` instance for this database.
@@ -425,8 +432,18 @@ Snapshot
       Same as :py:meth:`DB.iterator`, but operates on the snapshot instead.
 
 
+   .. py:method:: raw_iterator(...)
+
+      Create a new :py:class:`RawIterator` instance for this snapshot.
+
+      Same as :py:meth:`DB.raw_iterator`, but operates on the snapshot instead.
+
+
 Iterator
 ========
+
+Regular iterators
+-----------------
 
 Plyvel's :py:class:`Iterator` is intended to be used like a normal Python
 iterator, so you can just use a standard ``for`` loop to iterate over it.
@@ -498,14 +515,76 @@ Directly invoking methods on the :py:class:`Iterator` returned by
 
       .. versionadded:: 0.6
 
+Raw iterators
+-------------
+
+The raw iteration API mimics the C++ iterator interface provided by LevelDB.
+See the LevelDB documentation for a detailed description.
+
+.. py:class:: RawIterator
+
+   Raw iterator to iterate over a database
+
+   .. versionadded:: 0.7
+
+   .. py:method:: valid()
+
+      Check whether the iterator is currently valid.
+
+   .. py:method:: seek_to_first()
+
+      Seek to the first key (if any).
+
+   .. py:method:: seek_to_last()
+
+      Seek to the last key (if any).
+
+   .. py:method:: seek(target)
+
+      Seek to or past the specified key (if any).
+
+   .. py:method:: next()
+
+      Move the iterator one step forward.
+
+      May raise :py:exc:`IteratorInvalidError`.
+
+   .. py:method:: prev()
+
+      Move the iterator one step backward.
+
+      May raise :py:exc:`IteratorInvalidError`.
+
+   .. py:method:: key()
+
+      Return the current key.
+
+      May raise :py:exc:`IteratorInvalidError`.
+
+   .. py:method:: value()
+
+      Return the current value.
+
+      May raise :py:exc:`IteratorInvalidError`.
+
+   .. py:method:: item()
+
+      Return the current key and value as a tuple.
+
+      May raise :py:exc:`IteratorInvalidError`.
+
+   .. py:method:: close()
+
+      Close the iterator. Can also be accomplished using a context manager.
+      See :py:meth:`Iterator.close`.
+
 
 Errors
 ======
 
 Plyvel uses standard exceptions like ``TypeError``, ``ValueError``, and
 ``RuntimeError`` as much as possible. For LevelDB specific errors, Plyvel may
-raise a few custom exceptions: :py:class:`Error`, :py:class:`IOError`, and
-:py:class:`CorruptionError`.
+raise a few custom exceptions, which are described below.
 
 .. py:exception:: Error
 
@@ -527,6 +606,11 @@ raise a few custom exceptions: :py:class:`Error`, :py:class:`IOError`, and
 .. py:exception:: CorruptionError
 
    LevelDB corruption error
+
+
+.. py:exception:: IteratorInvalidError
+
+   Used by :py:class:`RawIterator` to signal invalid iterator state.
 
 
 .. vim: set tabstop=3 shiftwidth=3:
