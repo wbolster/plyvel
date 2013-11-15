@@ -654,7 +654,11 @@ cdef class BaseIterator:
             self._iter = db._db.NewIterator(read_options)
 
         # Store a weak reference on the db (needed when closing db)
-        db.iterators[id(self)] = weakref_ref(self)
+        iterator_id = id(self)
+        ref_dict = db.iterators
+        ref_dict[iterator_id] = weakref_ref(
+            self,
+            lambda wr: ref_dict.pop(iterator_id))
 
     cpdef close(self):
         if self._iter is not NULL:
