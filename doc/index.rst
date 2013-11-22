@@ -39,7 +39,7 @@ Plyvel's key features are:
   Plyvel works with both Python 2 and Python 3, without any API differences.
 
 
-.. rubric:: Do you enjoy using Plyvel?
+.. note Do you like Plyvel?
 
 You should know that Plyvel is a hobby project, written and maintained by me,
 Wouter Bolsterlee, in my spare time. Please consider making a small donation_ to
