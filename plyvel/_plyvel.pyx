@@ -1090,14 +1090,30 @@ cdef class Snapshot:
             self._snapshot = <leveldb.Snapshot*>db._db.GetSnapshot()
 
     def __dealloc__(self):
+        self.close()
+
+    cpdef close(self):
+        if self.db._db is NULL or self._snapshot is NULL:
+            return  # nothing to do
+
         with nogil:
-            if self.db._db is not NULL and self._snapshot is not NULL:
-                self.db._db.ReleaseSnapshot(self._snapshot)
+            self.db._db.ReleaseSnapshot(self._snapshot)
+            self._snapshot = NULL
+
+    def release(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False  # propagate exceptions
 
     def get(self, bytes key not None, default=None, *,
             bool verify_checksums=False, bool fill_cache=True):
-        if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
+        if self.db._db is NULL or self._snapshot is NULL:
+            raise RuntimeError("Database or snapshot is closed")
 
         cdef ReadOptions read_options
         read_options.verify_checksums = verify_checksums
@@ -1110,15 +1126,15 @@ cdef class Snapshot:
         return db_get(self.db, key, default, read_options)
 
     def __iter__(self):
-        if self.db._db is NULL:
-            raise RuntimeError("Cannot operate on closed LevelDB database")
-
         return self.iterator()
 
     def iterator(self, *, reverse=False, start=None, stop=None,
                  include_start=True, include_stop=False, prefix=None,
                  include_key=True, include_value=True,
                  bool verify_checksums=False, bool fill_cache=True):
+        if self.db._db is NULL or self._snapshot is NULL:
+            raise RuntimeError("Database or snapshot is closed")
+
         return Iterator(
             db=self.db, db_prefix=self.prefix, reverse=reverse, start=start,
             stop=stop, include_start=include_start, include_stop=include_stop,
@@ -1128,6 +1144,9 @@ cdef class Snapshot:
 
     def raw_iterator(self, *, bool verify_checksums=False,
                      bool fill_cache=True):
+        if self.db._db is NULL or self._snapshot is NULL:
+            raise RuntimeError("Database or snapshot is closed")
+
         return RawIterator(
             db=self.db,
             verify_checksums=verify_checksums,

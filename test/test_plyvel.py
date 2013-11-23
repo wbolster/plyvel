@@ -738,6 +738,34 @@ def test_snapshot(db):
     assert list(k for k, v in snapshot) == [b'b', b'c']
 
 
+def test_snapshot_closing(db):
+    # Snapshots can be closed explicitly
+    snapshot = db.snapshot()
+    snapshot.close()
+    with pytest.raises(RuntimeError):
+        snapshot.get(b'a')
+
+    snapshot.close()  # no-op
+
+
+def test_snapshot_closing_database(db):
+    # Closing the db should also render the snapshot unusable
+    snapshot = db.snapshot()
+    db.close()
+    with pytest.raises(RuntimeError):
+        snapshot.get(b'a')
+
+
+def test_snapshot_closing_context_manager(db):
+    # Context manager
+    db.put(b'a', b'a')
+    snapshot = db.snapshot()
+    with snapshot:
+        assert snapshot.get(b'a') == b'a'
+    with pytest.raises(RuntimeError):
+        snapshot.get(b'a')
+
+
 def test_property(db):
     with pytest.raises(TypeError):
         db.get_property()

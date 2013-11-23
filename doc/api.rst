@@ -439,6 +439,22 @@ Snapshot
       Same as :py:meth:`DB.raw_iterator`, but operates on the snapshot instead.
 
 
+   .. py:method:: close()
+
+      Close the snapshot. Can also be accomplished using a context manager. See
+      :py:meth:`Iterator.close` for an example.
+
+      .. versionadded:: 0.8
+
+
+   .. py:method:: release()
+
+      Alias for :py:meth:`Snapshot.close`. *Release* is the terminology used in
+      the LevelDB C++ API.
+
+      .. versionadded:: 0.8
+
+
 Iterator
 ========
 
