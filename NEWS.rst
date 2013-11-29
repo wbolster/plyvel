@@ -5,7 +5,7 @@ Version history
 Plyvel 0.8
 ==========
 
-Release date: *not yet released*
+Release date: 2013-11-29
 
 * Allow snapshots to be closed explicitly using either
   :py:meth:`Snapshot.close()` or a ``with`` block (`issue #21
