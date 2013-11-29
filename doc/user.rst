@@ -196,10 +196,18 @@ since the snapshot prevents LevelDB from cleaning up old data that is still
 accessible by the snapshot. This means that you should never keep a snapshot
 around longer than necessary. The snapshot and its associated resources will be
 released automatically when the snapshot reference count drops to zero, which
-(for local variables) happens when the variable goes out of scope. In long
-running functions, you can also clean it up yourself::
+(for local variables) happens when the variable goes out of scope (or after
+you've issued a ``del`` statement). If you want explicit control over the
+lifetime of a snapshot, you can also clean it up yourself using
+:py:meth:`Snapshot.close`::
 
-    >>> del sn
+    >>> sn.close()
+
+Alternatively, you can use the snapshot as a context manager:
+
+    >>> with db.snapshot() as sn:
+    ...     sn.get(b'key')
+
 
 Iterators
 =========
