@@ -510,7 +510,7 @@ Directly invoking methods on the :py:class:`Iterator` returned by
 
       Move the iterator to the specified `target`.
 
-      This moves the iterator to the the first key that sorts equal or before
+      This moves the iterator to the the first key that sorts equal or after
       the specified `target` within the iterator range (`start` and `stop`).
 
    .. py:method:: close()
