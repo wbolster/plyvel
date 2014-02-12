@@ -498,6 +498,53 @@ def test_reverse_range_iteration(db):
         expected_values=(b'3', b'2', b'1'))
 
 
+def test_range_iteration_ex(db):
+    db.put(b'1', b'1')
+    db.put(b'2', b'2')
+    db.put(b'3', b'3')
+    db.put(b'4', b'4')
+    db.put(b'5', b'5')
+
+    from bisect import bisect_left, bisect_right
+    keys = [b'1', b'2', b'3', b'4', b'5']
+    testkeys = [None, b'0', b'1', b'2', b'3', b'30', b'31', b'4', b'5', b'6']
+    for start in testkeys:
+        for stop in testkeys:
+            for include_start in (True, False):
+                if start is None:
+                    i = None
+                elif include_start:
+                    i = bisect_left(keys, start)
+                else:
+                    i = bisect_right(keys, start)
+                for include_stop in (True, False):
+                    if stop is None:
+                        k = None
+                    elif include_stop:
+                        k = bisect_right(keys, stop)
+                    else:
+                        k = bisect_left(keys, stop)
+
+                    expect = keys[i:k]
+                    result = list(db.iterator(start=start, stop=stop,
+                        include_start=include_start,
+                        include_stop=include_stop,
+                        include_value=False,
+                        ))
+                    assert result == expect, (
+                        start, include_start, stop, include_stop, result)
+            
+                    expect.reverse()
+                    result = list(db.iterator(start=start, stop=stop,
+                        include_start=include_start,
+                        include_stop=include_stop,
+                        include_value=False,
+                        reverse=True,
+                        ))
+                    assert result == expect, (
+                        start, include_start, stop, include_stop, result)
+
+
 def test_out_of_range_iterations(db):
     db.put(b'1', b'1')
     db.put(b'3', b'3')
