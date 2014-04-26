@@ -1,5 +1,4 @@
+-r requirements-test.txt
 Cython >= 0.17
-pytest
-pytest-cov
 sphinx
 tox
