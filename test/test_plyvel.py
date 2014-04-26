@@ -77,7 +77,7 @@ def test_open_fresh(db_dir):
         plyvel.DB(db_dir, error_if_exists=True)
 
 
-def tesT_open_no_compression(db_dir):
+def test_open_no_compression(db_dir):
     plyvel.DB(db_dir, compression=None, create_if_missing=True)
 
 
