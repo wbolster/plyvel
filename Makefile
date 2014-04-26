@@ -1,15 +1,17 @@
 
-.PHONY: all ext doc clean test
+.PHONY: all cython ext doc clean test
 
-all: ext
+all: cython ext
+
+cython:
+	cython --version
+	cython --cplus --fast-fail --annotate plyvel/_plyvel.pyx
 
 ext:
 	@echo
 	@echo "Building extension"
 	@echo "=================="
 	@echo
-	cython --version
-	cython --cplus --fast-fail --annotate plyvel/_plyvel.pyx
 	python setup.py build_ext --inplace --force
 
 doc:
