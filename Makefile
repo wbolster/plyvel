@@ -4,6 +4,10 @@
 all: cython ext
 
 cython:
+	@echo
+	@echo "Running Cython"
+	@echo "=============="
+	@echo
 	cython --version
 	cython --cplus --fast-fail --annotate plyvel/_plyvel.pyx
 
