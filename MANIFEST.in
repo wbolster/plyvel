@@ -1,5 +1,5 @@
 include Makefile
-include test-requirements.txt
+include requirements*.txt
 include *.rst
 include test/*.py
 include doc/conf.py doc/*.rst
