@@ -22,6 +22,11 @@ public:
     {
         Py_INCREF(comparator);
         zero = PyLong_FromLong(0);
+
+        /* LevelDB uses a background thread for compaction, and with custom
+         * comparators this background thread calls back into Python code,
+         * which means the GIL must be initialized. */
+        PyEval_InitThreads();
     }
 
     ~PlyvelCallbackComparator()
