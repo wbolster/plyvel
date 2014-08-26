@@ -2,6 +2,18 @@
 Version history
 ===============
 
+Plyvel 0.9
+==========
+
+Release date: 2014-08-27
+
+* Ensure that the Python GIL is initialized when a custom comparator is used,
+  since the background thread LevelDB uses for compaction calls back into Python
+  code in that case. This makes single-threaded programs using a custom
+  comparator work as intended. (`issue #35
+  <https://github.com/wbolster/plyvel/issues/35>`_)
+
+
 Plyvel 0.8
 ==========
 
