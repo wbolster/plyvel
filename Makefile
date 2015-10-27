@@ -11,7 +11,7 @@ cython:
 	cython --version
 	cython --cplus --fast-fail --annotate plyvel/_plyvel.pyx
 
-ext:
+ext: cython
 	@echo
 	@echo "Building extension"
 	@echo "=================="
