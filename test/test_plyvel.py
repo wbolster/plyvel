@@ -162,6 +162,12 @@ def test_large_lru_cache(db_dir):
     plyvel.DB(db_dir, create_if_missing=True, lru_cache_size=2 * 1024**3)
 
 
+def test_context_manager(db_dir):
+    with plyvel.DB(db_dir, create_if_missing=True): as db:
+        assert not db.closed
+    assert db.closed
+
+
 def test_put(db):
     db.put(b'foo', b'bar')
     db.put(b'foo', b'bar', sync=False)
