@@ -163,7 +163,7 @@ def test_large_lru_cache(db_dir):
 
 
 def test_context_manager(db_dir):
-    with plyvel.DB(db_dir, create_if_missing=True): as db:
+    with plyvel.DB(db_dir, create_if_missing=True) as db:
         assert not db.closed
     assert db.closed
 
