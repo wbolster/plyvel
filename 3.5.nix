@@ -6,6 +6,7 @@ with import <nixpkgs> {}; {
       python35Packages.cython
       python35Packages.virtualenv
       python35Packages.pytest
+      python35Packages.sphinx
     ];
     C_INCLUDE_PATH="${leveldb}/include/leveldb";
     shellHook =
