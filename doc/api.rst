@@ -23,6 +23,14 @@ LevelDB database.
 
    LevelDB database
 
+   Instances of this class can be used as context managers (Python's ``with``
+   block). When the ``with`` block terminates, the database will
+   automatically clase itself without an explicit call to
+   :py:meth:`DB.close`::
+
+      with plyvel.DB('/tmp/leveldb') as db:
+          db.put(b'key', b'value')
+
    .. py:method:: __init__(name, create_if_missing=False, error_if_exists=False, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
 
       Open the underlying database handle.
