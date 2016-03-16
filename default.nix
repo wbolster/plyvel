@@ -3,6 +3,7 @@ with import <nixpkgs> {}; {
     name = "plyvel";
     buildInputs = with pkgs; [
       leveldb
+      python35Packages.cython
       python35Packages.virtualenv
     ];
     C_INCLUDE_PATH="${leveldb}/include/leveldb";
@@ -10,7 +11,6 @@ with import <nixpkgs> {}; {
     ''
       test -d .virtualenv || virtualenv-3.5 .virtualenv
       . .virtualenv/bin/activate
-      pip install -e .
     '';
   };
 }
