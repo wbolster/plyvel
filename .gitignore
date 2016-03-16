@@ -7,7 +7,7 @@ dist/
 
 .coverage
 .tox/
-.virtualenv
+.virtualenv*
 
 plyvel/_plyvel.cpp
 plyvel/_plyvel.html

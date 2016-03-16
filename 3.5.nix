@@ -10,8 +10,8 @@ with import <nixpkgs> {}; {
     C_INCLUDE_PATH="${leveldb}/include/leveldb";
     shellHook =
     ''
-      test -d .virtualenv || virtualenv-3.5 .virtualenv
-      . .virtualenv/bin/activate
+      test -d .virtualenv-3.5 || virtualenv-3.5 .virtualenv-3.5
+      . .virtualenv-3.5/bin/activate
     '';
   };
 }
