@@ -280,7 +280,10 @@ cdef class DB:
     def __dealloc__(self):
         self.close()
 
-    def __exit__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, t, v, tb):
         self.close()
 
     def __repr__(self):
