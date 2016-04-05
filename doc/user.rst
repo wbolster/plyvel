@@ -166,7 +166,7 @@ raised an exception. In this example this means that neither ``key-3`` nor
 
    Write batches will never silently suppress exceptions. Exceptions will be
    propagated regardless of the value of the `transaction` argument, so in the
-   examples above will you will still see the ValueError.
+   examples above you will still see the ValueError.
 
 
 Snapshots
