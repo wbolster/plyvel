@@ -12,7 +12,7 @@ See the documentation and project page for more information:
 * `PyPI page`_
 
 .. _Project page: https://github.com/wbolster/plyvel
-.. _Documentation: https://plyvel.readthedocs.org/
+.. _Documentation: https://plyvel.readthedocs.io/
 .. _PyPI page: http://pypi.python.org/pypi/plyvel/
 .. _LevelDB: http://code.google.com/p/leveldb/
 
