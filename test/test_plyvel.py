@@ -12,13 +12,13 @@ import tempfile
 import threading
 import time
 
-if sys.version_info < (3, 0):
-    from future_builtins import zip
-    range = xrange
-
 import pytest
 
 import plyvel
+
+if sys.version_info < (3, 0):
+    from future_builtins import zip
+    range = xrange  # noqa: F821 (python 2 only)
 
 
 #
