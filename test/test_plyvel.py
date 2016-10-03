@@ -222,6 +222,18 @@ def test_null_bytes(db):
     assert db.get(key) is None
 
 
+def test_bytes_like(db):
+    b = b'bar'
+
+    value = bytearray(b)
+    db.put(b'quux', value)
+    assert db.get(b'quux') == value
+
+    value = memoryview(b)
+    db.put(b'foo', value)
+    assert db.get(b'foo') == value
+
+
 def test_write_batch(db):
     # Prepare a batch with some data
     batch = db.write_batch()
@@ -276,6 +288,14 @@ def test_write_batch_transaction(db):
             raise ValueError()
 
     assert list(db.iterator()) == []
+
+
+def test_write_batch_bytes_like(db):
+    with db.write_batch() as wb:
+        wb.put(b'a', bytearray(b'foo'))
+        wb.put(b'b', memoryview(b'bar'))
+    assert db.get(b'a') == b'foo'
+    assert db.get(b'b') == b'bar'
 
 
 def test_iteration(db):
