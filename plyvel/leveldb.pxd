@@ -69,6 +69,7 @@ cdef extern from "leveldb/options.h" namespace "leveldb":
         Cache* block_cache
         size_t block_size
         int block_restart_interval
+        size_t max_file_size
         CompressionType compression
         FilterPolicy* filter_policy
         Options() nogil
