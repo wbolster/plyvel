@@ -28,7 +28,7 @@ setup(
     url="https://github.com/wbolster/plyvel",
     version=__version__,
     author="Wouter Bolsterlee",
-    author_email="uws@xs4all.nl",
+    author_email="wouter@bolsterl.ee",
     ext_modules=ext_modules,
     packages=['plyvel'],
     license="BSD License",
