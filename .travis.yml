@@ -5,8 +5,7 @@ python:
   - "3.4"
   - "2.7"
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libleveldb-dev
+  - ./travis.sh
 install:
   - pip install -r requirements-dev.txt
   - make cython
