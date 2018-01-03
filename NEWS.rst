@@ -2,6 +2,28 @@
 Version history
 ===============
 
+Plyvel 1.0.0
+============
+
+Release date: 2018-..-.. TODO
+
+* First 1.x release. This library is quite mature, so there is no reason to keep
+  using 0.x version numbers. While at it, switch to semantic versioning.
+
+* Drop support for older Python versions. Minimum versions are now Python 3.4+
+  for modern Python and Python 2.7+ for legacy Python.
+
+* The mimimum LevelDB version is now 1.20, which added an option for
+  the maximum file size, which is now expossed in Plyvel.
+  (`pr #61 <https://github.com/wbolster/plyvel/pull/61>`_)
+
+* The various ``.put()`` methods are no longer restricted to just `bytes` (`str`
+  in Python 2), but will accept any type implementing Python's buffer protocol,
+  such as `bytes`, `bytearray`, and `memoryview`. Note that this only applies to
+  values; keys must still be `bytes`.
+  (`issue #52 <https://github.com/wbolster/plyvel/issues/52>`_)
+
+
 Plyvel 0.9
 ==========
 
