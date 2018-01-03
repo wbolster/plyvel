@@ -5,7 +5,7 @@ Version history
 Plyvel 1.0.0
 ============
 
-Release date: 2018-..-.. TODO
+Release date: 2018-01-03
 
 * First 1.x release. This library is quite mature, so there is no reason to keep
   using 0.x version numbers. While at it, switch to semantic versioning.
