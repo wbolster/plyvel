@@ -23,7 +23,7 @@ LevelDB database.
 
    LevelDB database
 
-   .. py:method:: __init__(name, create_if_missing=False, error_if_exists=False, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
+   .. py:method:: __init__(name, create_if_missing=False, error_if_exists=False, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, max_file_size=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
 
       Open the underlying database handle.
 
@@ -39,6 +39,9 @@ LevelDB database.
       :cpp:class:`Cache`, :cpp:class:`FilterPolicy`, and :cpp:class:`Comparator`
       in the LevelDB C++ API for more information.
 
+      .. versionadded:: 1.0.0
+         `max_file_size` argument
+
       :param str name: name of the database (directory name)
       :param bool create_if_missing: whether a new database should be created if
                                      needed
@@ -51,6 +54,7 @@ LevelDB database.
       :param int block_size: block size (in bytes)
       :param int block_restart_interval: block restart interval for delta
                                          encoding of keys
+      :param bool max_file_size: maximum file size (in bytes)
       :param bool compression: whether to use Snappy compression (enabled by default))
       :param int bloom_filter_bits: the number of bits to use for a bloom
                                     filter; the default of 0 means that no bloom
@@ -317,7 +321,7 @@ Database maintenance
 Existing databases can be repaired or destroyed using these module level
 functions:
 
-.. py:function:: repair_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
+.. py:function:: repair_db(name, paranoid_checks=None, write_buffer_size=None, max_open_files=None, lru_cache_size=None, block_size=None, block_restart_interval=None, max_file_size=None, compression='snappy', bloom_filter_bits=0, comparator=None, comparator_name=None)
 
    Repair the specified database.
 
