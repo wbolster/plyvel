@@ -51,7 +51,7 @@ LevelDB database.
       :param int block_size: block size (in bytes)
       :param int block_restart_interval: block restart interval for delta
                                          encoding of keys
-      :param compression: whether to use Snappy compression (enabled by default)
+      :param bool compression: whether to use Snappy compression (enabled by default))
       :param int bloom_filter_bits: the number of bits to use for a bloom
                                     filter; the default of 0 means that no bloom
                                     filter will be used
