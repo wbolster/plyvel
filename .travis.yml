@@ -1,0 +1,12 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+install:
+  - pip install -r requirements-dev.txt
+  - make cython
+  - pip install .
+script:
+  - make test
