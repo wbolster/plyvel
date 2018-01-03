@@ -12,6 +12,7 @@ def get_file_contents(filename):
     with open(join(CURRENT_DIR, filename)) as fp:
         return fp.read()
 
+
 ext_modules = [
     Extension(
         'plyvel._plyvel',
