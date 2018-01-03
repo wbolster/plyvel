@@ -14,7 +14,7 @@ Release date: 2018-01-03
   for modern Python and Python 2.7+ for legacy Python.
 
 * The mimimum LevelDB version is now 1.20, which added an option for
-  the maximum file size, which is now expossed in Plyvel.
+  the maximum file size, which is now exposed in Plyvel.
   (`pr #61 <https://github.com/wbolster/plyvel/pull/61>`_)
 
 * The various ``.put()`` methods are no longer restricted to just `bytes` (`str`
