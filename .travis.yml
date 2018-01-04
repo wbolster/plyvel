@@ -4,8 +4,8 @@ python:
   - "3.5"
   - "3.4"
   - "2.7"
-before_install:
-  - ./travis.sh
+# before_install:
+#   - ./travis.sh
 install:
   - pip install -r requirements-dev.txt
   - make cython
