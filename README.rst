@@ -2,6 +2,9 @@
 Plyvel
 ======
 
+.. image:: https://travis-ci.org/wbolster/plyvel.svg?branch=master
+    :target: https://travis-ci.org/wbolster/plyvel
+
 **Plyvel** is a fast and feature-rich Python interface to LevelDB_.
 
 Plyvel has a rich feature set, high performance, and a friendly Pythonic API.
