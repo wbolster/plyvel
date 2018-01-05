@@ -10,7 +10,7 @@ Release date: 2018-01-05
 * Provide binary packages (manylinux1 wheels) for Linux.
 
   These wheel packages have the LevelDB library embedded. This should
-  make installation on many Linux systems easier since these package
+  make installation on many Linux systems easier since these packages
   do not depend on a recent LevelDB version being installed
   system-wide: running ``pip install`` will simply download and
   install the extension, instead of compiling it.
