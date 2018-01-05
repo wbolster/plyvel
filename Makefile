@@ -1,5 +1,4 @@
-
-.PHONY: all cython ext doc clean test
+.PHONY: all cython ext doc clean test wheels
 
 all: cython ext
 
@@ -47,3 +46,17 @@ test: ext
 	@echo "============="
 	@echo
 	py.test
+
+wheels: cython
+	# Note: this should run inside the docker container.
+	@echo
+	@echo "Building wheels"
+	@echo "==============="
+	@echo
+	for dir in /opt/python/*; do \
+		$${dir}/bin/python setup.py bdist_wheel; \
+	done
+	for wheel in dist/*.whl; do \
+		auditwheel show $${wheel}; \
+		auditwheel repair -w /wheelhouse/ $${wheel}; \
+	done
