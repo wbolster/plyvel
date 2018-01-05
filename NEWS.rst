@@ -2,6 +2,23 @@
 Version history
 ===============
 
+Plyvel 1.0.1
+============
+
+Release date: 2018-01-05
+
+* Provide binary packages (manylinux1 wheels) for Linux.
+
+  These wheel packages have the LevelDB library embedded. This should
+  make installation on many Linux systems easier since these package
+  do not depend on a recent LevelDB version being installed
+  system-wide: running ``pip install`` will simply download and
+  install the extension, instead of compiling it.
+  (`pr #64 <https://github.com/wbolster/plyvel/pull/64>`_,
+  `issue #62 <https://github.com/wbolster/plyvel/issues/62>`_,
+  `issue #63 <https://github.com/wbolster/plyvel/issues/63>`_)
+
+
 Plyvel 1.0.0
 ============
 
