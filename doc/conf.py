@@ -16,6 +16,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
+import datetime
+
 from os.path import join, dirname
 
 with open(join(dirname(__file__), '../plyvel/_version.py')) as fp:
@@ -45,7 +47,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Plyvel'
-copyright = u'2012, Wouter Bolsterlee'
+copyright = u'2012‒{}, Wouter Bolsterlee'.format(
+    datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
