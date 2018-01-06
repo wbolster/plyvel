@@ -46,7 +46,7 @@ system.
    Plyvel 1.x depends on LevelDB >= 1.20, which at the time of writing
    (early 2018) is more recent than the versions packaged by various
    Linux distributions. Using an older version will result in
-   compile-time errors. The easiest solution iss to use the pre-built
+   compile-time errors. The easiest solution is to use the pre-built
    binary packages. Alternatively, install LevelDB manually on your
    system. The Dockerfile in the Plyvel source repository, which is
    used for building the official binary packages, shows how to do
