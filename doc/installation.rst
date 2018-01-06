@@ -25,32 +25,41 @@ Package Index <http://pypi.python.org/>`_ (PyPI) using ``pip``::
 it and installing it manually with ``python setup.py install`` should also
 work.)
 
-Note that Plyvel does not include a copy of LevelDB itself. Plyvel requires an
-installed shared library for LevelDB at build time, so make sure you have a
-shared LevelDB library and the development headers installed where the compiler
-and linker can find them. For Debian or Ubuntu something like ``apt-get install
-libleveldb1 libleveldb-dev`` should suffice, but any other installation method
-should do as well.
+The Plyvel source package does not include a copy of LevelDB itself.
+Plyvel requires LevelDB development headers and an installed shared
+library for LevelDB during build time, and the same installed shared
+library at runtime.
+
+To build from source, make sure you have a shared LevelDB library and
+the development headers installed where the compiler and linker can
+find them. For Debian or Ubuntu something like ``apt-get install
+libleveldb1 libleveldb-dev`` should suffice.
+
+For Linux, Plyvel also ships as pre-built binary packages
+(``manylinux1`` wheels) that have LevelDB embedded. Simply running
+``pip install plyvel`` doess the right thing with a modern ``pip`` on
+a modern Linux platform, even without any LevelDB libraries on your
+system.
+
+.. note::
+
+   Plyvel 1.x depends on LevelDB >= 1.20, which at the time of writing
+   (early 2018) is more recent than the versions packaged by various
+   Linux distributions. Using an older version will result in
+   compile-time errors. The easiest solution iss to use the pre-built
+   binary packages. Alternatively, install LevelDB manually on your
+   system. The Dockerfile in the Plyvel source repository, which is
+   used for building the official binary packages, shows how to do
+   this.
 
 .. warning::
 
-   The above installation method applies only to released tarballs available
+   The above installation method applies only to released packages available
    from PyPI. If you are building and installing from a source tree acquired
    through other means, e.g. checked out from source control, you will need to
    run Cython first. If you don't, you will see errors about missing source
    files. See the :doc:`developer documentation <developer>` for more
    information.
-
-.. note::
-
-   The LevelDB version packaged in Ubuntu Precise (12.04) is too old for Plyvel,
-   and the package does not include a shared library either. Manually installing
-   the
-   `libleveldb1 <http://packages.ubuntu.com/search?keywords=libleveldb1>`_,
-   `libleveldb-dev <http://packages.ubuntu.com/search?keywords=libleveldb-dev>`_,
-   `libsnappy1 <http://packages.ubuntu.com/search?keywords=libsnappy1>`_, and
-   `libsnappy-dev <http://packages.ubuntu.com/search?keywords=libsnappy-dev>`_
-   packages from Ubuntu Raring is known to work without problems.
 
 
 Verify that it works
