@@ -44,6 +44,18 @@ Almost all Plyvel code is covered by the unit tests. Plyvel uses *pytest* and
 ``tox`` to run the tests against multiple Python versions.
 
 
+Producing binary packages
+=========================
+
+To build a non-portable binary package for a single platform::
+
+  python setup.py bdist_wheel
+
+See the comments at the top of the ``Dockerfile`` for instructions on
+how to build portable ``manylinux1`` wheels for multiple Python
+versions that should work on many Linux platforms.
+
+
 Generating the documentation
 ============================
 
