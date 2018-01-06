@@ -21,7 +21,7 @@ Package Index <http://pypi.python.org/>`_ (PyPI) using ``pip``::
 
    (envname) $ pip install plyvel
 
-(In case you're feeling old-fashioned:: downloading a source tarball, unpacking
+(In case you're feeling old-fashioned: downloading a source tarball, unpacking
 it and installing it manually with ``python setup.py install`` should also
 work.)
 
