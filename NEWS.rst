@@ -2,6 +2,15 @@
 Version history
 ===============
 
+Plyvel 1.0.2
+============
+
+Release date: 2018-01-12
+
+* Correctly build wide unicode Python 2.7 wheels (cp27-cp27mu, UCS4).
+  (`issue #65 <https://github.com/wbolster/plyvel/issues/65>`_)
+
+
 Plyvel 1.0.1
 ============
 
