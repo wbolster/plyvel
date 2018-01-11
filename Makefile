@@ -30,6 +30,7 @@ test: ext
 wheels: cython
 	# Note: this should run inside the docker container.
 	for dir in /opt/python/*; do \
+		$${dir}/bin/python setup.py build --force; \
 		$${dir}/bin/python setup.py bdist_wheel; \
 	done
 	for wheel in dist/*.whl; do \
