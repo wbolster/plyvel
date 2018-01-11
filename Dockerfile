@@ -25,6 +25,8 @@ RUN true \
     && cp -av include/leveldb/ /usr/local/include/ \
     && ldconfig
 
+RUN rm /opt/python/cp33*
+
 RUN pip install --upgrade pip setuptools tox cython
 
 COPY . $PROJECT_ROOT
