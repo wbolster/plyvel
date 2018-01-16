@@ -1,6 +1,7 @@
 from os.path import join, dirname
 from setuptools import setup
 from setuptools.extension import Extension
+import platform
 
 CURRENT_DIR = dirname(__file__)
 
@@ -13,12 +14,16 @@ def get_file_contents(filename):
         return fp.read()
 
 
+extra_compile_args = ['-Wall', '-g']
+if platform.system() == 'Darwin':
+    extra_compile_args += ['-mmacosx-version-min=10.7', '-stdlib=libc++']
+
 ext_modules = [
     Extension(
         'plyvel._plyvel',
         sources=['plyvel/_plyvel.cpp', 'plyvel/comparator.cpp'],
         libraries=['leveldb'],
-        extra_compile_args=['-Wall', '-g'],
+        extra_compile_args=extra_compile_args,
     )
 ]
 
