@@ -2,6 +2,16 @@
 Version history
 ===============
 
+Plyvel 1.0.3
+============
+
+Release date: 2018-01-16
+
+* Fix building sources on OSX.
+  (`issue #66 <https://github.com/wbolster/plyvel/issues/66>`_,
+  `pr #67 <https://github.com/wbolster/plyvel/issues/67>`_)
+
+
 Plyvel 1.0.2
 ============
 
