@@ -13,6 +13,18 @@ ENV LC_ALL=en_US.UTF-8
 ENV LEVELDB_VERSION=1.20
 ENV PATH="/opt/python/cp36-cp36m/bin:${PATH}"
 ENV PROJECT_ROOT="/opt/plyvel"
+ENV SNAPPY_VERSION=1.1.3
+
+RUN true \
+    && mkdir /opt/snappy \
+    && cd /opt/snappy \
+    && wget -O snappy.tar.gz https://github.com/google/snappy/releases/download/${SNAPPY_VERSION}/snappy-${SNAPPY_VERSION}.tar.gz \
+    && tar xf snappy.tar.gz \
+    && cd snappy-${SNAPPY_VERSION}/ \
+    && ./configure \
+    && make -j4 \
+    && make install \
+    && ldconfig
 
 RUN true \
     && mkdir /opt/leveldb \
