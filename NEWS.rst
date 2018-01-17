@@ -8,7 +8,7 @@ Plyvel 1.0.4
 Release date: 2018-01-17
 
 * Build Python wheels with Snappy compression support.
-  (`issue #68 <  https://github.com/wbolster/plyvel/issues/68>`_)
+  (`issue #68 <https://github.com/wbolster/plyvel/issues/68>`_)
 
 
 Plyvel 1.0.3
