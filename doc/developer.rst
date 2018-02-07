@@ -61,3 +61,20 @@ Generating the documentation
 
 The documentation is written in ReStructuredText (reST) format and processed
 using *Sphinx*. Type ``make doc`` to build the HTML documentation.
+
+
+Developing with Nix package manager
+===================================
+If you are using Nix package manager, you may find the included Nix
+expressions helpful; execute the following command to set up the environment.
+
+::
+
+    nix-shell
+
+We haven't gotten ``tox`` working with Nix, so you can instead switch
+environments in Nix.
+
+::
+
+    nix-shell 2.7.nix
