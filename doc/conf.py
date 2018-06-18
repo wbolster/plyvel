@@ -23,7 +23,6 @@ release = __version__
 autodoc_default_flags = ['members', 'undoc-members']
 autodoc_member_order = 'bysource'
 
-html_static_path = ['_static']
 html_domain_indices = False
 html_show_sourcelink = False
 html_show_sphinx = False
