@@ -2,6 +2,16 @@
 Version history
 ===============
 
+Plyvel 1.0.5
+============
+
+Release date: 2018-07-17
+
+* Rebuild wheels: build against Snappy 1.1.7, and produce Python 3.7 wheels
+  (`issue #78 <https://github.com/wbolster/plyvel/issues/78>`_,
+  `pr #79 <https://github.com/wbolster/plyvel/pull/79>`_)
+
+
 Plyvel 1.0.4
 ============
 
