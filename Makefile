@@ -35,5 +35,13 @@ wheels: cython
 	done
 	for wheel in dist/*.whl; do \
 		auditwheel show $${wheel}; \
-		auditwheel repair -w /wheelhouse/ $${wheel}; \
+		auditwheel repair -w /dist/ $${wheel}; \
 	done
+
+sdist: cython
+	# Note: this should run inside the docker container.
+	python setup.py sdist --dist-dir /dist
+
+release:
+	docker build -t plyvel-build .
+	docker run -i -t -v $(pwd)/dist/:/dist plyvel-build
