@@ -33,7 +33,7 @@ library at runtime.
 To build from source, make sure you have a shared LevelDB library and
 the development headers installed where the compiler and linker can
 find them. For Debian or Ubuntu something like ``apt-get install
-libleveldb1 libleveldb-dev`` should suffice.
+libleveldb1v5 libleveldb-dev`` should suffice.
 
 For Linux, Plyvel also ships as pre-built binary packages
 (``manylinux1`` wheels) that have LevelDB embedded. Simply running
