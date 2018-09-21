@@ -1,35 +1,39 @@
 # Dockerfile for building manylinux1 wheels.
-#
-# Usage:
-#
-#   docker build -t plyvel-build .
-#   docker run -i -t -v $(pwd)/dist/:/wheelhouse plyvel-build
-#
-# The .whl files should appear in dist/ on the host.
 
 FROM quay.io/pypa/manylinux1_x86_64
 
 ENV LC_ALL=en_US.UTF-8
-ENV LEVELDB_VERSION=1.20
-ENV PATH="/opt/python/cp36-cp36m/bin:${PATH}"
-ENV PROJECT_ROOT="/opt/plyvel"
-ENV SNAPPY_VERSION=1.1.3
 
 RUN true \
-    && mkdir /opt/snappy \
-    && cd /opt/snappy \
-    && wget -O snappy.tar.gz https://github.com/google/snappy/releases/download/${SNAPPY_VERSION}/snappy-${SNAPPY_VERSION}.tar.gz \
-    && tar xf snappy.tar.gz \
-    && cd snappy-${SNAPPY_VERSION}/ \
-    && ./configure \
+    && mkdir /opt/cmake \
+    && cd /opt/cmake \
+    && curl -o cmake.tar.gz https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz \
+    && tar xf cmake.tar.gz \
+    && cd cmake-3.11.4 \
+    && ./bootstrap \
     && make -j4 \
     && make install \
     && ldconfig
 
+ENV SNAPPY_VERSION=1.1.7
+
+RUN true \
+    && mkdir /opt/snappy \
+    && cd /opt/snappy \
+    && curl -o snappy.tar.gz https://codeload.github.com/google/snappy/tar.gz/${SNAPPY_VERSION} \
+    && tar xf snappy.tar.gz \
+    && cd snappy-${SNAPPY_VERSION}/ \
+    && cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=on . \
+    && make -j4 \
+    && make install \
+    && ldconfig
+
+ENV LEVELDB_VERSION=1.20
+
 RUN true \
     && mkdir /opt/leveldb \
     && cd /opt/leveldb \
-    && wget -O leveldb.tar.gz https://github.com/google/leveldb/archive/v${LEVELDB_VERSION}.tar.gz \
+    && curl -o leveldb.tar.gz https://codeload.github.com/google/leveldb/tar.gz/v${LEVELDB_VERSION} \
     && tar xf leveldb.tar.gz \
     && cd leveldb-${LEVELDB_VERSION}/ \
     && make -j4 \
@@ -37,9 +41,11 @@ RUN true \
     && cp -av include/leveldb/ /usr/local/include/ \
     && ldconfig
 
-RUN rm /opt/python/cp33*
+ENV PATH="/opt/python/cp37-cp37m/bin:${PATH}"
 
 RUN pip install --upgrade pip setuptools tox cython
+
+ENV PROJECT_ROOT="/opt/plyvel"
 
 COPY . $PROJECT_ROOT
 
@@ -47,4 +53,4 @@ WORKDIR $PROJECT_ROOT
 
 CMD true \
     && git clean -xfd \
-    && make wheels
+    && make sdist wheels
