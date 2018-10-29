@@ -221,7 +221,7 @@ cdef int parse_options(Options *options, c_bool create_if_missing,
 cdef class DB:
     cdef leveldb.DB* _db
     cdef Options options
-    cdef object name
+    cdef readonly object name
     cdef object lock
     cdef dict iterators
 

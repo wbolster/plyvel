@@ -64,6 +64,13 @@ LevelDB database.
       :param bytes comparator_name: name for the custom comparator
 
 
+   .. py:attribute:: name
+
+      The (directory) name of this :py:class:`DB` instance. This is a
+      *read-only* attribute and must be set at instantiation time.
+
+      *New in version 1.1.0.*
+
    .. py:method:: close()
 
       Close the database.
