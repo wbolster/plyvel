@@ -1134,3 +1134,14 @@ def test_raw_iterator_closing(db):
         with db.raw_iterator() as it:
             pass
         it.valid()
+
+
+def test_access_DB_name_attr(db_dir):
+    db = plyvel.DB(db_dir, create_if_missing=True)
+    assert db.name == db_dir
+
+
+def test_try_changing_DB_name_attr(db_dir):
+    db = plyvel.DB(db_dir, create_if_missing=True)
+    with pytest.raises(AttributeError):
+        db.name = 'a'
