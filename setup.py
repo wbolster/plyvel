@@ -1,7 +1,6 @@
 from os.path import join, dirname
 from setuptools import setup
 from setuptools.extension import Extension
-import platform
 
 CURRENT_DIR = dirname(__file__)
 
@@ -15,8 +14,6 @@ def get_file_contents(filename):
 
 
 extra_compile_args = ['-Wall', '-g']
-if platform.system() == 'Darwin':
-    extra_compile_args += ['-mmacosx-version-min=10.7', '-stdlib=libc++']
 
 ext_modules = [
     Extension(
