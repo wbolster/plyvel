@@ -2,6 +2,21 @@
 Version history
 ===============
 
+Plyvel 1.1.0
+============
+
+Release date: 2019-05-02
+
+* Expose :py:attr:`~DB.name` attribute to Python code
+  (`pr #90 <https://github.com/wbolster/plyvel/pull/90>`_)
+
+* Fix building sources on OSX.
+  (`issue #95 <https://github.com/wbolster/plyvel/issues/95>`_,
+  `pr #97 <https://github.com/wbolster/plyvel/pull/97>`_)
+
+* Build Linux wheels against LevelDB 1.21
+
+
 Plyvel 1.0.5
 ============
 
