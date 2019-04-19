@@ -2,6 +2,15 @@
 Version history
 ===============
 
+Plyvel 1.0.6
+============
+
+Release date: 2019-04-19
+
+* Fix building sources on OSX.
+  (`issue #95 <https://github.com/wbolster/plyvel/issues/95>`_,
+  `pr #97 <https://github.com/wbolster/plyvel/pull/97>`_)
+
 Plyvel 1.0.5
 ============
 
