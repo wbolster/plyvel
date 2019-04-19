@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import platform
 import itertools
 import os
 import random
@@ -57,12 +58,12 @@ def test_version():
     v = plyvel.__leveldb_version__
     assert v.startswith('1.')
 
-
-def test_open_read_only_dir(db_dir):
-    # Opening a DB in a read-only dir should not work
-    os.chmod(db_dir, stat.S_IRUSR | stat.S_IXUSR)
-    with pytest.raises(plyvel.IOError):
-        plyvel.DB(db_dir)
+if platform.system() != 'Windows':
+    def test_open_read_only_dir(db_dir):
+        # Opening a DB in a read-only dir should not work
+        os.chmod(db_dir, stat.S_IRUSR | stat.S_IXUSR)
+        with pytest.raises(plyvel.IOError):
+            plyvel.DB(db_dir)
 
 
 def test_open_no_create(db_dir):

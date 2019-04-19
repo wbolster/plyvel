@@ -1,0 +1,144 @@
+environment:
+  TWINE_USERNAME: bauerj
+  # The encrypted password, used for deploying.
+  TWINE_PASSWORD: 
+    secure: nJvSXE3tRtnBNSmQNZ0oZg==
+
+  VCPKG_PATH: C:/tools/vcpkg/installed
+ 
+  matrix:
+ 
+    # Pre-installed Python versions, which Appveyor may upgrade to
+    # a later point release.
+ 
+    # - platform: x86
+    #   APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python27"
+    #   PYTHON_VERSION: "2.7.x"
+    #   PYTHON_ARCH: "32"
+    #   MSVC_VERSION: "Visual Studio 15"
+ 
+    # - platform: x64
+    #   APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python27-x64"
+    #   PYTHON_VERSION: "2.7.x"
+    #   PYTHON_ARCH: "64"
+    #   MSVC_VERSION: "Visual Studio 15 Win64"
+ 
+    # - platform: x86
+    #   APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python34"
+    #   PYTHON_VERSION: "3.4.x"
+    #   PYTHON_ARCH: "32"
+    #   MSVC_VERSION: "Visual Studio 15"
+
+    # - platform: x64
+    #   APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    #   PYTHON: "C:\\Python34-x64"
+    #   PYTHON_VERSION: "3.4.x"
+    #   PYTHON_ARCH: "64"
+    #   MSVC_VERSION: "Visual Studio 15 Win64"
+ 
+    - platform: x86
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "32"
+      MSVC_VERSION: "Visual Studio 15"
+
+    - platform: x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "64"
+      MSVC_VERSION: "Visual Studio 15 Win64"
+ 
+    - platform: x86
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "32"
+      MSVC_VERSION: "Visual Studio 15"
+
+    - platform: x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "64"
+      MSVC_VERSION: "Visual Studio 15 Win64"
+
+    - platform: x86
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python37"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "32"
+      MSVC_VERSION: "Visual Studio 15"
+
+    - platform: x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python37-x64"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "64"
+      MSVC_VERSION: "Visual Studio 15 Win64"
+ 
+init:
+  - "ECHO Python %PYTHON_VERSION% (%PYTHON_ARCH%bit) from %PYTHON%"
+
+install:
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ECHO "Filesystem root:"
+  # - ps: "ls \"C:/\""
+  
+  #stdint for vc9
+  # https://github.com/tango-controls/zmq-windows-ci/blob/master/appveyor.yml
+  # - appveyor DownloadFile https://raw.githubusercontent.com/mattn/gntp-send/master/include/msinttypes/stdint.h
+  # - cmd: copy stdint.h "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include"
+  
+  # Update Python PATH of this build (so pip is available, this cannot be
+  # done from inside the powershell script as it would require to restart
+  # the parent CMD process).
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python --version"
+  # - for /f %%i in ('which vcpkg') do set VCPKG_PATH=%%i/installed
+  
+  - if "%PLATFORM%" == "x64" set LEVELDB="vcpkg install leveldb:x64-windows"
+  - if "%PLATFORM%" == "x64" set VCPKG_SYS_PATH=x64-windows
+  - if "%PLATFORM%" == "x86" set LEVELDB="vcpkg install leveldb:x86-windows"
+  - if "%PLATFORM%" == "x86" set VCPKG_SYS_PATH=x86-windows
+  - echo "%LEVELDB%"
+  - echo "%VCPKG_PATH%/%VCPKG_SYS_PATH%/include"
+  - echo "%VCPKG_PATH%/%VCPKG_SYS_PATH%/lib"
+  - call "%LEVELDB%"
+
+  # Upgrade to the latest version of pip to avoid it displaying warnings
+  # about it being out of date.
+  - "pip install --disable-pip-version-check --user --upgrade pip"
+ 
+  # Install twine, support for 'bdist_wheel' and update setuptools.
+  - "pip install --upgrade wheel setuptools twine pytest"
+
+  - "pip install -r requirements-dev.txt"
+
+build_script:
+  - "cython --cplus --fast-fail --annotate plyvel/_plyvel.pyx"
+  - echo "%VCPKG_PATH%/%VCPKG_SYS_PATH%/include"
+  - echo "%VCPKG_PATH%/%VCPKG_SYS_PATH%/lib"
+  - "python setup.py build_ext --include-dirs=%VCPKG_PATH%/%VCPKG_SYS_PATH%/include --library-dirs=%VCPKG_PATH%/%VCPKG_SYS_PATH%/lib --libraries=shlwapi"
+  - "python setup.py install"
+ 
+test_script:
+  # Build the compiled extension and run the project tests
+  - "python setup.py test"
+  - "pytest"
+ 
+after_test:
+  # If tests are successful, create binary packages for the project.
+  - "python setup.py bdist_wheel"
+ 
+artifacts:
+  # Archive the generated packages in the ci.appveyor.com build report.
+  - path: dist\*.whl
+ 
+on_success:
+  # If this is a new release (a new tag), upload to PyPi
+  - if "%APPVEYOR_REPO_TAG%"=="true" ( twine upload dist\*.whl ) 
