@@ -28,16 +28,26 @@ RUN true \
     && make install \
     && ldconfig
 
-ENV LEVELDB_VERSION=1.20
+ENV LEVELDB_VERSION=1.21
 
 RUN true \
     && mkdir /opt/leveldb \
     && cd /opt/leveldb \
-    && curl -o leveldb.tar.gz https://codeload.github.com/google/leveldb/tar.gz/v${LEVELDB_VERSION} \
+    && curl -o leveldb.tar.gz https://codeload.github.com/google/leveldb/tar.gz/${LEVELDB_VERSION} \
     && tar xf leveldb.tar.gz \
     && cd leveldb-${LEVELDB_VERSION}/ \
-    && make -j4 \
-    && cp -av out-static/lib* out-shared/lib* /usr/local/lib/ \
+    && mkdir -p build \
+    && cd build \
+    && cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=on \
+        -DLEVELDB_BUILD_TESTS=off \
+        -DLEVELDB_BUILD_BENCHMARKS=off \
+        .. \
+    && cmake --build . \
+    && cp -av lib* /usr/local/lib/ \
+    && cd .. \
     && cp -av include/leveldb/ /usr/local/include/ \
     && ldconfig
 
