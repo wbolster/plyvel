@@ -1,14 +1,22 @@
 language: python
+
+services:
+  - docker
+
 python:
   - "3.6"
   - "3.5"
   - "3.4"
   - "2.7"
+
 before_install:
-  - ./travis.sh
+  - scripts/install-snappy.sh
+  - scripts/install-leveldb.sh
+
 install:
   - pip install -r requirements-dev.txt
   - make cython
   - pip install .
+
 script:
   - make test

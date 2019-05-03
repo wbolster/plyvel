@@ -1,66 +1,27 @@
-# Dockerfile for building manylinux1 wheels.
-
 FROM quay.io/pypa/manylinux1_x86_64
 
-ENV LC_ALL=en_US.UTF-8
+# Use CMake < 3.14.x b/c https://gitlab.kitware.com/cmake/cmake/issues/19086
+ENV CMAKE_VERSION=3.13.4
 
 RUN true \
     && mkdir /opt/cmake \
     && cd /opt/cmake \
-    && curl -o cmake.tar.gz https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz \
-    && tar xf cmake.tar.gz \
-    && cd cmake-3.11.4 \
-    && ./bootstrap \
+    && curl -sL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz | tar xzf - \
+    && cd ./cmake-* \
+    && ./bootstrap --parallel=4 \
     && make -j4 \
-    && make install \
-    && ldconfig
+    && make install
 
-ENV SNAPPY_VERSION=1.1.7
+# Remove sudo executable, since it does not work at all.
+# The installation scripts will not to invoke it.
+RUN rm "$(which sudo)"
 
-RUN true \
-    && mkdir /opt/snappy \
-    && cd /opt/snappy \
-    && curl -o snappy.tar.gz https://codeload.github.com/google/snappy/tar.gz/${SNAPPY_VERSION} \
-    && tar xf snappy.tar.gz \
-    && cd snappy-${SNAPPY_VERSION}/ \
-    && cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=on . \
-    && make -j4 \
-    && make install \
-    && ldconfig
+COPY scripts/install-snappy.sh .
+RUN ./install-snappy.sh
 
-ENV LEVELDB_VERSION=1.21
-
-RUN true \
-    && mkdir /opt/leveldb \
-    && cd /opt/leveldb \
-    && curl -o leveldb.tar.gz https://codeload.github.com/google/leveldb/tar.gz/${LEVELDB_VERSION} \
-    && tar xf leveldb.tar.gz \
-    && cd leveldb-${LEVELDB_VERSION}/ \
-    && mkdir -p build \
-    && cd build \
-    && cmake \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DBUILD_SHARED_LIBS=ON \
-        -DCMAKE_POSITION_INDEPENDENT_CODE=on \
-        -DLEVELDB_BUILD_TESTS=off \
-        -DLEVELDB_BUILD_BENCHMARKS=off \
-        .. \
-    && cmake --build . \
-    && cp -av lib* /usr/local/lib/ \
-    && cd .. \
-    && cp -av include/leveldb/ /usr/local/include/ \
-    && ldconfig
+COPY scripts/install-leveldb.sh .
+RUN ./install-leveldb.sh
 
 ENV PATH="/opt/python/cp37-cp37m/bin:${PATH}"
 
-RUN pip install --upgrade pip setuptools tox cython
-
-ENV PROJECT_ROOT="/opt/plyvel"
-
-COPY . $PROJECT_ROOT
-
-WORKDIR $PROJECT_ROOT
-
-CMD true \
-    && git clean -xfd \
-    && make sdist wheels
+RUN pip install --upgrade pip setuptools cython

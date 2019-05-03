@@ -1,4 +1,4 @@
-.PHONY: all cython ext doc clean test wheels
+.PHONY: all cython ext doc clean test docker-build-env release
 
 all: cython ext
 
@@ -25,23 +25,14 @@ clean:
 	find . -name __pycache__ -delete
 
 test: ext
-	py.test
+	pytest
 
-wheels: cython
-	# Note: this should run inside the docker container.
-	for dir in /opt/python/*; do \
-		$${dir}/bin/python setup.py build --force; \
-		$${dir}/bin/python setup.py bdist_wheel; \
-	done
-	for wheel in dist/*.whl; do \
-		auditwheel show $${wheel}; \
-		auditwheel repair -w /dist/ $${wheel}; \
-	done
-
-sdist: cython
-	# Note: this should run inside the docker container.
-	python setup.py sdist --dist-dir /dist
-
-release:
+docker-build-env:
 	docker build -t plyvel-build .
-	docker run -i -t -v $(pwd)/dist/:/dist plyvel-build
+
+release: docker-build-env
+	CIBW_BUILD='*-manylinux1_x86_64' \
+	CIBW_MANYLINUX1_X86_64_IMAGE=plyvel-build \
+	CIBW_BEFORE_BUILD=scripts/cibuildwheel-before-build.sh \
+	CIBW_PLATFORM=linux \
+	cibuildwheel --platform linux
