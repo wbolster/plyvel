@@ -35,4 +35,4 @@ release: docker-build-env
 	CIBW_MANYLINUX1_X86_64_IMAGE=plyvel-build \
 	CIBW_BEFORE_BUILD=scripts/cibuildwheel-before-build.sh \
 	CIBW_PLATFORM=linux \
-	cibuildwheel --platform linux
+	cibuildwheel --output-dir dist
