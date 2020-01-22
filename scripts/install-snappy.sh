@@ -4,7 +4,7 @@ set -eux
 
 SUDO=$(command -v sudo || true)
 
-SNAPPY_VERSION=1.1.7
+SNAPPY_VERSION=1.1.8
 
 mkdir /opt/snappy
 cd /opt/snappy
