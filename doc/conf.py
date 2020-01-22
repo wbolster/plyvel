@@ -20,7 +20,7 @@ copyright = u'2012‒{}, Wouter Bolsterlee'.format(
 version = __version__
 release = __version__
 
-autodoc_default_flags = ['members', 'undoc-members']
+autodoc_default_options = {"members": True, "undoc-members": True}
 autodoc_member_order = 'bysource'
 
 html_domain_indices = False
