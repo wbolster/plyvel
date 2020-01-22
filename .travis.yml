@@ -2,6 +2,10 @@ dist: xenial
 
 language: python
 
+branches:
+  only:
+  - master
+
 services:
   - docker
 
