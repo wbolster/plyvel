@@ -2,6 +2,24 @@
 Version history
 ===============
 
+Plyvel 1.2.0
+============
+
+Release date: 2020-01-22
+
+* Add Python 3.8 support
+  (`pr #109 <https://github.com/wbolster/plyvel/pull/109>`_)
+
+* Drop Python 3.4 support
+  (`pr #109 <https://github.com/wbolster/plyvel/pull/109>`_)
+
+* Build Linux wheels against Snappy 1.1.8, LevelDB 1.22, and produce Python 3.8 wheels
+  (`issue #108 <https://github.com/wbolster/plyvel/issues/108>`_,
+  `pr #111 <https://github.com/wbolster/plyvel/pull/111>`_, )
+
+* Improve compilation flags for Darwin (OSX) builds
+  (`pr #107 <https://github.com/wbolster/plyvel/pull/107>`_)
+
 Plyvel 1.1.0
 ============
 
