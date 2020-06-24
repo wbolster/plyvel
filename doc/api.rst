@@ -59,7 +59,7 @@ LevelDB database.
       :param int bloom_filter_bits: the number of bits to use for a bloom
                                     filter; the default of 0 means that no bloom
                                     filter will be used
-      :param callable comparator: a custom comparator callable that takes to
+      :param callable comparator: a custom comparator callable that takes two
                                   byte strings and returns an integer
       :param bytes comparator_name: name for the custom comparator
 
