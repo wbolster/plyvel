@@ -11,3 +11,4 @@ dist/
 plyvel/_plyvel.cpp
 plyvel/_plyvel.html
 plyvel/_plyvel*.so
+.idea/*
