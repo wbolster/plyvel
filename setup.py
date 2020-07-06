@@ -29,13 +29,14 @@ ext_modules = [
 ]
 
 setup(
-    name='plyvel',
+    name='plyvel-win32',
     description="Plyvel, a fast and feature-rich Python interface to LevelDB",
     long_description=get_file_contents('README.rst'),
-    url="https://github.com/wbolster/plyvel",
+    url="https://github.com/AustEcon/plyvel-win32",
+    download_url = f'https://github.com/AustEcon/plyvel-win32/archive/{__version__}.tar.gz',
     version=__version__,  # noqa: F821
-    author="Wouter Bolsterlee",
-    author_email="wouter@bolsterl.ee",
+    author="AustEcon",
+    author_email="austecon0922@gmail.com",
     ext_modules=ext_modules,
     packages=['plyvel'],
     license="BSD License",
@@ -49,8 +50,9 @@ setup(
         "Programming Language :: C++",
         "Programming Language :: Cython",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Database",
         "Topic :: Database :: Database Engines/Servers",
         "Topic :: Software Development :: Libraries :: Python Modules",

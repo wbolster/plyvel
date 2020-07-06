@@ -16,6 +16,23 @@ the cython build and wheel creation so that you don't have to. I have no intenti
 whatsoever of doing any development work on plyvel beyond this - please continue to use
 the main repository for all other purposes.
 
+To install:
+
+.. code-block:: python
+
+    > py -3.7-32 -m pip install plyvel-win32
+    > py -3.7 -m pip install plyvel-win32
+    > py -3.8-32 -m pip install plyvel-win32
+    > py -3.8 -m pip install plyvel-win32
+
+Then use like you normally use plyvel:
+
+.. code-block:: python
+
+    import plyvel
+    db = plyvel.DB('/tmp/testdb/', create_if_missing=True)
+
+
 Plyvel
 ------
 **Plyvel** is a fast and feature-rich Python interface to LevelDB_.
