@@ -37,7 +37,7 @@ libleveldb1v5 libleveldb-dev`` should suffice.
 
 For Linux, Plyvel also ships as pre-built binary packages
 (``manylinux1`` wheels) that have LevelDB embedded. Simply running
-``pip install plyvel`` doess the right thing with a modern ``pip`` on
+``pip install plyvel`` does the right thing with a modern ``pip`` on
 a modern Linux platform, even without any LevelDB libraries on your
 system.
 
