@@ -98,19 +98,6 @@ their behaviour, e.g. for synchronous writes or reads that will not fill the
 cache.
 
 
-Important note about byte strings
-=================================
-
-LevelDB stores all data as uninterpreted *byte strings*. Plyvel works the same
-way, and uses Python byte strings for all keys and values stored in and
-retrieved from LevelDB databases. In Python 2, this is the `str` type; in Python
-3, this is the `bytes` type. Since the default string type for string literals
-differs between Python 2 and 3, it is strongly recommended to use an explicit
-``b`` prefix for all byte string literals in both Python 2 and Python 3 code,
-e.g. ``b'this is a byte string'``. This avoids ambiguity and ensures that your
-code keeps working as intended if you switch between Python 2 and Python 3.
-
-
 Write batches
 =============
 
