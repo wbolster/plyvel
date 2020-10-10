@@ -2,6 +2,17 @@
 Version history
 ===============
 
+Plyvel 1.3.0
+============
+
+Release date: TBD
+
+* Add Python 3.9 support
+
+* Drop Python 3.5 support
+
+* Completely drop Python 2 support
+
 Plyvel 1.2.0
 ============
 
