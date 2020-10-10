@@ -22,6 +22,6 @@ RUN ./install-snappy.sh
 COPY scripts/install-leveldb.sh .
 RUN ./install-leveldb.sh
 
-ENV PATH="/opt/python/cp37-cp37m/bin:${PATH}"
+ENV PATH="/opt/python/cp39-cp39/bin:${PATH}"
 
 RUN pip install --upgrade pip setuptools cython
