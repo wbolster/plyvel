@@ -5,7 +5,7 @@ Version history
 Plyvel 1.3.0
 ============
 
-Release date: TBD
+Release date: 2020-10-10
 
 * Use manylinux2010 instead of manylinux1 to build wheels
   (`pr #103 <https://github.com/wbolster/plyvel/pull/103>`_)
