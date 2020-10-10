@@ -34,10 +34,6 @@ Plyvel's key features are:
   Plyvel comes with extensive documentation, including a user guide and API
   reference material.
 
-* **Python 2 and Python 3 compatibility**
-
-  Plyvel works with both Python 2 and Python 3, without any API differences.
-
 
 .. note Do you like Plyvel?
 
