@@ -16,10 +16,6 @@ import pytest
 
 import plyvel
 
-if sys.version_info < (3, 0):
-    from future_builtins import zip
-    range = xrange  # noqa: F821 (python 2 only)
-
 
 #
 # Fixtures
@@ -104,8 +100,7 @@ def test_invalid_open(db_dir):
         plyvel.DB(db_dir, compression='invalid', create_if_missing=True)
 
 
-# XXX: letter casing of encoding names differs between Python 2 and 3
-@pytest.mark.skipif(sys.getfilesystemencoding().lower() != 'utf-8',
+@pytest.mark.skipif(sys.getfilesystemencoding() != 'utf-8',
                     reason="requires UTF-8 file system encoding")
 def test_open_unicode_name(db_dir):
     db_dir = os.path.join(db_dir, 'úñîçøđê_name')
