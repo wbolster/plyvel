@@ -1,14 +1,13 @@
-FROM quay.io/pypa/manylinux1_x86_64
+FROM quay.io/pypa/manylinux2010_x86_64
 
-# Use CMake < 3.14.x b/c https://gitlab.kitware.com/cmake/cmake/issues/19086
-ENV CMAKE_VERSION=3.13.4
+ENV CMAKE_VERSION=3.18.4
 
 RUN true \
     && mkdir /opt/cmake \
     && cd /opt/cmake \
     && curl -sL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz | tar xzf - \
     && cd ./cmake-* \
-    && ./bootstrap --parallel=4 \
+    && ./bootstrap --parallel=4 -- -DCMAKE_USE_OPENSSL=OFF \
     && make -j4 \
     && make install
 
