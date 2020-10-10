@@ -1,4 +1,4 @@
-# cython: embedsignature=True
+# cython: embedsignature=True, language_level=3
 
 #
 # Note about API documentation:
