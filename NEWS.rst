@@ -7,6 +7,9 @@ Plyvel 1.3.0
 
 Release date: TBD
 
+* Use manylinux2010 instead of manylinux1 to build wheels
+  (`pr #103 <https://github.com/wbolster/plyvel/pull/103>`_)
+
 * Add Python 3.9 support
 
 * Drop Python 3.5 support
