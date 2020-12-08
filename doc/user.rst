@@ -107,7 +107,7 @@ batches are perfect for bulk loading data. Let's write some data::
 
     >>> wb = db.write_batch()
     >>> for i in xrange(100000):
-            wb.put(bytes(i), bytes(i) * 100)
+            wb.put(str(i).encode(), str(i).encode() * 100)
     ...
     >>> wb.write()
 
@@ -123,7 +123,7 @@ anymore:
 
     >>> with db.write_batch() as wb:
     ...     for i in xrange(100000):
-    ...         wb.put(bytes(i), bytes(i) * 100)
+    ...         wb.put(str(i).encode(), str(i).encode() * 100)
 
 If the ``with`` block raises an exception, pending modifications in the write
 batch will still be written to the database. This means each modification using
