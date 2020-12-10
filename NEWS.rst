@@ -2,6 +2,11 @@
 Version history
 ===============
 
+Plyvel 1.4.0
+============
+
+Release date: TBD
+
 Plyvel 1.3.0
 ============
 
