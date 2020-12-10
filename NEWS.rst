@@ -7,6 +7,12 @@ Plyvel 1.4.0
 
 Release date: TBD
 
+* The minimum LevelDB version is now 1.21
+
+* Add support for :py:meth:`WriteBatch.append()`
+
+* Add support for :py:meth:`WriteBatch.approximate_size()`
+
 Plyvel 1.3.0
 ============
 

@@ -407,6 +407,15 @@ Write batch
       a context manager (in a ``with`` block), this method will be invoked
       automatically.
 
+   .. py:method:: append(source)
+
+      Copy the operations in `source` (another
+      :py:class:`WriteBatch` instance) to this batch.
+
+   .. py:method:: approximate_size()
+
+      Return the size of the database changes caused by this batch.
+
 
 Snapshot
 ========

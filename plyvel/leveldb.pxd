@@ -110,7 +110,9 @@ cdef extern from "leveldb/write_batch.h" namespace "leveldb":
         void Put(Slice& key, Slice& value) nogil
         void Delete(Slice& key) nogil
         void Clear() nogil
-        # Status Iterate(Handler* handler) const
+        size_t ApproximateSize() nogil
+        void Append(WriteBatch& source) nogil
+        # Status Iterate(Handler* handler)
 
 
 cdef extern from "leveldb/iterator.h" namespace "leveldb":
