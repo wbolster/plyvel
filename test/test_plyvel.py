@@ -293,6 +293,30 @@ def test_write_batch_bytes_like(db):
     assert db.get(b'b') == b'bar'
 
 
+def test_write_batch_append(db):
+    wb = db.write_batch()
+    wb.put(b'a', b'aa')
+
+    other_wb = db.write_batch()
+    other_wb.put(b'b', b'bb')
+
+    wb.append(other_wb)
+    wb.write()
+
+    assert db.get(b'a') == b'aa'
+    assert db.get(b'b') == b'bb'
+
+
+def test_write_batch_approximate_size(db):
+    wb = db.write_batch()
+    initial_size = wb.approximate_size()
+    wb.put(b'a', b'aa')
+    wb.put(b'b', b'bb')
+    wb.delete(b'b')
+    final_size = wb.approximate_size()
+    assert initial_size < final_size
+
+
 def test_iteration(db):
     entries = []
     for i in range(100):

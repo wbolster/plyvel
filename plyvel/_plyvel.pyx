@@ -616,6 +616,18 @@ cdef class WriteBatch:
             st = self.db._db.Write(self.write_options, self._write_batch)
         raise_for_status(st)
 
+    def approximate_size(self):
+        if self.db._db is NULL:
+            raise RuntimeError("Database is closed")
+
+        return self._write_batch.ApproximateSize()
+
+    def append(self, WriteBatch source not None):
+        if self.db._db is NULL:
+            raise RuntimeError("Database is closed")
+
+        self._write_batch.Append(source._write_batch[0])
+
     def __enter__(self):
         if self.db._db is NULL:
             raise RuntimeError("Database is closed")
