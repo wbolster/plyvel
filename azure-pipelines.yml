@@ -1,0 +1,52 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - releases/*
+    - features/*
+  paths:
+    exclude: [ 'README.md' ]
+
+
+jobs:
+- job: BuildLinux
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: 3.9
+
+    - script: |
+        chmod +x ./scripts/install-snappy.sh
+        chmod +x ./scripts/install-leveldb.sh
+        chmod +x ./scripts/cibuildwheel-before-build.sh
+        ./scripts/install-snappy.sh
+        ./scripts/install-leveldb.sh
+      displayName: Install snappy and leveldb
+      continueOnError: true
+
+    - script: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+        make cython
+        pip install .
+      displayName: Pip install plyvel from source
+      continueOnError: true
+
+    - script: |
+        make test
+      displayName: Test
+      continueOnError: true
+
+    - script: |
+        pip install cibuildwheel
+        make release
+      displayName: Build plyvel wheel
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        artifactName: 'Linux'
+        pathtoPublish: 'dist'
+      displayName: Build wheel linux
