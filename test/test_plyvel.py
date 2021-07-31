@@ -56,9 +56,17 @@ def test_version():
 
 def test_open_read_only_dir(db_dir):
     # Opening a DB in a read-only dir should not work
-    os.chmod(db_dir, stat.S_IRUSR | stat.S_IXUSR)
-    with pytest.raises(plyvel.IOError):
-        plyvel.DB(db_dir)
+    try:
+        os.chmod(db_dir, stat.S_IRUSR | stat.S_IXUSR)
+        if sys.platform == "win32":
+            raise pytest.xfail("plyvel._plyvel.Error: b'Invalid argument: "
+                               "...\\AppData\\Local\\Temp\\tmpql45r6ad: does not exist")
+        else:
+            with pytest.raises(plyvel.IOError):
+                plyvel.DB(db_dir)
+    finally:
+        # (Needed for Windows) Make dir writeable again so cleanup can occur for this test
+        os.chmod(db_dir, stat.S_IWUSR | stat.S_IRUSR | stat.S_IXUSR)
 
 
 def test_open_no_create(db_dir):
