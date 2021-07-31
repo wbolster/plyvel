@@ -29,11 +29,11 @@ ext_modules = [
 ]
 
 setup(
-    name='plyvel-win32',
+    name='plyvel-wheels',
     description="Plyvel, a fast and feature-rich Python interface to LevelDB",
     long_description=get_file_contents('README.rst'),
-    url="https://github.com/AustEcon/plyvel-win32",
-    download_url = f'https://github.com/AustEcon/plyvel-win32/archive/{__version__}.tar.gz',
+    url="https://github.com/AustEcon/plyvel-wheels",
+    download_url=f'https://github.com/AustEcon/plyvel-wheels/archive/{__version__}.tar.gz',
     version=__version__,  # noqa: F821
     author="AustEcon",
     author_email="austecon0922@gmail.com",

@@ -1,6 +1,6 @@
-============
-Plyvel-win32
-============
+=============
+Plyvel-wheels
+=============
 
 .. image:: https://travis-ci.org/wbolster/plyvel.svg?branch=master
     :target: https://travis-ci.org/wbolster/plyvel
@@ -8,22 +8,20 @@ Plyvel-win32
 Why does this fork exist?
 --------------------------
 
-The sole reason for this fork existing is to provide win32 python wheels for
-ease of installation.
+The sole reason for this fork existing is to provide cross platform wheels for
+ease of installation - Namely on Mac and Windows which do not currently have bundled leveldb
+libraries. (This repo was previously named plyvel-win32 as it was only for windows)
 
-In other words, I am compiling the C++ leveldb -> x86 and x86-64 binaries + doing
+In other words, I am compiling the C++ leveldb -> x86-64 binaries + doing
 the cython build and wheel creation so that you don't have to. I have no intention
-whatsoever of doing any development work on plyvel beyond this - please continue to use
+of doing any development work on plyvel beyond this - please continue to use
 the main repository for all other purposes.
 
 To install:
 
 .. code-block:: python
 
-    > py -3.7-32 -m pip install plyvel-win32
-    > py -3.7 -m pip install plyvel-win32
-    > py -3.8-32 -m pip install plyvel-win32
-    > py -3.8 -m pip install plyvel-win32
+    > py -3.9 -m pip install plyvel-wheels
 
 Then use like you normally use plyvel:
 
@@ -31,6 +29,15 @@ Then use like you normally use plyvel:
 
     import plyvel
     db = plyvel.DB('/tmp/testdb/', create_if_missing=True)
+
+Note:
+-----
+There is a single failing test for windows:
+
+- `test_open_read_only_dir`
+
+Where there is a discrepancy in the type of error message that is thrown when trying to access a
+db in a read-only directory. I am unsure if this is of any significance in practice.
 
 
 Plyvel
