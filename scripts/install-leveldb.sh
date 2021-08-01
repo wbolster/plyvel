@@ -2,8 +2,11 @@
 
 set -ex
 
+LEVELDB_VERSION=1.23
+
 SUDO=$(command -v sudo || true)
 
+# Check env
 if [[ "$(uname)" == "Darwin" ]]; then
     ARCHS="x86_64"
     case "${CIBW_ARCHS_MACOS:-auto}" in
@@ -37,12 +40,15 @@ if [[ "$(uname)" == "Darwin" ]]; then
     export LIBRARY_PATH=/usr/local/lib # where find snappy library
 fi
 
-LEVELDB_VERSION=1.23
 
+# Prepare leveldb source code
 mkdir -p ~/opt/leveldb
 cd ~/opt/leveldb
 curl -sL leveldb.tar.gz https://codeload.github.com/google/leveldb/tar.gz/${LEVELDB_VERSION} | tar xzf -
 cd leveldb-*
+
+
+# Compile leveldb
 
 # `CMAKE_INSTALL_NAME_DIR` and `CMAKE_SKIP_INSTALL_RPATH` only have effect for MacOS
 if [[ "$(uname)" == "Darwin" ]]; then
@@ -66,6 +72,7 @@ if [[ "$(uname)" == "Linux" ]]; then
     which ldconfig && ldconfig || true
 fi
 
+# Check leveldb shared lib in macOS
 if [[ "$(uname)" == "Darwin" ]]; then
     otool -L $INSTALL_NAME_DIR/libleveldb.dylib
     file $INSTALL_NAME_DIR/libleveldb.dylib

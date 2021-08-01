@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-
 set -ex
+
+SNAPPY_VERSION=1.1.9
 
 SUDO=$(command -v sudo || true)
 SCRIPT="$( cd "$( dirname $0 )" && pwd )"
 PATCH_FILE=$SCRIPT/inline.patch # for snappy 1.1.9
 echo $PATCH_FILE
 
+# Check env
 if [[ "$(uname)" == "Darwin" ]]; then
     ARCHS="x86_64"
     case "${CIBW_ARCHS_MACOS:-auto}" in
@@ -34,18 +36,18 @@ if [[ "$(uname)" == "Darwin" ]]; then
     done
 fi
 
-SNAPPY_VERSION=1.1.9
-
+# Prepare snappy source code
 mkdir -p ~/opt/snappy
 cd ~/opt/snappy
 curl -sL https://codeload.github.com/google/snappy/tar.gz/${SNAPPY_VERSION} | tar xzf -
 cd ./snappy-*
 
-# Patch inline
+# Patch snappy `inline`
 cp $PATCH_FILE .
 echo $PWD
 patch < inline.patch
 
+# Compile snappy
 
 # `CMAKE_INSTALL_NAME_DIR` and `CMAKE_SKIP_INSTALL_RPATH` only have effect for MacOS
 # [CMAKE_SKIP_RPATH/CMAKE_SKIP_INSTALL_RPATH and INSTALL_NAME_DIR precedence on macOS](https://gitlab.kitware.com/cmake/cmake/-/issues/16589)
@@ -73,6 +75,7 @@ if [[ "$(uname)" == "Linux" ]]; then
     which ldconfig && ldconfig || true
 fi
 
+# Check snappy shared lib in macOS
 if [[ "$(uname)" == "Darwin" ]]; then
     otool -L $INSTALL_NAME_DIR/libsnappy.dylib
     file $INSTALL_NAME_DIR/libsnappy.dylib
