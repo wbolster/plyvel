@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -ex
 
 SNAPPY_VERSION=1.1.10
@@ -8,6 +7,7 @@ SCRIPT="$( cd "$( dirname $0 )" && pwd )"
 PATCH_FILE=$SCRIPT/1.1.9-0001-fix-inlining-failure.patch # for snappy 1.1.9
 echo $PATCH_FILE
 
+# Check env
 if [[ "$(uname)" == "Darwin" ]]; then
     ARCHS="x86_64"
     case "${CIBW_ARCHS_MACOS:-auto}" in
@@ -70,6 +70,7 @@ cmake --build . --target install
 echo $PWD
 patch < $PATCH_FILE
 
+# Compile snappy
 
 # `CMAKE_INSTALL_NAME_DIR` and `CMAKE_SKIP_INSTALL_RPATH` only have effect for MacOS
 # [CMAKE_SKIP_RPATH/CMAKE_SKIP_INSTALL_RPATH and INSTALL_NAME_DIR precedence on macOS](https://gitlab.kitware.com/cmake/cmake/-/issues/16589)
