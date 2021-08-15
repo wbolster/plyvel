@@ -85,7 +85,7 @@ LevelDB database.
 
          Closing a database while other threads are busy accessing the same
          database may result in hard crashes, since database operations do not
-         perform any synchronization/locking on the database object (for
+         perform any synchronisation/locking on the database object (for
          performance reasons) and simply assume it is available (and open).
          Applications should make sure not to close databases that are
          concurrently used from other threads.
