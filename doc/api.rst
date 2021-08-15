@@ -27,7 +27,7 @@ LevelDB database.
 
       Open the underlying database handle.
 
-      Most arguments have the same name as the the corresponding LevelDB
+      Most arguments have the same name as the corresponding LevelDB
       parameters; see the LevelDB documentation for a detailed description.
       Arguments defaulting to `None` are only propagated to LevelDB if
       specified, e.g. not specifying a `write_buffer_size` means the LevelDB
@@ -85,7 +85,7 @@ LevelDB database.
 
          Closing a database while other threads are busy accessing the same
          database may result in hard crashes, since database operations do not
-         perform any synchronisation/locking on the database object (for
+         perform any synchronization/locking on the database object (for
          performance reasons) and simply assume it is available (and open).
          Applications should make sure not to close databases that are
          concurrently used from other threads.
