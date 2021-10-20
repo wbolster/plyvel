@@ -4,10 +4,9 @@ FROM quay.io/pypa/manylinux2010_x86_64
 # The installation scripts will not to invoke it.
 RUN rm "$(which sudo)"
 
-COPY scripts/install-snappy.sh .
-RUN ./install-snappy.sh
+COPY scripts/ .
 
-COPY scripts/install-leveldb.sh .
+RUN ./install-snappy.sh
 RUN ./install-leveldb.sh
 
 ENV PATH="/opt/python/cp39-cp39/bin:${PATH}"
