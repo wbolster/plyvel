@@ -78,7 +78,7 @@ If you see an ``ImportError`` complaining about undefined symbols, e.g.
 …then the installer (actually, the linker) was unable to find the LevelDB
 library on your system when building Plyvel. Install LevelDB or set the proper
 environment variables for the compiler and linker and try ``pip install
---reinstall plyvel``.
+--upgrade --force-reinstall plyvel``.
 
 
 .. rubric:: Next steps

@@ -33,7 +33,7 @@ That's all there is to it. At this point ``/tmp/testdb/`` contains a fresh
 LevelDB database (assuming the directory did not contain a LevelDB database
 already).
 
-For real world applications, you probably want to tweak things like the size of
+For real-world applications, you probably want to tweak things like the size of
 the memory cache and the number of bits to use for the (optional) bloom filter.
 These settings, and many others, can be specified as arguments to the
 :py:class:`DB` constructor. For this tutorial we'll just use the LevelDB
