@@ -223,7 +223,7 @@ cdef class DB:
     cdef Options options
     cdef readonly object name
     cdef object lock
-    cdef dict iterators
+    cdef set iterator_weakrefs
 
     def __init__(self, name, *, bool create_if_missing=False,
                  bool error_if_exists=False, paranoid_checks=None,
@@ -252,17 +252,17 @@ cdef class DB:
         # leveldb/db.h). We don't use weakref.WeakValueDictionary here
         # for performance reasons.
         self.lock = threading.Lock()
-        self.iterators = dict()
+        self.iterator_weakrefs = set()
 
     cpdef close(self):
         # If the constructor raised an exception (and hence never
-        # completed), self.iterators can be None. In that case no
-        # iterators need to be cleaned anyway.
+        # completed), self.iterator_weakrefs can be None. In that
+        # case no iterators need to be cleaned anyway.
         cdef BaseIterator iterator
-        if self.iterators is not None:
+        if self.iterator_weakrefs is not None:
             with self.lock:
-                while self.iterators:
-                    iterator = self.iterators.popitem()[1]()
+                while self.iterator_weakrefs:
+                    iterator = self.iterator_weakrefs.pop()()
                     if iterator is not None:
                         iterator.close()
 
@@ -688,11 +688,7 @@ cdef class BaseIterator:
             self._iter = db._db.NewIterator(read_options)
 
         # Store a weak reference on the db (needed when closing db)
-        iterator_id = id(self)
-        ref_dict = db.iterators
-        ref_dict[iterator_id] = weakref_ref(
-            self,
-            lambda wr: ref_dict.pop(iterator_id))
+        db.iterator_weakrefs.add(weakref_ref(self, db.iterator_weakrefs.discard))
 
     cpdef close(self):
         if self._iter is not NULL:
