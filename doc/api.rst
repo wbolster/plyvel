@@ -56,7 +56,7 @@ LevelDB database.
                                          encoding of keys
       :param bool max_file_size: maximum file size (in bytes)
       :param bool compression: whether to use Snappy compression (enabled by default))
-      :param int bloom_filter_bits: the number of bits to use for a bloom
+      :param int bloom_filter_bits: the number of bits to use per key for a bloom
                                     filter; the default of 0 means that no bloom
                                     filter will be used
       :param callable comparator: a custom comparator callable that takes two
