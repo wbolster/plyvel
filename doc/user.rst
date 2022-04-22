@@ -15,7 +15,7 @@ This user guide gives an overview of Plyvel. It covers:
 Note: this document assumes basic familiarity with LevelDB; visit the `LevelDB
 homepage`_ for more information about its features and design.
 
-.. _`LevelDB homepage`: http://code.google.com/p/leveldb/
+.. _`LevelDB homepage`: https://github.com/google/leveldb
 
 
 Getting started

@@ -17,7 +17,7 @@ See the documentation and project page for more information:
 .. _Project page: https://github.com/wbolster/plyvel
 .. _Documentation: https://plyvel.readthedocs.io/
 .. _PyPI page: http://pypi.python.org/pypi/plyvel/
-.. _LevelDB: http://code.google.com/p/leveldb/
+.. _LevelDB: https://github.com/google/leveldb
 
 Note that using a released version is recommended over a checkout from version
 control. See the installation docs for more information.
