@@ -168,7 +168,7 @@ LevelDB database.
       * `include_start` and `include_stop` are only used if `start` and `stop`
         are specified.
 
-      Note: due to the whay the `prefix` support is implemented, this feature
+      Note: due to the way the `prefix` support is implemented, this feature
       only works reliably when the default DB comparator is used.
 
       See the :py:class:`Iterator` API for more information about iterators.
