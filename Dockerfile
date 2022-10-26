@@ -1,4 +1,4 @@
-FROM quay.io/pypa/manylinux2010_x86_64
+FROM quay.io/pypa/manylinux2014_x86_64
 
 # Remove sudo executable, since it does not work at all.
 # The installation scripts will not to invoke it.
