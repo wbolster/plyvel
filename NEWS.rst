@@ -2,6 +2,16 @@
 Version history
 ===============
 
+Plyvel 1.5.0
+============
+
+Release date: 2022-10-26
+
+* Rebuild Linux wheels, with ``manylinux_2_17`` and ``manylinux2014``
+  compatibility (``x86_64`` only). Also produce Python 3.11 wheels.
+  Still using Snappy 1.1.9 and LevelDB 1.22.
+  (`issue #148 <https://github.com/wbolster/plyvel/issues/148>`_)
+
 Plyvel 1.4.0
 ============
 
