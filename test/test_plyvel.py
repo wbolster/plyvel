@@ -1164,3 +1164,13 @@ def test_try_changing_DB_name_attr(db_dir):
     db = plyvel.DB(db_dir, create_if_missing=True)
     with pytest.raises(AttributeError):
         db.name = 'a'
+
+
+def test_context_manager(db_dir):
+    key = b'the-key'
+    value = b'the-value'
+    with plyvel.DB(db_dir, create_if_missing=True) as db:
+        db.put(key, value)
+        assert db.get(key) == value
+
+    assert db.closed
