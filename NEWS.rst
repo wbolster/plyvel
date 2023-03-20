@@ -2,16 +2,33 @@
 Version history
 ===============
 
+Plyvel 1.5.0
+============
+
+Release date: 2022-10-26
+
+* Rebuild Linux wheels, with ``manylinux_2_17`` and ``manylinux2014``
+  compatibility (``x86_64`` only). Also produce Python 3.11 wheels.
+  Still using Snappy 1.1.9 and LevelDB 1.22.
+  (`issue #148 <https://github.com/wbolster/plyvel/issues/148>`_)
+
 Plyvel 1.4.0
 ============
 
-Release date: TBD
+Release date: 2021-12-29
+
+* Build Linux wheels against Snappy 1.1.9, LevelDB 1.22, and produce
+  Python 3.10 wheels
+  (`issue #138 <https://github.com/wbolster/plyvel/issues/138>`_)
 
 * The minimum LevelDB version is now 1.21
+  (`pr #121 <https://github.com/wbolster/plyvel/pull/121>`_)
 
 * Add support for :py:meth:`WriteBatch.append()`
+  (`pr #121 <https://github.com/wbolster/plyvel/pull/121>`_)
 
 * Add support for :py:meth:`WriteBatch.approximate_size()`
+  (`pr #121 <https://github.com/wbolster/plyvel/pull/121>`_)
 
 Plyvel 1.3.0
 ============

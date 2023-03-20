@@ -32,7 +32,7 @@ docker-build-env:
 
 release: docker-build-env
 	CIBW_BUILD='cp3*-manylinux_x86_64' \
-	CIBW_SKIP='cp35-manylinux_x86_64' \
+	CIBW_SKIP='cp36-manylinux_x86_64' \
 	CIBW_MANYLINUX_X86_64_IMAGE=plyvel-build \
 	CIBW_BEFORE_BUILD=scripts/cibuildwheel-before-build.sh \
 	CIBW_PLATFORM=linux \

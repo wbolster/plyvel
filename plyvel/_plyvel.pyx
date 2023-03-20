@@ -449,6 +449,12 @@ cdef class DB:
     def prefixed_db(self, bytes prefix not None):
         return PrefixedDB(db=self, prefix=prefix)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
 
 cdef class PrefixedDB:
     cdef readonly DB db

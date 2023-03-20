@@ -4,7 +4,7 @@ Plyvel
 
 **Plyvel** is a fast and feature-rich Python interface to LevelDB_.
 
-.. _LevelDB: http://code.google.com/p/leveldb/
+.. _LevelDB: https://github.com/google/leveldb
 
 Plyvel's key features are:
 
