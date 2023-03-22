@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-SNAPPY_VERSION=1.1.10
+SNAPPY_VERSION=1.1.9
 SUDO=$(command -v sudo || true)
 SCRIPT="$( cd "$( dirname $0 )" && pwd )"
 PATCH_FILE=$SCRIPT/1.1.9-0001-fix-inlining-failure.patch # for snappy 1.1.9
