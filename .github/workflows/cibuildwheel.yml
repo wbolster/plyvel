@@ -53,22 +53,14 @@ jobs:
               arch: "auto aarch64"
               build: "cp37* cp38* cp39*"
 
-<<<<<<< HEAD
           - os: windows-2019
-=======
-          - os: windows-latest
->>>>>>> 145904f (support windows wheel building in github CI)
             name: win32
             architecture: x86
             cibw:
               arch: x86
               build: "cp37* cp38* cp39*"
 
-<<<<<<< HEAD
           - os: windows-2019
-=======
-          - os: windows-latest
->>>>>>> 145904f (support windows wheel building in github CI)
             name: win_amd64
             architecture: x64
             cibw:
