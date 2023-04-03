@@ -29,137 +29,137 @@ jobs:
         with:
           path: ./dist/*.tar.gz
 
-  wheel:
-    name: Build ${{ matrix.os }}-${{ matrix.cibw.arch }} wheel
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            name: mac-intel
-            cibw:
-              arch: x86_64
-              build: "cp37-*"
+  # wheel:
+  #   name: Build ${{ matrix.os }}-${{ matrix.cibw.arch }} wheel
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - os: macos-latest
+  #           name: mac-intel
+  #           cibw:
+  #             arch: x86_64
+  #             build: "cp37-*"
 
-          # - os: macos-latest
-          #   name: mac-arm
-          #   cibw:
-          #     arch: universal2
-          #     build: "cp37-* cp38-* cp39-* cp310-* cp311-*"
+  #         - os: macos-latest
+  #           name: mac-arm
+  #           cibw:
+  #             arch: universal2
+  #             build: "cp37-* cp38-* cp39-* cp310-* cp311-*"
 
-          # - os: ubuntu-latest
-          #   name: manylinux
-          #   cibw:
-          #     arch: "auto aarch64"
-          #     build: "cp37-* cp38-* cp39-* cp310-* cp311-*"
+  #         - os: ubuntu-latest
+  #           name: manylinux
+  #           cibw:
+  #             arch: "auto aarch64"
+  #             build: "cp37-* cp38-* cp39-* cp310-* cp311-*"
 
-          # - os: windows-2019
-          #   name: win32
-          #   architecture: x86
-          #   cibw:
-          #     arch: x86
-          #     build: "cp37-* cp38-* cp39-* cp310-* cp311-*"
+  #         - os: windows-2019
+  #           name: win32
+  #           architecture: x86
+  #           cibw:
+  #             arch: x86
+  #             build: "cp37-* cp38-* cp39-* cp310-* cp311-*"
 
-          # - os: windows-2019
-          #   name: win_amd64
-          #   architecture: x64
-          #   cibw:
-          #     arch: AMD64
-          #     build: "cp37-* cp38-* cp39-* cp310-* cp311-*" #cp38*win_amd64 cp39*win_amd64"
-    env:
-      VCPKG_INCLUDE_PATH: "C:/vcpkg/installed/${{ matrix.architecture }}-windows/include"
-      VCPKG_LIB_PATH: "C:/vcpkg/installed/${{ matrix.architecture }}-windows/lib"
-      VCPKG_DLL_PATH: "C:/vcpkg/installed/${{ matrix.architecture }}-windows/bin"
-      CIBW_BUILD: "${{ matrix.cibw.build || '*' }}"
-      # `CPLUS_INCLUDE_PATH` and `LIBRARY_PATH` for `setup.py` to link leveldb and snappy headers and libs in macOS
-      CIBW_ENVIRONMENT_MACOS: >
-        C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
-        CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
-        LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
-      # [Path and environment variables for command-line builds](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-160), for setuptools msvc compiler in windows
-      # `PATH`: `delvewheel` searches it for the location of DLL dependencies
-      # `INCLUDE` and `LIB`: `MSVC` env variables for `setup.py` to link leveldb and snappy headers and libs in windows
-      CIBW_ENVIRONMENT_WINDOWS: >
-        INCLUDE="C:/local/include;$INCLUDE"
-        LIB="C:/local/lib;$LIB"
-        PATH="C:/local/bin;$PATH"
-      CIBW_ARCHS_LINUX: "${{ matrix.cibw.arch || 'auto' }}"
-      CIBW_ARCHS_MACOS: "${{ matrix.cibw.arch || 'auto' }}"
-      CIBW_ARCHS_WINDOWS: "${{ matrix.cibw.arch || 'auto' }}"
-      CIBW_BEFORE_ALL_LINUX: "gcc -v && bash scripts/install-snappy.sh && bash scripts/install-leveldb.sh"
-      CIBW_BEFORE_ALL_MACOS: "clang -v && bash scripts/install-snappy.sh && bash scripts/install-leveldb.sh"
-      # CIBW_BEFORE_ALL_WINDOWS: "vcpkg install leveldb:${{ matrix.architecture }}-windows"
-      # Install `delvewheel` on windows, because `cibuildwheel` doesn't yet ship a default repair command for Windows.
-      CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
-      CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair --lib-sdir . -w {dest_dir} {wheel}"
-      CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-listdeps {wheel} && delocate-wheel -w {dest_dir} {wheel} -v"
-      CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel} -v"
+  #         - os: windows-2019
+  #           name: win_amd64
+  #           architecture: x64
+  #           cibw:
+  #             arch: AMD64
+  #             build: "cp37-* cp38-* cp39-* cp310-* cp311-*" #cp38*win_amd64 cp39*win_amd64"
+  #   env:
+  #     VCPKG_INCLUDE_PATH: "C:/vcpkg/installed/${{ matrix.architecture }}-windows/include"
+  #     VCPKG_LIB_PATH: "C:/vcpkg/installed/${{ matrix.architecture }}-windows/lib"
+  #     VCPKG_DLL_PATH: "C:/vcpkg/installed/${{ matrix.architecture }}-windows/bin"
+  #     CIBW_BUILD: "${{ matrix.cibw.build || '*' }}"
+  #     # `CPLUS_INCLUDE_PATH` and `LIBRARY_PATH` for `setup.py` to link leveldb and snappy headers and libs in macOS
+  #     CIBW_ENVIRONMENT_MACOS: >
+  #       C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
+  #       CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
+  #       LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
+  #     # [Path and environment variables for command-line builds](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-160), for setuptools msvc compiler in windows
+  #     # `PATH`: `delvewheel` searches it for the location of DLL dependencies
+  #     # `INCLUDE` and `LIB`: `MSVC` env variables for `setup.py` to link leveldb and snappy headers and libs in windows
+  #     CIBW_ENVIRONMENT_WINDOWS: >
+  #       INCLUDE="C:/local/include;$INCLUDE"
+  #       LIB="C:/local/lib;$LIB"
+  #       PATH="C:/local/bin;$PATH"
+  #     CIBW_ARCHS_LINUX: "${{ matrix.cibw.arch || 'auto' }}"
+  #     CIBW_ARCHS_MACOS: "${{ matrix.cibw.arch || 'auto' }}"
+  #     CIBW_ARCHS_WINDOWS: "${{ matrix.cibw.arch || 'auto' }}"
+  #     CIBW_BEFORE_ALL_LINUX: "gcc -v && bash scripts/install-snappy.sh && bash scripts/install-leveldb.sh"
+  #     CIBW_BEFORE_ALL_MACOS: "clang -v && bash scripts/install-snappy.sh && bash scripts/install-leveldb.sh"
+  #     # CIBW_BEFORE_ALL_WINDOWS: "vcpkg install leveldb:${{ matrix.architecture }}-windows"
+  #     # Install `delvewheel` on windows, because `cibuildwheel` doesn't yet ship a default repair command for Windows.
+  #     CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
+  #     CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair --lib-sdir . -w {dest_dir} {wheel}"
+  #     CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-listdeps {wheel} && delocate-wheel -w {dest_dir} {wheel} -v"
+  #     CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel} -v"
 
-      CIBW_TEST_REQUIRES: "pytest"
-      CIBW_TEST_COMMAND: "pytest -v {package}/test"
-      # Build using the manylinux2014 image instead of manylinux2010
-      # CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-      # CIBW_MANYLINUX_I686_IMAGE: manylinux2014
-      # CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
-    steps:
-      - uses: actions/checkout@v2
+  #     CIBW_TEST_REQUIRES: "pytest"
+  #     CIBW_TEST_COMMAND: "pytest -v {package}/test"
+  #     # Build using the manylinux2014 image instead of manylinux2010
+  #     # CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+  #     # CIBW_MANYLINUX_I686_IMAGE: manylinux2014
+  #     # CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-          architecture: ${{ matrix.architecture }}
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: "3.8"
+  #         architecture: ${{ matrix.architecture }}
 
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v1
-        with:
-          platforms: all
+  #     - name: Set up QEMU
+  #       if: runner.os == 'Linux'
+  #       uses: docker/setup-qemu-action@v1
+  #       with:
+  #         platforms: all
 
-      # From 10/23/2019, GitHub Actions default shell on Windows runners is changing to `PowerShell`
-      # However, cibuildwheel still use `CMD` instead of `PowerShell`, test by using "(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell" in
-      # such `CIBW_BEFORE_ALL_WINDOWS`
-      # vcpkg install leveldb:${{ matrix.architecture }}-windows
-      - name: Install windows dependencies
-        if: runner.os == 'Windows'
-        run: |
-          echo "We are in shell:"; echo(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell
-          PowerShell scripts/install-snappy.ps1
-          PowerShell scripts/install-leveldb.ps1
-          echo "Find leveldb in:"
-          If ((test-path "C:\local\include")) { (dir "C:\local\include") }
-          If ((test-path "C:\local\lib")) { (dir "C:\local\lib") }
-          If ((test-path "C:\local\bin")) { (dir "C:\local\bin") }
+  #     # From 10/23/2019, GitHub Actions default shell on Windows runners is changing to `PowerShell`
+  #     # However, cibuildwheel still use `CMD` instead of `PowerShell`, test by using "(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell" in
+  #     # such `CIBW_BEFORE_ALL_WINDOWS`
+  #     # vcpkg install leveldb:${{ matrix.architecture }}-windows
+  #     - name: Install windows dependencies
+  #       if: runner.os == 'Windows'
+  #       run: |
+  #         echo "We are in shell:"; echo(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell
+  #         PowerShell scripts/install-snappy.ps1
+  #         PowerShell scripts/install-leveldb.ps1
+  #         echo "Find leveldb in:"
+  #         If ((test-path "C:\local\include")) { (dir "C:\local\include") }
+  #         If ((test-path "C:\local\lib")) { (dir "C:\local\lib") }
+  #         If ((test-path "C:\local\bin")) { (dir "C:\local\bin") }
 
-      - name: Install cibuildwheel
-        run: |
-          pip install -U setuptools pip wheel
-          pip install -U cibuildwheel
+  #     - name: Install cibuildwheel
+  #       run: |
+  #         pip install -U setuptools pip wheel
+  #         pip install -U cibuildwheel
 
-      - name: Build
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+  #     - name: Build
+  #       run: |
+  #         python -m cibuildwheel --output-dir wheelhouse
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         path: ./wheelhouse/*.whl
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          files: |
-            ./wheelhouse/*.whl
+  #     - name: Release
+  #       uses: softprops/action-gh-release@v1
+  #       if: startsWith(github.ref, 'refs/tags/v')
+  #       with:
+  #         files: |
+  #           ./wheelhouse/*.whl
 
   publish:
     name: Publish wheels to PyPI
-    needs: [sdist, wheel]
+    needs: [sdist]
     runs-on: ubuntu-latest
     # upload to PyPI on every tag starting with 'v'
     # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
     # alternatively, to publish when a GitHub Release is created, use the following rule:
-    if: github.event_name == 'release'
+    # if: github.event_name == 'release'
     steps:
       - uses: actions/download-artifact@v2
         with:
