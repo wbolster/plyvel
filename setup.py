@@ -31,7 +31,7 @@ ext_modules = [
 ]
 
 setup(
-    name='plyvel-CI',
+    name='plyvel-ci',
     description="Plyvel, a fast and feature-rich Python interface to LevelDB",
     long_description=get_file_contents('README.rst'),
     url="https://github.com/wbolster/plyvel",
