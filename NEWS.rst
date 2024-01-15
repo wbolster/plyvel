@@ -2,6 +2,18 @@
 Version history
 ===============
 
+Plyvel 1.5.1
+============
+
+Release date: 2024-01-15
+
+* Add Python 3.12 support
+
+* Rebuild Linux wheels, including Python 3.12 wheels.
+
+* Allow using plyvel.DB as a context manager
+  (`pr #151 <https://github.com/wbolster/plyvel/pull/151>`_)
+
 Plyvel 1.5.0
 ============
 
