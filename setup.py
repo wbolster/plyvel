@@ -14,7 +14,7 @@ def get_file_contents(filename):
         return fp.read()
 
 
-extra_compile_args = ['-Wall', '-g', '-x', 'c++', '-std=c++11']
+extra_compile_args = ['-Wall', '-g', '-x', 'c++', '-std=c++11', '-fno-rtti']
 
 if platform.system() == 'Darwin':
     extra_compile_args += ['-stdlib=libc++']

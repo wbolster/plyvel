@@ -6,6 +6,7 @@ RUN rm "$(which sudo)"
 
 COPY scripts/ .
 
+RUN yum update && yum install -y lzo-devel lz4-devel
 RUN ./install-snappy.sh
 RUN ./install-leveldb.sh
 
