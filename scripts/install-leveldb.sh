@@ -4,7 +4,7 @@ set -eux
 
 SUDO=$(command -v sudo || true)
 
-LEVELDB_VERSION=1.22
+LEVELDB_VERSION=1.23
 
 mkdir /opt/leveldb
 cd /opt/leveldb
