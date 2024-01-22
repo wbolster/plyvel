@@ -905,7 +905,7 @@ cdef class Iterator(BaseIterator):
             raise RuntimeError("Database or iterator is closed")
 
         if self.state == IN_BETWEEN:
-            pass
+            self.state = IN_BETWEEN_ALREADY_POSITIONED
         elif self.state == IN_BETWEEN_ALREADY_POSITIONED:
             assert self._iter.Valid()
             with nogil:
@@ -914,7 +914,6 @@ cdef class Iterator(BaseIterator):
                 # The .seek() resulted in the first key in the database
                 self.state = BEFORE_START
                 raise StopIteration
-            raise_for_status(self._iter.status())
         elif self.state == BEFORE_START:
             raise StopIteration
         elif self.state == AFTER_STOP:
@@ -928,8 +927,12 @@ cdef class Iterator(BaseIterator):
                     self._iter.Seek(self.stop_slice)
 
                 if self._iter.Valid():
-                    # Move one step back if stop is exclusive.
-                    if not self.include_stop:
+                    # Move one step back if stop is exclusive
+                    # or stop key does not exist.
+                    if (not self.include_stop
+                        or self.comparator.Compare(
+                            self._iter.key(), self.stop_slice) > 0
+                        ):
                         with nogil:
                             self._iter.Prev()
                 else:
@@ -938,51 +941,22 @@ cdef class Iterator(BaseIterator):
                     with nogil:
                         self._iter.SeekToLast()
 
-                # Make sure the iterator is not past the stop key
-                if self._iter.Valid() and self.comparator.Compare(self._iter.key(), self.stop_slice) > 0:
-                    with nogil:
-                        self._iter.Prev()
-
             if not self._iter.Valid():
                 # No entries left
                 raise StopIteration
 
-            # After all the stepping back, we might even have ended up
-            # *before* the start key. In this case the iterator does not
-            # yield any items.
-            if self.start is not None and self.comparator.Compare(self.start_slice, self._iter.key()) >= 0:
-                raise StopIteration
-
-            raise_for_status(self._iter.status())
-
-        # Unlike .real_next(), first obtain the value, then move the
-        # iterator pointer (not the other way around), so that
-        # repeatedly calling it.prev() and next(it) will work as
-        # designed.
-        out = self.current()
-        with nogil:
-            self._iter.Prev()
-        if not self._iter.Valid():
-            # Moved before the first key in the database
-            self.state = BEFORE_START
-        else:
-            if self.start is None:
-                # Iterator is valid
-                self.state = IN_BETWEEN
-            else:
-                # Check range boundaries
-                n = 0 if self.include_start else 1
-                if self.comparator.Compare(
-                        self._iter.key(), self.start_slice) >= n:
-                    # Iterator is valid and within range boundaries
-                    self.state = IN_BETWEEN
-                else:
-                    # Iterator is valid, but has moved before the
-                    # 'start' key
-                    self.state = BEFORE_START
+            self.state = IN_BETWEEN_ALREADY_POSITIONED
 
         raise_for_status(self._iter.status())
-        return out
+
+        # Check range boundaries
+        if self.start is not None:
+            n = 0 if self.include_start else 1
+            if self.comparator.Compare(self._iter.key(), self.start_slice) < n:
+                self.state = BEFORE_START
+                raise StopIteration
+
+        return self.current()
 
     def seek_to_start(self):
         if self._iter is NULL:
