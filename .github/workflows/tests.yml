@@ -1,4 +1,4 @@
-name: plyvel build
+name: plyvel test
 
 on:
   # Triggers the workflow on push to the main branch
