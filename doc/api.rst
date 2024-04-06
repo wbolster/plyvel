@@ -35,6 +35,11 @@ LevelDB database.
 
       Most arguments are optional; only the database name is required.
 
+      Instances of this class can be used as context managers
+      (Python's ``with`` block). When the ``with`` block terminates,
+      the database automatically closes without an explicit call to
+      :py:meth:`DB.close`.
+
       See the descriptions for :cpp:class:`DB`, :cpp:func:`DB::Open`,
       :cpp:class:`Cache`, :cpp:class:`FilterPolicy`, and :cpp:class:`Comparator`
       in the LevelDB C++ API for more information.

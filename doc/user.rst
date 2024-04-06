@@ -48,6 +48,13 @@ To close the database we just opened, use :py:meth:`DB.close` and inspect the
     >>> db.closed
     True
 
+:py:class:`DB` instances can also be used as context managers, which
+will cause the database to close itself at the end of the ``with``
+block::
+
+    with plyvel.DB('/tmp/testdb/') as db:
+        ...
+
 Alternatively, you can just delete the variable that points to it, but this
 might not close the database immediately, e.g. because active iterators are
 using it::
