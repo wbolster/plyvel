@@ -3,7 +3,7 @@ name: plyvel build
 on:
   # Triggers the workflow on push to the main branch
   push:
-    branches: [main ,CI]
+    branches: [main]
   pull_request:
     branches: [main]
   # Allows you to run this workflow manually from the Actions tab
