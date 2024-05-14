@@ -213,6 +213,10 @@ cdef int parse_options(Options *options, c_bool create_if_missing,
             comparator_name, comparator)
 
 
+def contains_is_unsupported():
+    raise TypeError("__contains__ is not supported ('in' and 'not in' operators)")
+
+
 #
 # Database
 #
@@ -348,6 +352,9 @@ cdef class DB:
             raise RuntimeError("Database is closed")
 
         return WriteBatch(self, None, transaction, sync)
+
+    def __contains__(self, key):
+        contains_is_unsupported()
 
     def __iter__(self):
         if self._db is NULL:
@@ -487,6 +494,9 @@ cdef class PrefixedDB:
 
     def write_batch(self, *, transaction=False, bool sync=False):
         return WriteBatch(self.db, self.prefix, transaction, sync)
+
+    def __contains__(self, key):
+        contains_is_unsupported()
 
     def __iter__(self):
         return self.iterator()
@@ -707,6 +717,9 @@ cdef class BaseIterator:
 
     def __dealloc__(self):
         self.close()
+
+    def __contains__(self, key):
+        contains_is_unsupported()
 
     def __enter__(self):
         return self
@@ -1164,6 +1177,9 @@ cdef class Snapshot:
             key = self.prefix + key
 
         return db_get(self.db, key, default, read_options)
+
+    def __contains__(self, key):
+        contains_is_unsupported()
 
     def __iter__(self):
         return self.iterator()

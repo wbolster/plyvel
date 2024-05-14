@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import functools
 import itertools
 import os
 import random
@@ -1174,3 +1175,33 @@ def test_context_manager(db_dir):
         assert db.get(key) == value
 
     assert db.closed
+
+
+def test_in_operator(db):
+    """The ‘in’ and ‘not in’ operators should not work."""
+    raises = functools.partial(
+        pytest.raises, TypeError, match="__contains__ is not supported"
+    )
+    key = b"key"
+    with raises():
+        key in db
+    with raises():
+        key not in db
+
+    snapshot = db.snapshot()
+    with raises():
+        key in snapshot
+    with raises():
+        key not in snapshot
+
+    prefixed_db = db.prefixed_db(b"k")
+    with raises():
+        key in prefixed_db
+    with raises():
+        key not in prefixed_db
+
+    iterator = iter(db)
+    with raises():
+        key in iterator
+    with raises():
+        key not in iterator
