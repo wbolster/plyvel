@@ -2,6 +2,7 @@ from os.path import join, dirname
 from setuptools import setup
 from setuptools.extension import Extension
 import platform
+from Cython.Build import cythonize
 
 CURRENT_DIR = dirname(__file__)
 
@@ -13,30 +14,31 @@ def get_file_contents(filename):
     with open(join(CURRENT_DIR, filename)) as fp:
         return fp.read()
 
+# add "-fno-rtti" fix `Symbol not found: __ZTIN7leveldb10ComparatorE` when using `leveldb 1.23`. Because `leveldb 1.23` compiled without RTTI(run time type info), if we use "-frtti", `U typeinfo for leveldb::Comparator` will not be found in `leveldb.a` or `leveldb.so`
+extra_compile_args = ['-Wall', '-g', '-x', 'c++', '-std=c++11', '-fno-rtti']
 
-extra_compile_args = ['-Wall', '-g', '-x', 'c++', '-std=c++11']
-
-if platform.system() == 'Darwin':
-    extra_compile_args += ['-stdlib=libc++']
+if platform.system() == "Darwin":
+    extra_compile_args += ["-stdlib=libc++"]
 
 ext_modules = [
     Extension(
         'plyvel._plyvel',
-        sources=['plyvel/_plyvel.cpp', 'plyvel/comparator.cpp'],
+        language="c++",
+        sources=['plyvel/_plyvel.pyx', 'plyvel/comparator.cpp'],
         libraries=['leveldb'],
         extra_compile_args=extra_compile_args,
-    )
+    ),
 ]
 
 setup(
-    name='plyvel',
+    name='plyvel-ci',
     description="Plyvel, a fast and feature-rich Python interface to LevelDB",
     long_description=get_file_contents('README.rst'),
     url="https://github.com/wbolster/plyvel",
     version=__version__,  # noqa: F821
     author="Wouter Bolsterlee",
     author_email="wouter@bolsterl.ee",
-    ext_modules=ext_modules,
+    ext_modules=cythonize(ext_modules, build_dir='build'),
     packages=['plyvel'],
     license="BSD License",
     classifiers=[

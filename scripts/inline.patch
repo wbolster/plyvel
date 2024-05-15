@@ -1,0 +1,12 @@
+Add inline with SNAPPY_ATTRIBUTE_ALWAYS_INLINE on AdvanceToNextTag to fix:
+1097 |         size_t tag_type = AdvanceToNextTag(&ip, &tag);
+     |                           ~~~~~~~~~~~~~~~~^~~~~~~~~~~
+../snappy.cc:1017:8: error: inlining failed in call to 'always_inline'
+'size_t snappy::AdvanceToNextTag(const uint8_t**, size_t*)': function body can be overwritten at link time
+[patch from here](https://github.com/google/snappy/pull/128)
+
+--- snappy.cc	2021-07-20 16:01:01.000000000 +0800
++++ snappy.cc	2021-07-20 16:08:06.000000000 +0800
+@@ -1017 +1017 @@
+-size_t AdvanceToNextTag(const uint8_t** ip_p, size_t* tag) {
++inline size_t AdvanceToNextTag(const uint8_t** ip_p, size_t* tag) {

@@ -4,6 +4,8 @@ Plyvel
 
 .. image:: https://travis-ci.org/wbolster/plyvel.svg?branch=master
     :target: https://travis-ci.org/wbolster/plyvel
+.. image:: https://github.com/liviaerxin/plyvel/actions/workflows/cibuildwheel.yml/badge.svg?branch=CI
+    :target: https://github.com/liviaerxin/plyvel/tree/CI
 
 **Plyvel** is a fast and feature-rich Python interface to LevelDB_.
 
