@@ -1,0 +1,158 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - releases/*
+    - features/*
+  paths:
+    exclude: [ 'README.md' ]
+
+
+jobs:
+- job: BuildMacOS
+  pool: {vmImage: 'macOS-10.14'}
+
+  variables:
+    leveldbVersion: 1.22
+
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: 3.9
+
+    - script: |
+        brew tap bagonyi/homebrew-formulae git@github.com:bagonyi/homebrew-formulae.git
+        brew extract --version=$(leveldbVersion) leveldb bagonyi/formulae
+        brew install leveldb@$(leveldbVersion)
+      displayName: Install leveldb 1.22
+
+    - script: |
+        python3 -m pip install --upgrade pip
+        pip3 install cython
+        pip3 install wheel
+        pip3 install pytest
+        pip3 install delocate
+        pip3 install cibuildwheel
+      displayName: Prepare python (cython, wheel, delocate)
+
+    - script: |
+        CIBW_BEFORE_BUILD='echo $(python --version) && python -m pip install cython && python -m cython --cplus --fast-fail --annotate plyvel/_plyvel.pyx && python ./setup.py build_ext' \
+        CIBW_BUILD='cp3*-macosx_x86_64' \
+        CIBW_PLATFORM=macos \
+        cibuildwheel --output-dir wheelhouse .
+      displayName: Build plyvel wheel (cibuildwheel)
+      continueOnError: true
+
+    # NOTE: removal of the local plyvel directory is so that it doesn't interfere with import paths
+    # from site-packages when running tests
+    - script: |
+        python3.9 -m pip install wheelhouse/plyvel-1.3.0-cp39-cp39-macosx_10_9_x86_64.whl
+        rm -r plyvel
+        pytest test
+      displayName: Install from wheel and test
+      continueOnError: true
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        artifactName: 'MacOS'
+        pathtoPublish: 'wheelhouse'
+      displayName: Publish wheel MacOS (cibuildwheel)
+
+- job: BuildWindows
+  pool: {vmImage: 'windows-latest'}
+
+  variables:
+    VCPKG_LEVELDB_INCLUDE_PATH: C:\vcpkg\packages\leveldb_x64-windows\include\
+    VCPKG_LEVELDB_LIB_PATH: C:\vcpkg\packages\leveldb_x64-windows\lib\
+    vcpkgVersion: 2020.06.15
+    vcpkgInstallParamPath: '$(Build.SourcesDirectory)\.azure-pipelines\vcpkg'
+    vcpkgBinariesPath: 'C:\Users\VssAdministrator\AppData\Local\vcpkg\archives'
+    vcpkg.arch: 'x64'
+
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: 3.9
+
+    # If additional packages are added you should add them to the 'key' to create a new cache entry
+    - task: Cache@2
+      displayName: Cache vcpkg
+      inputs:
+        key: leveldb:x64-windows | "$(vcpkg.arch)" | "$(vcpkgVersion)" | "$(Agent.OS)"
+        path: '$(vcpkgBinariesPath)'
+
+    - pwsh: |
+        vcpkg install leveldb:x64-windows
+      displayName: Install leveldb:x64-windows
+
+    - pwsh: |
+        python3 -m pip install --upgrade pip
+        pip3 install cython
+        pip3 install wheel
+        pip3 install pytest
+        pip3 install cibuildwheel
+      displayName: Prepare python (cython, wheel, delocate)
+
+    - bash: |
+        CIBW_BEFORE_BUILD='echo $(python --version) && python -m pip install cython && python -m cython --cplus --fast-fail --annotate plyvel/_plyvel.pyx && python ./setup.py build_ext --include-dirs=$(VCPKG_LEVELDB_INCLUDE_PATH) --library-dirs=$(VCPKG_LEVELDB_LIB_PATH) --libraries=shlwapi' \
+        CIBW_BUILD='cp3*-win_amd64' \
+        CIBW_PLATFORM=windows \
+        cibuildwheel --output-dir wheelhouse .
+      displayName: Build plyvel wheel (cibuildwheel)
+
+    # NOTE: removal of the local plyvel directory is so that it doesn't interfere with import paths
+    # from site-packages when running tests
+    - script: |
+        py -3.9 -m pip install -U wheelhouse/plyvel-1.3.0-cp39-cp39-win_amd64.whl
+        rm -r plyvel
+        pytest
+      displayName: Install from wheel and test
+      continueOnError: true
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        artifactName: 'Windows'
+        pathtoPublish: 'wheelhouse'
+      displayName: Publish wheel Windows
+
+- job: BuildLinux
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: 3.9
+
+    - script: |
+        chmod +x ./scripts/install-snappy.sh
+        chmod +x ./scripts/install-leveldb.sh
+        chmod +x ./scripts/cibuildwheel-before-build.sh
+        ./scripts/install-snappy.sh
+        ./scripts/install-leveldb.sh
+      displayName: Install snappy and leveldb
+      continueOnError: true
+
+    - script: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+        make cython
+        pip install .
+      displayName: Pip install plyvel from source
+      continueOnError: true
+
+    - script: |
+        make test
+      displayName: Test
+      continueOnError: true
+
+    - script: |
+        pip install cibuildwheel
+        make release
+      displayName: Build plyvel wheel
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        artifactName: 'Linux'
+        pathtoPublish: 'dist'
+      displayName: Publish wheel linux
