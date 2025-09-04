@@ -1,0 +1,4 @@
+{
+    "esbonio.sphinx.confDir": "",
+    "python.formatting.provider": "black"
+}

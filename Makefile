@@ -25,7 +25,7 @@ clean:
 	find . -name __pycache__ -delete
 
 test: ext
-	pytest
+	python -m pytest
 
 docker-build-env:
 	docker build -t plyvel-build .
